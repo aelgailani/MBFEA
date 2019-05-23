@@ -59,6 +59,7 @@ public:
     Eigen::VectorXd wallForceRight;
     Eigen::VectorXd wallForceLeft;
     std::vector<int> masterSlave;
+    std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
     double topPos, botPos, leftPos, rightPos;
     double xMid, yMid;
