@@ -54,6 +54,12 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="initialNodesFileName") {
             split >> b;
             initialNodesFileName = b;
+        }else if (a=="boundaryType") {
+            split >> b;
+            boundaryType = b;
+        }else if (a=="imagesMargin") {
+            split >> c;
+            imagesMargin = c;
         }else if (a=="initTopPos") {
             split >> c;
             initTopPos = c;
@@ -133,6 +139,8 @@ void Parameters::print_to_console(void) const {
             printit("surfaceNodesFileName",surfaceNodesFileName);
             printit("trianglesFileName",trianglesFileName);
             printit("initialNodesFileName",initialNodesFileName);
+            printit("boundaryType",boundaryType);
+            printit("imagesMargin",imagesMargin);
             printit("initTopPos",initTopPos);
             printit("initBotPos",initBotPos);
             printit("initRightPos",initRightPos);

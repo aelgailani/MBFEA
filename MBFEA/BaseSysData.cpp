@@ -29,9 +29,9 @@ BaseSysData::BaseSysData(const Parameters& pars){
     std::string line;
     std::getline(inFile, line);
     std::istringstream sb(line);
-    sb >> numNodes;
-    refPosX.resize(numNodes, 1);
-    refPosY.resize(numNodes, 1);
+    sb >> numOriginalNodes;
+    refPosX.resize(numOriginalNodes, 1);
+    refPosY.resize(numOriginalNodes, 1);
     double ID,isBoundary,x,y;
     int id = 0;
     while(std::getline(inFile, line))
@@ -42,8 +42,8 @@ BaseSysData::BaseSysData(const Parameters& pars){
         refPosY(id) = y;
         id++;
     }
-    assert(numNodes==refPosX.size());
-    assert(numNodes==refPosY.size());
+    assert(numOriginalNodes==refPosX.size());
+    assert(numOriginalNodes==refPosY.size());
     inFile.close();
 
     
@@ -64,12 +64,12 @@ BaseSysData::BaseSysData(const Parameters& pars){
     assert(line=="Number of surfaces");
     std::getline(inFile, line);
     std::istringstream sb1(line);
-    sb1 >> numMeshes;
+    sb1 >> numOriginalMeshes;
     std::getline(inFile, line);
     std::istringstream sb2(line);
     sb2 >> numNodesPerMesh;
     
-    while(meshID < numMeshes)
+    while(meshID < numOriginalMeshes)
     {
         i =0;
         while(std::getline(inFile, line))
@@ -77,14 +77,42 @@ BaseSysData::BaseSysData(const Parameters& pars){
             if(line==""){break;}
             std::istringstream split(line);
             split >> nodeID;
-            surfaceMeshes[meshID].push_back(nodeID);
+            originalSurfaceMeshes[meshID].push_back(nodeID);
             i++;
-            (numSurfaceNodes)++;
+            (numOriginalSurfaceNodes)++;
         }
         meshID++;
     }
     inFile.close();
     
+    if (pars.boundaryType == "periodic"){
+        for (int meshID=0; meshID < numOriginalMeshes; meshID++){
+            for(int& d : originalSurfaceMeshes[meshID] ){
+                surfaceMeshes[meshID].push_back(d);
+                surfaceMeshes[meshID+numOriginalMeshes].push_back(d+numOriginalNodes);
+                surfaceMeshes[meshID+numOriginalMeshes*2].push_back(d+numOriginalNodes*2);
+                surfaceMeshes[meshID+numOriginalMeshes*3].push_back(d+numOriginalNodes*3);
+                surfaceMeshes[meshID+numOriginalMeshes*4].push_back(d+numOriginalNodes*4);
+                surfaceMeshes[meshID+numOriginalMeshes*5].push_back(d+numOriginalNodes*5);
+                surfaceMeshes[meshID+numOriginalMeshes*6].push_back(d+numOriginalNodes*6);
+                surfaceMeshes[meshID+numOriginalMeshes*7].push_back(d+numOriginalNodes*7);
+                surfaceMeshes[meshID+numOriginalMeshes*8].push_back(d+numOriginalNodes*8);
+            }
+        }
+        numNodes = numOriginalNodes * 9;
+        numMeshes = numOriginalMeshes * 9;
+        numSurfaceNodes = numOriginalSurfaceNodes * 9;
+
+    }else if (pars.boundaryType == "walls"){
+        std::cout << pars.boundaryType<< std::endl;
+        numNodes = numOriginalNodes;
+        numMeshes = numOriginalMeshes;
+        numSurfaceNodes = numOriginalSurfaceNodes;
+        surfaceMeshes = originalSurfaceMeshes;
+    }else{
+        printf("Please specifiy a valid boundries type ['periodic' or 'walls']!");
+        exit(1);
+    }
     
 //**************  Read triangles data  ********************************************************************************************
     
@@ -154,7 +182,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
         surfaceSegments[segmentID][2] = meshID;
         surfaceSegments[segmentID][3] = segmentID-1;
         surfaceSegments[segmentID][4] = segmentID-numNodesPerMesh+1;
-        surfaceSegments[0][3] = segmentID; // check later. looks weird.
+        surfaceSegments[0][3] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][1] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][0]][0] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][2] = meshID;

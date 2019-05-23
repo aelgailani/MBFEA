@@ -24,10 +24,23 @@ public:
     double lyRef;
     double lxRef;
     std::map<int,std::vector<int>> surfaceMeshes;
+    std::map<int,std::vector<int>> originalSurfaceMeshes;
+    std::map<int,std::vector<int>> imageMeshesL;
+    std::map<int,std::vector<int>> imageMeshesR;
+    std::map<int,std::vector<int>> imageMeshesB;
+    std::map<int,std::vector<int>> imageMeshesT;
+    std::map<int,std::vector<int>> imageMeshesBL;
+    std::map<int,std::vector<int>> imageMeshesBR;
+    std::map<int,std::vector<int>> imageMeshesTL;
+    std::map<int,std::vector<int>> imageMeshesTR;
+    
     std::map<int,std::vector<int>>  triangles;
     int numNodes;
+    int numOriginalNodes;
     int numSurfaceNodes;
+    int numOriginalSurfaceNodes;
     int numMeshes;
+    int numOriginalMeshes;
     int numElements;
     int numNodesPerMesh;
     std::vector< std::vector<int> > surfaceSegments;

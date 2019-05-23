@@ -27,6 +27,8 @@ public:
     std::string trianglesFileName;
     std::string surfaceNodesFileName;
     std::string initialNodesFileName;
+    std::string boundaryType;
+    double imagesMargin;
     double initTopPos;
     double initBotPos;
     double initRightPos;

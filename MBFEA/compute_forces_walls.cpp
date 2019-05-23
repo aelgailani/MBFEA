@@ -15,14 +15,11 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::compute_forces_walls(const BaseSysData& baseData, const Parameters& pars)
 {
     
     contactsEnergy=0; //erase previous step data
-    KWXX = 0;
-    KWWH = 0;
-    KWWV = 0;
-    KWYY = 0;
+
     //compute the deformation gradient
     defGradXX = gradX * curPosX;
     defGradYX = gradX * curPosY;
@@ -46,22 +43,22 @@ void Configuration::compute_forces(const BaseSysData& baseData, const Parameters
     internalEnergyPerEle = elasticEnergyPerEle.array() + mixingEnergyPerEle.array();
     
     //compute the inverse of defGrad
-    defGradInvTransXX = defGradYY.array()/ areaRatio.array();
-    defGradInvTransXY = defGradXY.array()/ areaRatio.array() * -1 ;
-    defGradInvTransYX = defGradYX.array()/ areaRatio.array() * -1;
-    defGradInvTransYY = defGradXX.array()/ areaRatio.array();
+    invDefGradTransXX = defGradYY.array()/ areaRatio.array();
+    invDefGradTransXY = defGradXY.array()/ areaRatio.array() * -1 ;
+    invDefGradTransYX = defGradYX.array()/ areaRatio.array() * -1;
+    invDefGradTransYY = defGradXX.array()/ areaRatio.array();
     
     swellingPressurePerEle = pars.kTOverOmega * ( (pars.chi+areaRatio.array()) / (areaRatio.array()).pow(2) + log((areaRatio.array()-1)/areaRatio.array()) );
     
-    PK1stressXX = pars.NkT * defGradXX.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * defGradInvTransXX.array();
-    PK1stressXY = pars.NkT * defGradXY.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * defGradInvTransYX.array();
-    PK1stressYX = pars.NkT * defGradYX.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * defGradInvTransXY.array();
-    PK1stressYY = pars.NkT * defGradYY.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * defGradInvTransYY.array();
+    PK1stressXX = pars.NkT * defGradXX.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * invDefGradTransXX.array();
+    PK1stressXY = pars.NkT * defGradXY.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * invDefGradTransYX.array();
+    PK1stressYX = pars.NkT * defGradYX.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * invDefGradTransXY.array();
+    PK1stressYY = pars.NkT * defGradYY.array() + ( swellingPressurePerEle.array() * areaRatio.array() - pars.NkT ) * invDefGradTransYY.array();
     
-    CstressXX = pars.NkT/areaRatio.array()*(defGradXX.array()*defGradXX.array()+defGradXY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*defGradInvTransXX.array()+defGradXY.array()*defGradInvTransYX.array());
-    CstressXY = pars.NkT/areaRatio.array()*(defGradXX.array()*defGradYX.array()+defGradXY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*defGradInvTransXX.array()+defGradYY.array()*defGradInvTransYX.array());
-    CstressYX = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradXX.array()+defGradYY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*defGradInvTransXY.array()+defGradXY.array()*defGradInvTransYY.array());
-    CstressYY = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradYX.array()+defGradYY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*defGradInvTransXY.array()+defGradYY.array()*defGradInvTransYY.array());
+    CstressXX = pars.NkT/areaRatio.array()*(defGradXX.array()*defGradXX.array()+defGradXY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*invDefGradTransXX.array()+defGradXY.array()*invDefGradTransYX.array());
+    CstressXY = pars.NkT/areaRatio.array()*(defGradXX.array()*defGradYX.array()+defGradXY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*invDefGradTransXX.array()+defGradYY.array()*invDefGradTransYX.array());
+    CstressYX = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradXX.array()+defGradYY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*invDefGradTransXY.array()+defGradXY.array()*invDefGradTransYY.array());
+    CstressYY = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradYX.array()+defGradYY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*invDefGradTransXY.array()+defGradYY.array()*invDefGradTransYY.array());
     
     
     
@@ -72,6 +69,7 @@ void Configuration::compute_forces(const BaseSysData& baseData, const Parameters
     forceY = - gradX.transpose() * (PK1stressYX.array() * abs(refArea.array())).matrix() - gradY.transpose() * (PK1stressYY.array() * abs(refArea.array())).matrix();
     interForceX = forceX;
     interForceY = forceY;
+    
     double maxWallinterference = 0;
     //do harmonic repulsion on any nodes above topPos or below botPos
     if (pars.wallStyle=="harmonic"){
@@ -80,15 +78,7 @@ void Configuration::compute_forces(const BaseSysData& baseData, const Parameters
         wallForceRight= pars.HWallStiffness * (0.5*(sign(curPosX.array()-rightPos)+1))*(rightPos-curPosX.array());
         wallForceLeft= pars.HWallStiffness * (0.5*(sign(leftPos-curPosX.array())+1))*(leftPos-curPosX.array());
         wallsEnergy = 0.5/pars.HWallStiffness * (wallForceTop.dot(wallForceTop) + wallForceBottom.dot(wallForceBottom) + wallForceLeft.dot(wallForceLeft) + wallForceRight.dot(wallForceRight));
-        KWWV += (wallForceTop.array() * topPos).sum();
-        KWWV += (wallForceBottom.array() * botPos).sum();
-        KWWH += (wallForceRight.array() * rightPos).sum();
-        KWWH += (wallForceLeft.array() * leftPos).sum();
-        KWXX += pars.HWallStiffness * ((0.5*(sign(curPosX.array()-rightPos)+1))*(rightPos-curPosX.array())*(rightPos-curPosX.array())).sum();
-        KWXX += pars.HWallStiffness * ((0.5*(sign(leftPos-curPosX.array())+1))*(leftPos-curPosX.array())*(leftPos-curPosX.array())).sum();
-        KWYY += pars.HWallStiffness * ((0.5*(sign(curPosY.array()-topPos)+1))*(topPos-curPosY.array())*(topPos-curPosY.array())).sum();
-        KWYY += pars.HWallStiffness * ((0.5*(sign(botPos-curPosY.array())+1))*(botPos-curPosY.array())*(botPos-curPosY.array())).sum();
-        
+
         maxWallinterference = -(wallForceTop.minCoeff())/pars.HWallStiffness;
         if(wallForceBottom.maxCoeff()/pars.HWallStiffness > maxWallinterference ){
             maxWallinterference = wallForceBottom.maxCoeff()/pars.HWallStiffness;
@@ -322,27 +312,36 @@ void Configuration::compute_forces(const BaseSysData& baseData, const Parameters
                 maxInterference = shortestPath[0];
             }
             segmentIinteractions++ ;
-            forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
-            forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
-            forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
-            forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
-            forceX(shortestPath[10]) = forceX(shortestPath[10]) + shortestPath[12];
-            forceY(shortestPath[10]) = forceY(shortestPath[10]) + shortestPath[13];
+            if (nodeRow.first.first < baseData.numOriginalNodes){
+                forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
+                forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
+            }
+            if ( shortestPath[6] < baseData.numOriginalNodes){
+                forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
+                forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
+            }
+            if ( shortestPath[10] < baseData.numOriginalNodes){
+                forceX(shortestPath[10]) = forceX(shortestPath[10]) + shortestPath[12];
+                forceY(shortestPath[10]) = forceY(shortestPath[10]) + shortestPath[13];
+            }
+         
             
             contactsEnergy += pars.penaltyStiffness/2 *(shortestPath[0]*shortestPath[0]);
-            KWXX += pars.penaltyStiffness * (shortestPath[18]*shortestPath[18]);
-            KWYY += pars.penaltyStiffness * (shortestPath[19]*shortestPath[19]);
+
         }else{
             
             nodeIinteractions++;
-            forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
-            forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
-            forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
-            forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
+            if (nodeRow.first.first < baseData.numOriginalNodes){
+                forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
+                forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
+            }
+            if ( shortestPath[6] < baseData.numOriginalNodes){
+                forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
+                forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
+            }
             
             contactsEnergy += pars.penaltyStiffness/2 *(shortestPath[0]*shortestPath[0]);
-            KWXX += pars.penaltyStiffness * (shortestPath[11]*shortestPath[11]);
-            KWYY += pars.penaltyStiffness * (shortestPath[12]*shortestPath[12]);
+
         }
         
     }

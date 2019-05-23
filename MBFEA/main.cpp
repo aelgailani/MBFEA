@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
     //  Main loop
     std::clock_t begin0 = clock();
-    if (pars.runMode=="compress"){
+    if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
             std::clock_t begin = clock();
@@ -116,12 +116,17 @@ int main(int argc, char* argv[])
                 mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
             }
 
-            // Take a step
+     
            
-            mainSys.compute_forces(baseData, pars);
+            // Take an Euler step
+            if (pars.boundaryType == "walls"){
+                mainSys.compute_forces_walls(baseData, pars);
+            }else if (pars.boundaryType == "periodic"){
+                mainSys.compute_forces_PBC(baseData, pars);
+            }
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-
+            
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
             std::clock_t end = clock();
@@ -153,7 +158,8 @@ int main(int argc, char* argv[])
                 break;
             }
         }
-    }else if (pars.runMode=="shear"){
+    }else if (pars.runMode=="shear"){  //  shearing ***********************************************************************************************
+        mainSys.maxR = 9999;
         while (1)
         {
             double initialFiniteShear = 0.0;
@@ -184,8 +190,13 @@ int main(int argc, char* argv[])
 
 
             
-            // Take a step
-            mainSys.compute_forces(baseData, pars);
+            // Take an Euler step
+            if (pars.boundaryType == "walls"){
+                mainSys.compute_forces_walls(baseData, pars);
+            }else if (pars.boundaryType == "periodic"){
+                mainSys.compute_forces_PBC(baseData, pars);
+            }
+
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
             
@@ -199,11 +210,12 @@ int main(int argc, char* argv[])
             if (stage==0){
                 
                 mainSys.dump_global_data(pars, 'w' , 'f');
+                mainSys.dump_global_data(pars, 'a' , 'f');
                 
             }else if (stage==2){
                 
                 mainSys.dump_global_data(pars, 'a' , 'f');
-                break;
+                
             }
             
       
@@ -214,11 +226,16 @@ int main(int argc, char* argv[])
             
            
             timeStep++;
+            std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "elapsed time per step:  " << double(end-begin)/ CLOCKS_PER_SEC << std::endl;
             std::cout << "elapsed total:  " << double(end-begin0)/ CLOCKS_PER_SEC << std::endl;
             std::cout << "\n" << std::endl;
             
+            if (stage==2){
+                std::cout << "Done !" << std::endl;
+                break;
+            }
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>20.0){
                 std::cout << "Foce condition met !" << std::endl;
                 break;
