@@ -23,6 +23,23 @@ public:
 
     Eigen::VectorXd curPosX;
     Eigen::VectorXd curPosY;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR;
+    double maxWallinterference;
     Eigen::VectorXd augmentedCurPosX;
     Eigen::VectorXd augmentedCurPosY;
     Eigen::VectorXd defGradXX;
@@ -59,6 +76,13 @@ public:
     Eigen::VectorXd wallForceRight;
     Eigen::VectorXd wallForceLeft;
     std::vector<int> masterSlave;
+    std::vector<int> segments;
+    std::vector<int> meshes;
+    unsigned long meshesNum;
+    int xBin, yBin;
+    std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
+    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
+    std::map<std::pair<int,int>, std::vector<double>> gaps;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
     double topPos, botPos, leftPos, rightPos;
     double xMid, yMid;
@@ -83,7 +107,11 @@ public:
     double S4;
     double ex;
     double ey;
-
+    double numXBins;
+    double numYBins;
+    double verletCellSizeX;
+    double verletCellSizeY;
+    double maxInterference;
 
     
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);

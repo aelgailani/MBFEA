@@ -72,44 +72,44 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     
     
     // Create images x y
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR = curPosX.array()+lxNew;
+    curPosXL = curPosX.array()-lxNew;
+    curPosXR = curPosX.array()+lxNew;
+    curPosXB = curPosX;
+    curPosXT = curPosX;
+    curPosXBL = curPosX.array()-lxNew;
+    curPosXBR = curPosX.array()+lxNew;
+    curPosXTL = curPosX.array()-lxNew;
+    curPosXTR = curPosX.array()+lxNew;
     
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR = curPosY.array()+lyNew;
+    curPosYL = curPosY;
+    curPosYR = curPosY;
+    curPosYB = curPosY.array()-lyNew;
+    curPosYT = curPosY.array()+lyNew;
+    curPosYBL = curPosY.array()-lyNew;
+    curPosYBR = curPosY.array()-lyNew;
+    curPosYTL = curPosY.array()+lyNew;
+    curPosYTR = curPosY.array()+lyNew;
     
     augmentedCurPosX.resize(baseData.numNodes);
     augmentedCurPosY.resize(baseData.numNodes);
     augmentedCurPosX << curPosX, curPosXL, curPosXR, curPosXB, curPosXT, curPosXBL, curPosXBR, curPosXTL, curPosXTR;
     augmentedCurPosY << curPosY, curPosYL, curPosYR, curPosYB, curPosYT, curPosYBL, curPosYBR, curPosYTL, curPosYTR;
     
-    double maxWallinterference = 0;
+    maxWallinterference = 0;
     
     //compute surface forces
     ////construct and fill the bins
 
-    double numXBins = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-    double numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-    double verletCellSizeX  = lxNew/numXBins;
-    double verletCellSizeY = lyNew/numYBins;
+    numXBins = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+    numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+    verletCellSizeX  = lxNew/numXBins;
+    verletCellSizeY = lyNew/numYBins;
 
     
-    
-    int xBin, yBin;
-    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
-    std::map<std::pair<int,int>, std::vector<double>> gaps;
+    spatialGridNodes.clear();
+    spatialGridSegments.clear();
+    spatialGridMeshes.clear();
+    gaps.clear();
     
     
     for (int meshID=0; meshID < baseData.numMeshes; meshID++)
@@ -130,11 +130,11 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
             }
         }
     }
-        double maxInterference = 0;
+        maxInterference = 0;
         
         
         //// loop over the bins to compute forces
-        std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
+       
         
         for (auto const& bin : spatialGridNodes)
         {
@@ -143,9 +143,9 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
                 continue;
             }
             
-            std::vector<int> segments = spatialGridSegments[bin.first];
-            std::vector<int> meshes = spatialGridMeshes[bin.first];
-            unsigned long meshesNum = meshes.size();
+            segments = spatialGridSegments[bin.first];
+            meshes = spatialGridMeshes[bin.first];
+            meshesNum = meshes.size();
             
             for (auto const& delta: neighborBinDelta)
             {
@@ -209,13 +209,7 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
                     double x1 = augmentedCurPosX[node1];
                     double y1 = augmentedCurPosY[node1];
                     
-                    //exclude segments that lies outside the walls to solve the sliiping failure at high phi
-//                    if ((y0>topPos && y1>topPos) || (y0<botPos && y1<botPos) || (x0<leftPos && x1<leftPos)  || (x0>rightPos && x1>rightPos)){
-//                        continue;
-//                    }
-//                    
-                    
-                    
+         
                     double dx = x1-x0;
                     double dy = y1-y0;
                     double L = sqrt(std::pow(dx,2)+std::pow(dy,2));
