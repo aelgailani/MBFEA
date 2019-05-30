@@ -10,14 +10,15 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <chrono>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep)
 {
-    
+    auto start1 = std::chrono::high_resolution_clock::now();
     contactsEnergy=0; //erase previous step data
     //compute the deformation gradient
     defGradXX = gradX * curPosX;
@@ -25,27 +26,51 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     defGradXY = gradY * curPosX;
     defGradYY = gradY * curPosY;
     
+    auto finish1 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed1 = finish1 - start1;
+    std::cout << "elapsed time in defGrad:  " << elapsed1.count() << std::endl;
+    
     //compute the determinant of defGrad
     areaRatio = defGradXX.array() * defGradYY.array() - defGradXY.array() * defGradYX.array();
-    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
+
+    
+    auto finish2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed2 = finish2 - finish1;
+    std::cout << "elapsed time in areaRatio:  " << elapsed2.count() << std::endl;
     
     //compute the magnitude squared of defGrad
     fSquared = defGradXX.array().pow(2)+defGradXY.array().pow(2)+defGradYX.array().pow(2)+defGradYY.array().pow(2);
     
+    auto finish3 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed3 = finish3 - finish2;
+    std::cout << "elapsed time in fSquared:  " << elapsed3.count() << std::endl;
+    
     //compute the local elastic energy density
     elasticEnergyPerEle = pars.NkT/2.0 * (fSquared.array()- 2 - 2*log(abs(areaRatio.array())));
+    auto finish4 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed4 = finish4 - finish3;
+    std::cout << "elapsed time in elasticEnergyPerEle:  " << elapsed4.count() << std::endl;
     
     //compute the local mixing energy density
     mixingEnergyPerEle = pars.kTOverOmega*(areaRatio.array()-1.0)*(log((abs(areaRatio.array())-1.0)/abs(areaRatio.array()))+pars.chi/abs(areaRatio.array()));
+    auto finish5 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed5 = finish5 - finish4;
+    std::cout << "elapsed time in mixingEnergyPerEle:  " << elapsed5.count() << std::endl;
     
     //compute the local total energy density
     internalEnergyPerEle = elasticEnergyPerEle.array() + mixingEnergyPerEle.array();
+    auto finish6 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed6 = finish6 - finish5;
+    std::cout << "elapsed time in internalEnergyPerEle:  " << elapsed6.count() << std::endl;
     
     //compute the inverse of defGrad
     invDefGradTransXX = defGradYY.array()/ areaRatio.array();
     invDefGradTransXY = defGradXY.array()/ areaRatio.array() * -1 ;
     invDefGradTransYX = defGradYX.array()/ areaRatio.array() * -1;
     invDefGradTransYY = defGradXX.array()/ areaRatio.array();
+    auto finish7 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed7 = finish7 - finish6;
+    std::cout << "elapsed time in invDefGradTrans:  " << elapsed7.count() << std::endl;
     
     swellingPressurePerEle = pars.kTOverOmega * ( (pars.chi+areaRatio.array()) / (areaRatio.array()).pow(2) + log((areaRatio.array()-1)/areaRatio.array()) );
     
@@ -59,7 +84,9 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     CstressYX = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradXX.array()+defGradYY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*invDefGradTransXY.array()+defGradXY.array()*invDefGradTransYY.array());
     CstressYY = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradYX.array()+defGradYY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*invDefGradTransXY.array()+defGradYY.array()*invDefGradTransYY.array());
     
-    
+    auto finish11 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed11 = finish11 - finish7;
+    std::cout << "elapsed time in stresses:  " << elapsed11.count() << std::endl;
     
     
     
@@ -69,32 +96,44 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     interForceX = forceX;
     interForceY = forceY;
     
-    
+    auto finish12 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed12 = finish12 - finish11;
+    std::cout << "elapsed time in internal forces:  " << elapsed12.count() << std::endl;
     
     // Create images x y
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR = curPosX.array()+lxNew;
+    curPosXL = curPosX.array()-lxNew;
+    curPosXR = curPosX.array()+lxNew;
+    curPosXB = curPosX;
+    curPosXT = curPosX;
+    curPosXBL = curPosX.array()-lxNew;
+    curPosXBR = curPosX.array()+lxNew;
+    curPosXTL = curPosX.array()-lxNew;
+    curPosXTR = curPosX.array()+lxNew;
     
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR = curPosY.array()+lyNew;
+    curPosYL = curPosY;
+    curPosYR = curPosY;
+    curPosYB = curPosY.array()-lyNew;
+    curPosYT = curPosY.array()+lyNew;
+    curPosYBL = curPosY.array()-lyNew;
+    curPosYBR = curPosY.array()-lyNew;
+    curPosYTL = curPosY.array()+lyNew;
+    curPosYTR = curPosY.array()+lyNew;
+    
+    auto finish13 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed13 = finish13 - finish12;
+    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
     augmentedCurPosX.resize(baseData.numNodes);
     augmentedCurPosY.resize(baseData.numNodes);
     augmentedCurPosX << curPosX, curPosXL, curPosXR, curPosXB, curPosXT, curPosXBL, curPosXBR, curPosXTL, curPosXTR;
     augmentedCurPosY << curPosY, curPosYL, curPosYR, curPosYB, curPosYT, curPosYBL, curPosYBR, curPosYTL, curPosYTR;
+   
+    auto finish14 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed14 = finish14 - finish13;
+    std::cout << "elapsed time in augmentedCurPos:  " << elapsed14.count() << std::endl;
     
+    std::chrono::duration<double> elapsedT1 = finish14 - start1;
+    std::cout << "total elapsed time in internal nodes:  " << elapsedT1.count() << std::endl;
     double maxWallinterference = 0;
     
     //compute surface forces
@@ -108,33 +147,42 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     
     
     int xBin, yBin;
-    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
-    std::map<std::pair<int,int>, std::vector<double>> gaps;
+    double maxInterference = 0;
     
+    // gaps must be cleared at each step
+    gaps.clear();
     
-    for (int meshID=0; meshID < baseData.numMeshes; meshID++)
-    {
-        for (int nodeID=0; nodeID < baseData.numNodesPerMesh; nodeID++)
+    // update Verlet cells only if necessary
+//    if (displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff*0.5 || timeStep == pars.startingTimeStep)
+//    {
+        spatialGridNodes.clear();
+        spatialGridSegments.clear();
+        spatialGridMeshes.clear();
+        augmentedSegments.clear();
+        augmentedMeshes.clear();
+        
+        for (int meshID=0; meshID < baseData.numMeshes; meshID++)
         {
-            double x = augmentedCurPosX[baseData.surfaceMeshes.at(meshID)[nodeID]];
-            double y = augmentedCurPosY[baseData.surfaceMeshes.at(meshID)[nodeID]];
-            
-            if (  x > (leftPos-lxNew*pars.imagesMargin) &&  x < (rightPos+lxNew*pars.imagesMargin) && y > (botPos-lyNew*pars.imagesMargin) && y < (topPos+lyNew*pars.imagesMargin) ) {
-                xBin = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
-                yBin = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
-                spatialGridNodes[{xBin,yBin}].push_back(baseData.surfaceMeshes.at(meshID)[nodeID]);
-                spatialGridSegments[{xBin,yBin}].push_back(baseData.nodeToSegments[baseData.surfaceMeshes.at(meshID)[nodeID]][0]);  //add the first segment of this particle
-                spatialGridSegments[{xBin,yBin}].push_back(baseData.nodeToSegments[baseData.surfaceMeshes.at(meshID)[nodeID]][1]);  //add the second segment of this particle
-                spatialGridMeshes[{xBin,yBin}].push_back(meshID); //add the mesh of this particle
-            
+            for (int nodeID=0; nodeID < baseData.numNodesPerMesh; nodeID++)
+            {
+                double x = augmentedCurPosX[baseData.surfaceMeshes.at(meshID)[nodeID]];
+                double y = augmentedCurPosY[baseData.surfaceMeshes.at(meshID)[nodeID]];
+                
+                if (  x > (leftPos-lxNew*pars.imagesMargin) &&  x < (rightPos+lxNew*pars.imagesMargin) && y > (botPos-lyNew*pars.imagesMargin) && y < (topPos+lyNew*pars.imagesMargin) ) {
+                    xBin = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
+                    yBin = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+                    spatialGridNodes[{xBin,yBin}].push_back(baseData.surfaceMeshes.at(meshID)[nodeID]);
+                    spatialGridSegments[{xBin,yBin}].push_back(baseData.nodeToSegments[baseData.surfaceMeshes.at(meshID)[nodeID]][0]);  //add the first segment of this particle
+                    spatialGridSegments[{xBin,yBin}].push_back(baseData.nodeToSegments[baseData.surfaceMeshes.at(meshID)[nodeID]][1]);  //add the second segment of this particle
+                    spatialGridMeshes[{xBin,yBin}].push_back(meshID); //add the mesh of this particle
+                    
+                }
             }
         }
-    }
-        double maxInterference = 0;
-        
-        
-        //// loop over the bins to compute forces
-        std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
+    
+        auto finish15 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed15 = finish15 - finish14;
+        std::cout << "elapsed time in populating spatialGrid maps:  " << elapsed15.count() << std::endl;
         
         for (auto const& bin : spatialGridNodes)
         {
@@ -145,7 +193,6 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
             
             std::vector<int> segments = spatialGridSegments[bin.first];
             std::vector<int> meshes = spatialGridMeshes[bin.first];
-            unsigned long meshesNum = meshes.size();
             
             for (auto const& delta: neighborBinDelta)
             {
@@ -178,18 +225,35 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
                         meshes.push_back(i);
                     }
                 }
-                meshesNum = meshes.size();
-                
             }
             
-            if  (baseData.numMeshes<2) // check if all nodes live in the same mesh
-            {
-                continue;
-            }
-            
-            for (int const& node: bin.second)
+            augmentedSegments[bin.first]=segments;
+            augmentedMeshes[bin.first]=meshes;
+
+        }
+        
+        auto finish16 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed16 = finish16 - finish15;
+        std::cout << "elapsed time in populating augmented Segments and Meshes maps:  " << elapsed16.count() << std::endl;
+//    }
+
+
+    
+    // loop over bins
+    for (auto const& bin : spatialGridNodes)
+    {
+        std::vector<int>& segments = augmentedSegments[bin.first];
+        std::vector<int>& meshes = augmentedMeshes[bin.first];
+
+        if  (meshes.size() <2) // check if all nodes live in the same mesh
+        {
+            continue;
+        }
+        
+        for (int const& node: bin.second)
             {
                 int slaveMesh = baseData.nodeToSegments[node][2];
+
                 for(int const& segment: segments)
                 {
                     int masterMesh = baseData.surfaceSegments[segment][2];
@@ -289,11 +353,16 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
                 }
             }
             
-        }
-        
+    }
+   
+    auto finish17 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed17 = finish17 - finish16;
+    std::cout << "elapsed time finding closest approaches:  " << elapsed17.count() << std::endl;
+    
+    
         int segmentIinteractions = 0;
         int nodeIinteractions = 0;
-        
+    
         for (auto const& nodeRow: gaps)
         {
             
@@ -340,13 +409,22 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
    
             }
         }
-        
+    
         internalEnergy = internalEnergyPerEle.dot(refArea) + contactsEnergy;
         totalEnergy= internalEnergy + wallsEnergy;
-        
-        std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
-        std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
-        std::cout << "max skin interference   " << maxInterference << std::endl;
-        std::cout << "max wall interference   " << maxWallinterference << std::endl;
-        
-    }
+    
+    auto finish18 = std::chrono::high_resolution_clock::now();
+    
+    std::chrono::duration<double> elapsed18 = finish18 - finish17;
+    std::cout << "elapsed time adding surface forces:  " << elapsed18.count() << std::endl;
+    std::chrono::duration<double> elapsed19 = finish18 - finish14;
+    std::cout << "total elapsed time in surface interactions:  " << elapsed19.count() << std::endl;
+    
+    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
+    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
+    std::cout << "max skin interference   " << maxInterference << std::endl;
+    std::cout << "max wall interference   " << maxWallinterference << std::endl;
+    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
+
+    
+}

@@ -23,6 +23,8 @@ public:
 
     Eigen::VectorXd curPosX;
     Eigen::VectorXd curPosY;
+    Eigen::VectorXd curPosXAtLastGridUpdate;
+    Eigen::VectorXd curPosYAtLastGridUpdate;
     Eigen::VectorXd augmentedCurPosX;
     Eigen::VectorXd augmentedCurPosY;
     Eigen::VectorXd defGradXX;
@@ -58,6 +60,23 @@ public:
     Eigen::VectorXd wallForceBottom;
     Eigen::VectorXd wallForceRight;
     Eigen::VectorXd wallForceLeft;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR ;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR ;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR;
+    
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR ;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT ;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR ;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL;
+    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR ;
     std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
@@ -84,14 +103,19 @@ public:
     double S4;
     double ex;
     double ey;
-
+    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
+    std::map<std::pair<int,int>, std::vector<double>> gaps;
+    std::map<std::pair<int,int>, std::vector<int>> augmentedSegments;
+    std::map<std::pair<int,int>, std::vector<int>> augmentedMeshes;
+    
+    Eigen::VectorXd displacementSinceLastGridUpdate;
 
     
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);
     void dump_per_node(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
-    void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars);
-    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars);
+    void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
+    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);

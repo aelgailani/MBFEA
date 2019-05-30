@@ -15,7 +15,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_walls(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep)
 {
     
     contactsEnergy=0; //erase previous step data

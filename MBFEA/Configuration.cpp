@@ -95,7 +95,9 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         inFile.close();
     }
     
-    
+    curPosXAtLastGridUpdate = curPosX;
+    curPosYAtLastGridUpdate = curPosY;
+    displacementSinceLastGridUpdate = curPosX - curPosX ;  // basically a zero vector, initially
     defGradXX.resize(baseData.numElements,1);
     defGradXY.resize(baseData.numElements,1);
     defGradYX.resize(baseData.numElements,1);
