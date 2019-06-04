@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <chrono>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
@@ -17,6 +18,8 @@
 
 void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars)
 {
+    
+    auto t1 = std::chrono::high_resolution_clock::now();
     
     contactsEnergy=0; //erase previous step data
     //compute the deformation gradient
@@ -97,6 +100,9 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     
     double maxWallinterference = 0;
     
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> d1 = t2 - t1;
+    std::cout << "Total time elapsed in internal nodes:  " << d1.count() << std::endl;
     //compute surface forces
     ////construct and fill the bins
 
@@ -111,7 +117,7 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
     std::map<std::pair<int,int>, std::vector<double>> gaps;
     
-    
+     auto t21 = std::chrono::high_resolution_clock::now();
     for (int meshID=0; meshID < baseData.numMeshes; meshID++)
     {
         for (int nodeID=0; nodeID < baseData.numNodesPerMesh; nodeID++)
@@ -132,7 +138,9 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     }
         double maxInterference = 0;
         
-        
+    auto t22 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> d21 = t22 - t21;
+    std::cout << "elapsed time in verlet cells maps update:  " << d21.count() << std::endl;
         //// loop over the bins to compute forces
         std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
         
@@ -290,7 +298,10 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
             }
             
         }
-        
+    auto t23 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> d22 = t23 - t22;
+    std::cout << "elapsed time in looping over verlet cells:  " << d22.count() << std::endl;
+    
         int segmentIinteractions = 0;
         int nodeIinteractions = 0;
         
@@ -340,7 +351,10 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
    
             }
         }
-        
+        auto t3 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> d2 = t3 - t2;
+        std::cout << "Total time elapsed in surface interactions:  " << d2.count() << std::endl;
+    
         internalEnergy = internalEnergyPerEle.dot(refArea) + contactsEnergy;
         totalEnergy= internalEnergy + wallsEnergy;
         

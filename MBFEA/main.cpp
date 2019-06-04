@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <chrono>
 #include "Parameters.hpp"
 #include "visualization.hpp"
 #include "BaseSysData.hpp"
@@ -104,12 +105,13 @@ int main(int argc, char* argv[])
     mainSys.dump_global_data(pars, 'w', 'i');
 
     //  Main loop
-    std::clock_t begin0 = clock();
+    auto t0 = std::chrono::high_resolution_clock::now();
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
-            std::clock_t begin = clock();
             std::cout << timeStep << std::endl;
+            auto t1 = std::chrono::high_resolution_clock::now();
+  
 
             if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
             {
@@ -129,7 +131,6 @@ int main(int argc, char* argv[])
             
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
-            std::clock_t end = clock();
 
          
             
@@ -140,13 +141,15 @@ int main(int argc, char* argv[])
                 mainSys.dump_per_ele(baseData, pars,timeStep);
                 plotWithPython(timeStep);
             }
-            
+            auto t2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> d1 = t2 - t1;
+            std::chrono::duration<double> d2 = t2 - t0;
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "elapsed time per step:  " << double(end-begin)/ CLOCKS_PER_SEC << std::endl;
-            std::cout << "elapsed total:  " << double(end-begin0)/ CLOCKS_PER_SEC << std::endl;
+            std::cout << "elapsed time per step:  " << d1.count() << std::endl;
+            std::cout << "elapsed total:  " << d2.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>20.0){
@@ -163,7 +166,7 @@ int main(int argc, char* argv[])
         while (1)
         {
             double initialFiniteShear = 0.0;
-            std::clock_t begin = clock();
+            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
 
             
@@ -202,7 +205,6 @@ int main(int argc, char* argv[])
             
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
-            std::clock_t end = clock();
             
             // Dump data
             mainSys.dump_global_data(pars, 'a', 'i');
@@ -224,12 +226,15 @@ int main(int argc, char* argv[])
                 mainSys.dump_per_ele(baseData, pars,timeStep);
             }
             
-           
+            auto t2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> d1 = t2 - t1;
+            std::chrono::duration<double> d2 = t2 - t0;
+            
             timeStep++;
             std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "elapsed time per step:  " << double(end-begin)/ CLOCKS_PER_SEC << std::endl;
-            std::cout << "elapsed total:  " << double(end-begin0)/ CLOCKS_PER_SEC << std::endl;
+            std::cout << "elapsed time per step:  " << d1.count() << std::endl;
+            std::cout << "elapsed total:  " << d2.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if (stage==2){
