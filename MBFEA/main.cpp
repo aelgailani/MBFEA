@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
+           
             auto start = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
 

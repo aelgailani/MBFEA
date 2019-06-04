@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <valarray>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
@@ -373,7 +374,8 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
 }
 
 
-void Configuration::hold(const BaseSysData& baseData, const Parameters& pars){
+void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
+{
     
     std::cout << "holding ... " << std::endl;
     std::cout << "e1  " << e1 <<std::endl;
@@ -400,6 +402,31 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars){
     curPosY = curPosY.array() - yMid;
     curPosY *= 1.0/lxCur*lxNew;
     curPosY = curPosY.array() + yMid;
+}
+
+void Configuration::update_cells(const BaseSysData& baseData, const Parameters& pars)
+{
+    
+    int xBin, yBin, cellID;
+    double x, y;
     
 
+    for (int nodeID=0; nodeID < baseData.numSurfaceNodes; nodeID++)
+    {
+        x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
+        y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
+        xBin = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
+        yBin = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+
+        if ( (xBin < 0) || (yBin < 0) || (xBin >= numXBins)  || (yBin >= numYBins) )
+        {
+            continue;
+        }
+        cellID = numXBins*yBin+xBin+baseData.numSurfaceNodes;
+        cellList[nodeID] = cellList[cellID];
+        cellList[cellID] = nodeID;
+    }
+    
 }
+    
+

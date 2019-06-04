@@ -25,6 +25,7 @@ public:
     double lxRef;
     std::map<int,std::vector<int>> surfaceMeshes;
     std::map<int,std::vector<int>> originalSurfaceMeshes;
+    std::vector<int> flatSurfaceNodes;
     std::map<int,std::vector<int>> imageMeshesL;
     std::map<int,std::vector<int>> imageMeshesR;
     std::map<int,std::vector<int>> imageMeshesB;

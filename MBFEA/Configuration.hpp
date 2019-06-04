@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <valarray>
 #include "Parameters.hpp"
 #include "BaseSysData.hpp"
 
@@ -60,25 +61,26 @@ public:
     Eigen::VectorXd wallForceBottom;
     Eigen::VectorXd wallForceRight;
     Eigen::VectorXd wallForceLeft;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR ;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR ;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR;
     
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR ;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT ;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR ;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR ;
-    std::vector<int> masterSlave;
-    std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
+    Eigen::VectorXd curPosXL;
+    Eigen::VectorXd curPosXR ;
+    Eigen::VectorXd curPosXB;
+    Eigen::VectorXd curPosXT;
+    Eigen::VectorXd curPosXBL;
+    Eigen::VectorXd curPosXBR ;
+    Eigen::VectorXd curPosXTL;
+    Eigen::VectorXd curPosXTR;
+    
+    Eigen::VectorXd curPosYL;
+    Eigen::VectorXd curPosYR ;
+    Eigen::VectorXd curPosYB;
+    Eigen::VectorXd curPosYT ;
+    Eigen::VectorXd curPosYBL;
+    Eigen::VectorXd curPosYBR ;
+    Eigen::VectorXd curPosYTL;
+    Eigen::VectorXd curPosYTR ;
+    
+    int segmentIinteractions, nodeIinteractions;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
     double topPos, botPos, leftPos, rightPos;
     double xMid, yMid;
@@ -103,19 +105,32 @@ public:
     double S4;
     double ex;
     double ey;
+    double numXBins;
+    double numYBins;
+    double verletCellSizeX;
+    double verletCellSizeY;
+    double maxWallinterference;
+    double maxInterference;
+    
     std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
     std::map<std::pair<int,int>, std::vector<double>> gaps;
     std::map<std::pair<int,int>, std::vector<int>> augmentedSegments;
     std::map<std::pair<int,int>, std::vector<int>> augmentedMeshes;
+    std::valarray<int> cellList;
+    
+    std::vector<int> masterSlave;
+    std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
     Eigen::VectorXd displacementSinceLastGridUpdate;
 
-    
+    void update_cells(const BaseSysData& baseData, const Parameters& pars);
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);
     void dump_per_node(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
+    void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
+    void NTS_interaction(const int& node, const int& segment, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);

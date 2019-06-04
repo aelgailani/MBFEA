@@ -78,10 +78,10 @@ BaseSysData::BaseSysData(const Parameters& pars){
             std::istringstream split(line);
             split >> nodeID;
             originalSurfaceMeshes[meshID].push_back(nodeID);
+            flatSurfaceNodes.push_back(nodeID);
             i++;
             (numOriginalSurfaceNodes)++;
-        }
-        meshID++;
+        }        meshID++;
     }
     inFile.close();
     
@@ -97,18 +97,38 @@ BaseSysData::BaseSysData(const Parameters& pars){
                 surfaceMeshes[meshID+numOriginalMeshes*6].push_back(d+numOriginalNodes*6);
                 surfaceMeshes[meshID+numOriginalMeshes*7].push_back(d+numOriginalNodes*7);
                 surfaceMeshes[meshID+numOriginalMeshes*8].push_back(d+numOriginalNodes*8);
+                
             }
         }
+        
         numNodes = numOriginalNodes * 9;
         numMeshes = numOriginalMeshes * 9;
         numSurfaceNodes = numOriginalSurfaceNodes * 9;
 
+        for (int meshID=0; meshID < numMeshes; meshID++){
+            for(int& d : surfaceMeshes[meshID] ){
+
+                flatSurfaceNodes.push_back(d);
+            }
+        }
+        
+        
+        
+        
+        
+        
     }else if (pars.boundaryType == "walls"){
         std::cout << pars.boundaryType<< std::endl;
         numNodes = numOriginalNodes;
         numMeshes = numOriginalMeshes;
         numSurfaceNodes = numOriginalSurfaceNodes;
         surfaceMeshes = originalSurfaceMeshes;
+        for (int meshID=0; meshID < numMeshes; meshID++){
+            for(int& d : surfaceMeshes[meshID] ){
+                
+                flatSurfaceNodes.push_back(d);
+            }
+        }
     }else{
         printf("Please specifiy a valid boundries type ['periodic' or 'walls']!");
         exit(1);
@@ -182,7 +202,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
         surfaceSegments[segmentID][2] = meshID;
         surfaceSegments[segmentID][3] = segmentID-1;
         surfaceSegments[segmentID][4] = segmentID-numNodesPerMesh+1;
-        surfaceSegments[0][3] = segmentID;
+        surfaceSegments[segmentID-numNodesPerMesh+1][3] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][1] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][0]][0] = segmentID;
         nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][2] = meshID;
