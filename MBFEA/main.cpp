@@ -19,7 +19,6 @@
 
 int main(int argc, char* argv[])
 {
-   auto start0 = std::chrono::high_resolution_clock::now();
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
@@ -105,14 +104,16 @@ int main(int argc, char* argv[])
     mainSys.dump_global_data(pars, 'w', 'i');
 
     //  Main loop
-    
+    auto t0 = std::chrono::high_resolution_clock::now();
+
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
            
-            auto start = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
+            auto t1 = std::chrono::high_resolution_clock::now();
 
+            
             if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
             {
                 mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
@@ -149,16 +150,16 @@ int main(int argc, char* argv[])
                 plotWithPython(timeStep);
             }
             
-            auto finish = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = finish - start;
-            std::chrono::duration<double> elapsed0 = finish - start0;
+            auto t2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> d1 = t2 - t1;
+            std::chrono::duration<double> d2 = t2 - t0;
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff()<< std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+            std::cout << "elapsed time per step:  " << d1.count() << std::endl;
+            std::cout << "elapsed total:  " << d2.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
@@ -175,7 +176,7 @@ int main(int argc, char* argv[])
         while (1)
         {
             double initialFiniteShear = 0.0;
-            auto start = std::chrono::high_resolution_clock::now();
+            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
 
             
@@ -242,15 +243,16 @@ int main(int argc, char* argv[])
                 mainSys.dump_per_ele(baseData, pars,timeStep);
             }
             
-            auto finish = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = finish - start;
-            std::chrono::duration<double> elapsed0 = finish - start0;
+            auto t2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> d1 = t2 - t1;
+            std::chrono::duration<double> d2 = t2 - t0;
+            
             timeStep++;
             std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff() << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+            std::cout << "elapsed time per step:  " << d1.count() << std::endl;
+            std::cout << "elapsed total:  " << d2.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if (stage==2){

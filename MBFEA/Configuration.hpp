@@ -112,10 +112,8 @@ public:
     double maxWallinterference;
     double maxInterference;
     
-    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
     std::map<std::pair<int,int>, std::vector<double>> gaps;
-    std::map<std::pair<int,int>, std::vector<int>> augmentedSegments;
-    std::map<std::pair<int,int>, std::vector<int>> augmentedMeshes;
+    std::valarray<double> closestMaster;
     std::valarray<int> cellList;
     
     std::vector<int> masterSlave;
