@@ -116,7 +116,8 @@ public:
     std::map<std::pair<int,int>, std::vector<double>> gaps;
     std::map<std::pair<int,int>, std::vector<int>> augmentedSegments;
     std::map<std::pair<int,int>, std::vector<int>> augmentedMeshes;
-    std::valarray<int> cellList;
+    std::valarray<int> cellListNodes;
+    Eigen::MatrixXd cellListSegments;
     
     std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};

@@ -407,7 +407,7 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
 void Configuration::update_cells(const BaseSysData& baseData, const Parameters& pars)
 {
     
-    int xBin, yBin, cellID;
+    int xBin, yBin, cellID, cellIDseg;
     double x, y;
     
 
@@ -423,8 +423,20 @@ void Configuration::update_cells(const BaseSysData& baseData, const Parameters& 
             continue;
         }
         cellID = numXBins*yBin+xBin+baseData.numSurfaceNodes;
-        cellList[nodeID] = cellList[cellID];
-        cellList[cellID] = nodeID;
+        cellIDseg = numXBins*yBin+xBin;
+        
+        cellListNodes[nodeID] = cellListNodes[cellID];
+        cellListNodes[cellID] = nodeID;
+        
+        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1],cellIDseg) == -1) {
+            cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1],cellIDseg) = cellListSegments(baseData.numSurfaceNodes,cellIDseg);
+            cellListSegments(baseData.numSurfaceNodes,cellIDseg) = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1];
+        }
+        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0],cellIDseg) == -1) {
+            cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0],cellIDseg) = cellListSegments(baseData.numSurfaceNodes,cellIDseg);
+            cellListSegments(baseData.numSurfaceNodes,cellIDseg) = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
+        }
+        
     }
     
 }

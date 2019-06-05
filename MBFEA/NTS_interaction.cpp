@@ -29,13 +29,7 @@ void Configuration::NTS_interaction(const int& node, const int& segment,  const 
     double y0 = augmentedCurPosY[node0];
     double x1 = augmentedCurPosX[node1];
     double y1 = augmentedCurPosY[node1];
-//    double xi = curPosX[node];
-//    double yi = curPosY[node];
-//    double x0 = curPosX[node0];
-//    double y0 = curPosY[node0];
-//    double x1 = curPosX[node1];
-//    double y1 = curPosY[node1];
-// 
+
     double dx = x1-x0;
     double dy = y1-y0;
     double L = sqrt(std::pow(dx,2)+std::pow(dy,2));

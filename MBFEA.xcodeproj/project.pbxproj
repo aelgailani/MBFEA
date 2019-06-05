@@ -12,7 +12,6 @@
 		682D8F2622A1E5F0001EB3C9 /* NTS_interaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2522A1E5F0001EB3C9 /* NTS_interaction.cpp */; };
 		684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853BD228F5FE500DBFE52 /* Configuration.cpp */; };
 		684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853C0228F6FD600DBFE52 /* BaseSysData.cpp */; };
-		684853C4228F9CF400DBFE52 /* compute_forces_walls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853C3228F9CF400DBFE52 /* compute_forces_walls.cpp */; };
 		68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B4E1226562DF00D1CB68 /* main.cpp */; };
 		68A7B504227BD71700D1CB68 /* Parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B502227BD71700D1CB68 /* Parameters.cpp */; };
 		68A7B50D2280F77300D1CB68 /* visualization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B50B2280F77300D1CB68 /* visualization.cpp */; };
@@ -38,7 +37,6 @@
 		684853BE228F5FE500DBFE52 /* Configuration.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Configuration.hpp; sourceTree = "<group>"; };
 		684853C0228F6FD600DBFE52 /* BaseSysData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BaseSysData.cpp; sourceTree = "<group>"; };
 		684853C1228F6FD600DBFE52 /* BaseSysData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BaseSysData.hpp; sourceTree = "<group>"; };
-		684853C3228F9CF400DBFE52 /* compute_forces_walls.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_forces_walls.cpp; sourceTree = "<group>"; };
 		68A7B4DE226562DF00D1CB68 /* MBFEA */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MBFEA; sourceTree = BUILT_PRODUCTS_DIR; };
 		68A7B4E1226562DF00D1CB68 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		68A7B502227BD71700D1CB68 /* Parameters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parameters.cpp; sourceTree = "<group>"; };
@@ -88,7 +86,6 @@
 				684853C1228F6FD600DBFE52 /* BaseSysData.hpp */,
 				68A7B502227BD71700D1CB68 /* Parameters.cpp */,
 				68A7B503227BD71700D1CB68 /* Parameters.hpp */,
-				684853C3228F9CF400DBFE52 /* compute_forces_walls.cpp */,
 				682D8F2122939207001EB3C9 /* compute_forces_PBC.cpp */,
 			);
 			path = MBFEA;
@@ -156,7 +153,6 @@
 				684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */,
 				682D8F2222939207001EB3C9 /* compute_forces_PBC.cpp in Sources */,
 				68A7B50D2280F77300D1CB68 /* visualization.cpp in Sources */,
-				684853C4228F9CF400DBFE52 /* compute_forces_walls.cpp in Sources */,
 				68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */,
 				682D8F2622A1E5F0001EB3C9 /* NTS_interaction.cpp in Sources */,
 			);

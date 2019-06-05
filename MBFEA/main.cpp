@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
            
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_walls(baseData, pars, timeStep);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_walls(baseData, pars, timeStep);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }

@@ -26,8 +26,10 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
     numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
     verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXBins;
     verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYBins;
-    cellList.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
-    
+    cellListNodes.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
+    cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
+    cellListSegments.fill(-1);
+
     auto t1 = std::chrono::high_resolution_clock::now();
     
     update_cells(baseData, pars);
@@ -42,6 +44,8 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
         for (int m1x=0; m1x<numXBins; m1x++)
         {
             int m1 = numXBins*m1y + m1x + baseData.numSurfaceNodes;
+            
+            int slaveNodeId = cellListNodes[m1];
             for (auto const& delta: neighborBinDelta)
             {
                 int  nBinXid = m1x + delta.first;
@@ -52,31 +56,31 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                     continue;
                     
                 }
-                int   m2 = numXBins*nBinYid + nBinXid + baseData.numSurfaceNodes;
-                int slaveNodeId = cellList[m1];  //this is the slave surface node id in flatSurfaceNodes vector, not the global id
+                int   m2 = numXBins*nBinYid + nBinXid;
+                //this is the slave surface node id in flatSurfaceNodes vector, not the global id
                 while (slaveNodeId>=0)
                 {
                     int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
-                    int masterNodeId = cellList[m2]; //this is the master surface node id in flatSurfaceNodes vector, not the global id
-                    while (masterNodeId>=0)
+                    int masterSegment = cellListSegments(baseData.numSurfaceNodes,m2);
+                    while (masterSegment>=0)
                     {
-                        int masterMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[masterNodeId]][2];
+                        int masterMesh = baseData.surfaceSegments[masterSegment][2];
                         if (slaveMesh==masterMesh)
                         {
-                            masterNodeId = cellList[masterNodeId];
+                            masterSegment = cellListSegments(masterSegment,m2);
                             continue;
                         }
 
-                        int segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[masterNodeId]][0];
-                        int segment1 = baseData.nodeToSegments[baseData.flatSurfaceNodes[masterNodeId]][1];
-                        NTS_interaction(baseData.flatSurfaceNodes[slaveNodeId],segment0, baseData, pars);
-                        NTS_interaction(baseData.flatSurfaceNodes[slaveNodeId],segment1, baseData, pars);
+                        NTS_interaction(baseData.flatSurfaceNodes[slaveNodeId],masterSegment, baseData, pars);
                         
-                        masterNodeId = cellList[masterNodeId];
+                        masterSegment = cellListSegments(masterSegment,m2);
                     }
+
                     
-                    slaveNodeId = cellList[slaveNodeId];
+
                 }
+                std::cout << "slaveNodeId:  " << slaveNodeId << std::endl;
+                slaveNodeId = cellListNodes[slaveNodeId];
             }
         }
     }
