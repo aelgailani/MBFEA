@@ -42,6 +42,8 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
         for (int m1x=0; m1x<numXBins; m1x++)
         {
             int m1 = numXBins*m1y + m1x + baseData.numSurfaceNodes;
+            int slaveNodeId = cellList[m1];  //this is the slave surface node id in flatSurfaceNodes vector, not the global id
+
             for (auto const& delta: neighborBinDelta)
             {
                 int  nBinXid = m1x + delta.first;
@@ -53,7 +55,6 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                     
                 }
                 int   m2 = numXBins*nBinYid + nBinXid + baseData.numSurfaceNodes;
-                int slaveNodeId = cellList[m1];  //this is the slave surface node id in flatSurfaceNodes vector, not the global id
                 while (slaveNodeId>=0)
                 {
                     int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
