@@ -28,6 +28,14 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lyNew = lyCur;
         lxNew = lxCur;
         
+//        numXBins = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+//        numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+//        verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXBins;
+//        verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYBins;
+//        cellListNodes.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
+//        cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
+
+        
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
         inFile.open(pars.restartFile); //Make sure later that the file is open in "read" mode only
@@ -428,11 +436,11 @@ void Configuration::update_cells(const BaseSysData& baseData, const Parameters& 
         cellListNodes[nodeID] = cellListNodes[cellID];
         cellListNodes[cellID] = nodeID;
         
-        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1],cellIDseg) == -1) {
+        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1],cellIDseg) == -2) {
             cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1],cellIDseg) = cellListSegments(baseData.numSurfaceNodes,cellIDseg);
             cellListSegments(baseData.numSurfaceNodes,cellIDseg) = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1];
         }
-        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0],cellIDseg) == -1) {
+        if (cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0],cellIDseg) == -2) {
             cellListSegments(baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0],cellIDseg) = cellListSegments(baseData.numSurfaceNodes,cellIDseg);
             cellListSegments(baseData.numSurfaceNodes,cellIDseg) = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
         }

@@ -27,9 +27,15 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
     verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXBins;
     verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYBins;
     cellListNodes.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
-    cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
-    cellListSegments.fill(-1);
 
+    cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
+    cellListSegments.fill(-2);
+    
+    for (int i=0; i < numXBins*numYBins; i++)
+    {
+        cellListSegments(baseData.numSurfaceNodes,i)=-1;
+    }
+    
     auto t1 = std::chrono::high_resolution_clock::now();
     
     update_cells(baseData, pars);
@@ -46,21 +52,20 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             int m1 = numXBins*m1y + m1x + baseData.numSurfaceNodes;
             
             int slaveNodeId = cellListNodes[m1];
-            for (auto const& delta: neighborBinDelta)
+            int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
+            while (slaveNodeId>=0)
             {
-                int  nBinXid = m1x + delta.first;
-                int  nBinYid = m1y + delta.second;
-                
-                if ((nBinXid < 0) || (nBinYid < 0) || (nBinXid == numXBins) || (nBinYid == numYBins))
+                for (auto const& delta: neighborBinDelta)
                 {
-                    continue;
+                    int  nBinXid = m1x + delta.first;
+                    int  nBinYid = m1y + delta.second;
                     
-                }
-                int   m2 = numXBins*nBinYid + nBinXid;
-                //this is the slave surface node id in flatSurfaceNodes vector, not the global id
-                while (slaveNodeId>=0)
-                {
-                    int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
+                    if ((nBinXid < 0) || (nBinYid < 0) || (nBinXid == numXBins) || (nBinYid == numYBins))
+                    {
+                        continue;
+                        
+                    }
+                    int   m2 = numXBins*nBinYid + nBinXid;
                     int masterSegment = cellListSegments(baseData.numSurfaceNodes,m2);
                     while (masterSegment>=0)
                     {
@@ -75,11 +80,8 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                         
                         masterSegment = cellListSegments(masterSegment,m2);
                     }
-
-                    
-
                 }
-                std::cout << "slaveNodeId:  " << slaveNodeId << std::endl;
+                
                 slaveNodeId = cellListNodes[slaveNodeId];
             }
         }
