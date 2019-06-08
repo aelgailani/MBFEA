@@ -78,7 +78,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
             std::istringstream split(line);
             split >> nodeID;
             originalSurfaceMeshes[meshID].push_back(nodeID);
-            flatSurfaceNodes.push_back(nodeID);
+//            flatSurfaceNodes.push_back(nodeID);
             i++;
             (numOriginalSurfaceNodes)++;
         }        meshID++;

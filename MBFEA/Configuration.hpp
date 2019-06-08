@@ -105,19 +105,16 @@ public:
     double S4;
     double ex;
     double ey;
-    double numXBins;
-    double numYBins;
+    int numXCells, numYCells;
     double verletCellSizeX;
     double verletCellSizeY;
     double maxWallinterference;
     double maxInterference;
     
-    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
     std::map<std::pair<int,int>, std::vector<double>> gaps;
-    std::map<std::pair<int,int>, std::vector<int>> augmentedSegments;
-    std::map<std::pair<int,int>, std::vector<int>> augmentedMeshes;
-    std::valarray<int> cellListNodes;
-    Eigen::MatrixXd cellListSegments;
+    std::valarray<int> nodesLinkedList;
+    Eigen::MatrixXd segmentsLinkedList;
+    Eigen::MatrixXd cellsHeads;
     
     std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
