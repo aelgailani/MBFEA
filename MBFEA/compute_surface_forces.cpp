@@ -100,6 +100,57 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
     std::chrono::duration<double> d2 = t3 - t2;
     std::cout << "elapsed time in looping over verlet cells:  " << d2.count() << std::endl;
     
+    for (auto const& nodeRow: gaps)
+    {
+        
+        std::vector<double> shortestPath = nodeRow.second;
+        
+        if (shortestPath[1]>= 0)
+        {
+            continue;
+        }
+        if (shortestPath[0] > maxInterference)
+        {
+            maxInterference = shortestPath[0];
+        }
+        if (shortestPath.size()==20)
+        {
+            
+            segmentIinteractions++ ;
+            if (nodeRow.first.first < baseData.numOriginalNodes)
+            {
+                forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
+                forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
+            }
+            if ( shortestPath[6] < baseData.numOriginalNodes){
+                forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
+                forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
+            }
+            if ( shortestPath[10] < baseData.numOriginalNodes){
+                forceX(shortestPath[10]) = forceX(shortestPath[10]) + shortestPath[12];
+                forceY(shortestPath[10]) = forceY(shortestPath[10]) + shortestPath[13];
+            }
+            
+            
+            contactsEnergy += pars.penaltyStiffness/2 *(shortestPath[0]*shortestPath[0]);
+            
+            
+        }else{
+            
+            nodeIinteractions++;
+            if (nodeRow.first.first < baseData.numOriginalNodes){
+                forceX(nodeRow.first.first) = forceX(nodeRow.first.first) + shortestPath[4] ;
+                forceY(nodeRow.first.first) = forceY(nodeRow.first.first) + shortestPath[5] ;
+            }
+            if ( shortestPath[6] < baseData.numOriginalNodes){
+                forceX(shortestPath[6]) = forceX(shortestPath[6])  + shortestPath[8] ;
+                forceY(shortestPath[6]) = forceY(shortestPath[6]) + shortestPath[9];
+            }
+            
+            contactsEnergy += pars.penaltyStiffness/2 *(shortestPath[0]*shortestPath[0]);
+            
+        }
+    }
     
     auto t4 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> d4 = t4 - t3;
