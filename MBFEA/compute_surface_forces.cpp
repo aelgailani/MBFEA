@@ -49,10 +49,12 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
         {
             int cellFlatId = numXCells*cellYid + cellXid + baseData.numSurfaceNodes;
             int slaveNodeId = nodesLinkedList[cellFlatId];
-            int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
+
             
             while (slaveNodeId>=0)
             {
+                int slaveMesh = baseData.nodeToSegments[baseData.flatSurfaceNodes[slaveNodeId]][2];
+                
                 for (auto const& delta: neighborBinDelta)
                 {
                     int  nCellXid = cellXid + delta.first;
@@ -67,6 +69,7 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                     int masterSegment = cellsHeads(nCellFlatId,0);
                     int nextMSegment;
                     int column = cellsHeads(nCellFlatId,1);
+                    
                     while (masterSegment>=0)
                     {
                         int masterMesh = baseData.surfaceSegments[masterSegment][2];
