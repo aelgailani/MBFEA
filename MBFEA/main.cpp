@@ -19,7 +19,7 @@
 
 int main(int argc, char* argv[])
 {
-   
+   auto start0 = std::chrono::high_resolution_clock::now();
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
@@ -122,12 +122,20 @@ int main(int argc, char* argv[])
            
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_walls(baseData, pars);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }
+            
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
+            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
+                // updated curPos AtLastGridUpdate
+                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
+                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
+            }
+            
             
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
@@ -147,12 +155,13 @@ int main(int argc, char* argv[])
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff()<< std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
             std::cout << "elapsed time per step:  " << d1.count() << std::endl;
             std::cout << "elapsed total:  " << d2.count() << std::endl;
             std::cout << "\n" << std::endl;
             
-            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>20.0){
+            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
                 std::cout << "Foce condition met !" << std::endl;
                 break;
             }
@@ -195,13 +204,19 @@ int main(int argc, char* argv[])
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_walls(baseData, pars);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep);
             }
 
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
+            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
+                // updated curPos AtLastGridUpdate
+                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
+                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
+            }
             
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
@@ -241,7 +256,7 @@ int main(int argc, char* argv[])
                 std::cout << "Done !" << std::endl;
                 break;
             }
-            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>20.0){
+            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
                 std::cout << "Foce condition met !" << std::endl;
                 break;
             }

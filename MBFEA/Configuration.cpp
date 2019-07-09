@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
+#include <valarray>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
@@ -26,6 +27,14 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lyCur =  baseData.lxRef;
         lyNew = lyCur;
         lxNew = lxCur;
+        
+//        numXBins = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+//        numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+//        verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXBins;
+//        verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYBins;
+//        cellListNodes.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
+//        cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
+
         
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
@@ -95,7 +104,9 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         inFile.close();
     }
     
-    
+    curPosXAtLastGridUpdate = curPosX;
+    curPosYAtLastGridUpdate = curPosY;
+    displacementSinceLastGridUpdate = curPosX - curPosX ;  // basically a zero vector, initially
     defGradXX.resize(baseData.numElements,1);
     defGradXY.resize(baseData.numElements,1);
     defGradYX.resize(baseData.numElements,1);
@@ -371,7 +382,8 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
 }
 
 
-void Configuration::hold(const BaseSysData& baseData, const Parameters& pars){
+void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
+{
     
     std::cout << "holding ... " << std::endl;
     std::cout << "e1  " << e1 <<std::endl;
@@ -398,6 +410,70 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars){
     curPosY = curPosY.array() - yMid;
     curPosY *= 1.0/lxCur*lxNew;
     curPosY = curPosY.array() + yMid;
+}
+
+void Configuration::update_cells(const BaseSysData& baseData, const Parameters& pars)
+{
+    
+    int xCell, yCell, cellId_1, cellId_2, segment0, segment1;
+    double x, y;
+
     
 
+    for (int nodeID=0; nodeID < baseData.numSurfaceNodes; nodeID++)
+    {
+        x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
+        y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
+        xCell = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
+        yCell = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+
+        if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
+        {
+            continue;
+        }
+        
+        segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
+        segment1 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1];
+        
+        cellId_1 = numXCells*yCell+xCell+baseData.numSurfaceNodes;
+        cellId_2 = numXCells*yCell+xCell;
+        
+        nodesLinkedList[nodeID] = nodesLinkedList[cellId_1];
+        nodesLinkedList[cellId_1] = nodeID;
+        
+        if (segmentsLinkedList[segment1][0] == -2) {
+            segmentsLinkedList[segment1][0] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment1][1] = cellsHeads[cellId_2][1]; //inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment1;
+            cellsHeads[cellId_2][1] = 0;  //column 0 of segmentsLinkedList
+            segmentsLinkedList[segment1][4] = cellId_2;
+        }else if(segmentsLinkedList[segment1][2] == -2 && segmentsLinkedList[segment1][4] != cellId_2) {
+            segmentsLinkedList[segment1][2] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment1][3] = cellsHeads[cellId_2][1];//inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment1;
+            cellsHeads[cellId_2][1] = 2;  //column 2 of segmentsLinkedList
+            
+            segmentsLinkedList[segment1][4] = cellId_2;
+        }
+        
+        if (segmentsLinkedList[segment0][0] == -2) {
+            segmentsLinkedList[segment0][0] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment0][1] = cellsHeads[cellId_2][1]; //inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment0;
+            cellsHeads[cellId_2][1] = 0;  //column 0 of segmentsLinkedList
+            
+            segmentsLinkedList[segment0][4] = cellId_2;
+        }else if(segmentsLinkedList[segment0][2] == -2 && segmentsLinkedList[segment1][4]!= cellId_2 ) {
+            segmentsLinkedList[segment0][2] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment0][3] = cellsHeads[cellId_2][1];//inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment0;
+            cellsHeads[cellId_2][1] = 2;  //column 2 of segmentsLinkedList
+            
+            segmentsLinkedList[segment0][4] = cellId_2;
+        }
+        
+    }
+    
 }
+    
+

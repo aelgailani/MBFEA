@@ -16,7 +16,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep)
 {
     
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -28,27 +28,52 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     defGradXY = gradY * curPosX;
     defGradYY = gradY * curPosY;
     
+//    auto finish1 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed1 = finish1 - start1;
+//    std::cout << "elapsed time in defGrad:  " << elapsed1.count() << std::endl;
+    
     //compute the determinant of defGrad
     areaRatio = defGradXX.array() * defGradYY.array() - defGradXY.array() * defGradYX.array();
-    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
+
+    
+//    auto finish2 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed2 = finish2 - finish1;
+//    std::cout << "elapsed time in areaRatio:  " << elapsed2.count() << std::endl;
     
     //compute the magnitude squared of defGrad
     fSquared = defGradXX.array().pow(2)+defGradXY.array().pow(2)+defGradYX.array().pow(2)+defGradYY.array().pow(2);
     
+//    auto finish3 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed3 = finish3 - finish2;
+//    std::cout << "elapsed time in fSquared:  " << elapsed3.count() << std::endl;
+    
     //compute the local elastic energy density
     elasticEnergyPerEle = pars.NkT/2.0 * (fSquared.array()- 2 - 2*log(abs(areaRatio.array())));
+//    auto finish4 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed4 = finish4 - finish3;
+//    std::cout << "elapsed time in elasticEnergyPerEle:  " << elapsed4.count() << std::endl;
     
     //compute the local mixing energy density
     mixingEnergyPerEle = pars.kTOverOmega*(areaRatio.array()-1.0)*(log((abs(areaRatio.array())-1.0)/abs(areaRatio.array()))+pars.chi/abs(areaRatio.array()));
+//    auto finish5 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed5 = finish5 - finish4;
+//    std::cout << "elapsed time in mixingEnergyPerEle:  " << elapsed5.count() << std::endl;
     
     //compute the local total energy density
     internalEnergyPerEle = elasticEnergyPerEle.array() + mixingEnergyPerEle.array();
+//    auto finish6 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed6 = finish6 - finish5;
+//    std::cout << "elapsed time in internalEnergyPerEle:  " << elapsed6.count() << std::endl;
     
     //compute the inverse of defGrad
     invDefGradTransXX = defGradYY.array()/ areaRatio.array();
     invDefGradTransXY = defGradXY.array()/ areaRatio.array() * -1 ;
     invDefGradTransYX = defGradYX.array()/ areaRatio.array() * -1;
     invDefGradTransYY = defGradXX.array()/ areaRatio.array();
+    
+//    auto finish7 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed7 = finish7 - finish6;
+//    std::cout << "elapsed time in invDefGradTrans:  " << elapsed7.count() << std::endl;
     
     swellingPressurePerEle = pars.kTOverOmega * ( (pars.chi+areaRatio.array()) / (areaRatio.array()).pow(2) + log((areaRatio.array()-1)/areaRatio.array()) );
     
@@ -62,8 +87,10 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     CstressYX = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradXX.array()+defGradYY.array()*defGradXY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradXX.array()*invDefGradTransXY.array()+defGradXY.array()*invDefGradTransYY.array());
     CstressYY = pars.NkT/areaRatio.array()*(defGradYX.array()*defGradYX.array()+defGradYY.array()*defGradYY.array())+(swellingPressurePerEle.array()-1/areaRatio.array())*(defGradYX.array()*invDefGradTransXY.array()+defGradYY.array()*invDefGradTransYY.array());
     
-    
-    
+//    auto finish11 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed11 = finish11 - finish7;
+//    std::cout << "elapsed time in stresses:  " << elapsed11.count() << std::endl;
+//
     
     
     //compute the nodal forces from the stresses
@@ -72,26 +99,32 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     interForceX = forceX;
     interForceY = forceY;
     
-    
+//    auto finish12 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed12 = finish12 - finish11;
+//    std::cout << "elapsed time in internal forces:  " << elapsed12.count() << std::endl;
     
     // Create images x y
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXB = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXT = curPosX;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXBR = curPosX.array()+lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTL = curPosX.array()-lxNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosXTR = curPosX.array()+lxNew;
+    curPosXL = curPosX.array()-lxNew;
+    curPosXR = curPosX.array()+lxNew;
+    curPosXB = curPosX;
+    curPosXT = curPosX;
+    curPosXBL = curPosX.array()-lxNew;
+    curPosXBR = curPosX.array()+lxNew;
+    curPosXTL = curPosX.array()-lxNew;
+    curPosXTR = curPosX.array()+lxNew;
     
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYL = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYR = curPosY;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYB = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYT = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBL = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYBR = curPosY.array()-lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTL = curPosY.array()+lyNew;
-    Eigen::Matrix<double,Eigen::Dynamic, 1> curPosYTR = curPosY.array()+lyNew;
+    curPosYL = curPosY;
+    curPosYR = curPosY;
+    curPosYB = curPosY.array()-lyNew;
+    curPosYT = curPosY.array()+lyNew;
+    curPosYBL = curPosY.array()-lyNew;
+    curPosYBR = curPosY.array()-lyNew;
+    curPosYTL = curPosY.array()+lyNew;
+    curPosYTR = curPosY.array()+lyNew;
+    
+//    auto finish13 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed13 = finish13 - finish12;
+//    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
     augmentedCurPosX.resize(baseData.numNodes);
     augmentedCurPosY.resize(baseData.numNodes);
@@ -111,11 +144,15 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     double verletCellSizeX  = lxNew/numXBins;
     double verletCellSizeY = lyNew/numYBins;
 
+    auto finish15 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed15 = finish15 - start1;
+    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
+    compute_surface_forces(baseData,pars,timeStep);
     
-    int xBin, yBin;
-    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
-    std::map<std::pair<int,int>, std::vector<double>> gaps;
+    auto finish16 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed16 = finish16 - finish15;
+    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
     
      auto t21 = std::chrono::high_resolution_clock::now();
     for (int meshID=0; meshID < baseData.numMeshes; meshID++)
