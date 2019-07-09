@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <iomanip>
 #include <chrono>
+#include <valarray>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
@@ -144,15 +145,11 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     double verletCellSizeX  = lxNew/numXBins;
     double verletCellSizeY = lyNew/numYBins;
 
-    auto finish15 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed15 = finish15 - start1;
-    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
-    compute_surface_forces(baseData,pars,timeStep);
     
-    auto finish16 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed16 = finish16 - finish15;
-    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
+    int xBin, yBin;
+    std::map<std::pair<int,int>, std::vector<int>> spatialGridNodes,spatialGridSegments,spatialGridMeshes;
+    std::map<std::pair<int,int>, std::vector<double>> gaps;
     
      auto t21 = std::chrono::high_resolution_clock::now();
     for (int meshID=0; meshID < baseData.numMeshes; meshID++)

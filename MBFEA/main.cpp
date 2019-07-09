@@ -109,6 +109,8 @@ int main(int argc, char* argv[])
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
+           
+            auto start = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             auto t1 = std::chrono::high_resolution_clock::now();
   
@@ -220,6 +222,7 @@ int main(int argc, char* argv[])
             
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
+
             
             // Dump data
             mainSys.dump_global_data(pars, 'a', 'i');
