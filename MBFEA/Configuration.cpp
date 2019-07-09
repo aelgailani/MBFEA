@@ -441,35 +441,35 @@ void Configuration::update_cells(const BaseSysData& baseData, const Parameters& 
         nodesLinkedList[nodeID] = nodesLinkedList[cellId_1];
         nodesLinkedList[cellId_1] = nodeID;
         
-        if (segmentsLinkedList(segment1,0) == -2) {
-            segmentsLinkedList(segment1,0) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment1,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
-            cellsHeads(cellId_2,0) = segment1;
-            cellsHeads(cellId_2,1) = 0;  //column 0 of segmentsLinkedList
-            segmentsLinkedList(segment1,4) = cellId_2;
-        }else if(segmentsLinkedList(segment1,2) == -2 && segmentsLinkedList(segment1,4) != cellId_2) {
-            segmentsLinkedList(segment1,2) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment1,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
-            cellsHeads(cellId_2,0) = segment1;
-            cellsHeads(cellId_2,1) = 2;  //column 2 of segmentsLinkedList
+        if (segmentsLinkedList[segment1][0] == -2) {
+            segmentsLinkedList[segment1][0] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment1][1] = cellsHeads[cellId_2][1]; //inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment1;
+            cellsHeads[cellId_2][1] = 0;  //column 0 of segmentsLinkedList
+            segmentsLinkedList[segment1][4] = cellId_2;
+        }else if(segmentsLinkedList[segment1][2] == -2 && segmentsLinkedList[segment1][4] != cellId_2) {
+            segmentsLinkedList[segment1][2] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment1][3] = cellsHeads[cellId_2][1];//inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment1;
+            cellsHeads[cellId_2][1] = 2;  //column 2 of segmentsLinkedList
             
-            segmentsLinkedList(segment1,4) = cellId_2;
+            segmentsLinkedList[segment1][4] = cellId_2;
         }
         
-        if (segmentsLinkedList(segment0,0) == -2) {
-            segmentsLinkedList(segment0,0) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment0,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
-            cellsHeads(cellId_2,0) = segment0;
-            cellsHeads(cellId_2,1) = 0;  //column 0 of segmentsLinkedList
+        if (segmentsLinkedList[segment0][0] == -2) {
+            segmentsLinkedList[segment0][0] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment0][1] = cellsHeads[cellId_2][1]; //inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment0;
+            cellsHeads[cellId_2][1] = 0;  //column 0 of segmentsLinkedList
             
-            segmentsLinkedList(segment0,4) = cellId_2;
-        }else if(segmentsLinkedList(segment0,2) == -2 && segmentsLinkedList(segment0,4)!= cellId_2 ) {
-            segmentsLinkedList(segment0,2) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment0,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
-            cellsHeads(cellId_2,0) = segment0;
-            cellsHeads(cellId_2,1) = 2;  //column 2 of segmentsLinkedList
+            segmentsLinkedList[segment0][4] = cellId_2;
+        }else if(segmentsLinkedList[segment0][2] == -2 && segmentsLinkedList[segment1][4]!= cellId_2 ) {
+            segmentsLinkedList[segment0][2] = cellsHeads[cellId_2][0];
+            segmentsLinkedList[segment0][3] = cellsHeads[cellId_2][1];//inheret the column of the segment associated with this cell
+            cellsHeads[cellId_2][0] = segment0;
+            cellsHeads[cellId_2][1] = 2;  //column 2 of segmentsLinkedList
             
-            segmentsLinkedList(segment0,4) = cellId_2;
+            segmentsLinkedList[segment0][4] = cellId_2;
         }
         
     }

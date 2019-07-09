@@ -28,11 +28,8 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
     verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYCells;
     
     nodesLinkedList.resize(numXCells*numYCells+baseData.numSurfaceNodes,-1);
-    segmentsLinkedList.resize(baseData.numSurfaceNodes, 5);
-    segmentsLinkedList.fill(-2);
-    cellsHeads.resize(numXCells*numYCells, 2);
-    cellsHeads.fill(-1);
-
+    segmentsLinkedList.resize(baseData.numSurfaceNodes, std::vector<int>(5, -2));
+    cellsHeads.resize(numXCells*numYCells, std::vector<int>(2, -1));
     
     auto t1 = std::chrono::high_resolution_clock::now();
     
@@ -66,27 +63,27 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                     }
                     
                     int nCellFlatId = numXCells*nCellYid + nCellXid;
-                    int masterSegment = cellsHeads(nCellFlatId,0);
+                    int masterSegment = cellsHeads[nCellFlatId][0];
                     int nextMSegment;
-                    int column = cellsHeads(nCellFlatId,1);
+                    int column = cellsHeads[nCellFlatId][1];
                     
                     while (masterSegment>=0)
-                    {
+                    { 
                         int masterMesh = baseData.surfaceSegments[masterSegment][2];
                         
                         if (slaveMesh==masterMesh)
                         {
                             
-                            nextMSegment = segmentsLinkedList(masterSegment,column);
-                            column = segmentsLinkedList(masterSegment,column+1);
+                            nextMSegment = segmentsLinkedList[masterSegment][column];
+                            column = segmentsLinkedList[masterSegment][column+1];
                             masterSegment = nextMSegment;
                             continue;
                         }
 
                         NTS_interaction(baseData.flatSurfaceNodes[slaveNodeId],masterSegment, baseData, pars);
                         
-                        nextMSegment = segmentsLinkedList(masterSegment,column);
-                        column = segmentsLinkedList(masterSegment,column+1);
+                        nextMSegment = segmentsLinkedList[masterSegment][column];
+                        column = segmentsLinkedList[masterSegment][column+1];
                         masterSegment = nextMSegment;
                     }
                 }

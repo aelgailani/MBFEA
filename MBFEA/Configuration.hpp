@@ -113,10 +113,10 @@ public:
     
     std::map<std::pair<int,int>, std::vector<double>> gaps;
     std::valarray<int> nodesLinkedList;
-    Eigen::MatrixXd segmentsLinkedList;
-    Eigen::MatrixXd cellsHeads;
+    std::vector<std::vector<int>> segmentsLinkedList;
+    std::vector<std::vector<int>> cellsHeads;
     
-    std::vector<int> masterSlave;
+//    std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
     Eigen::VectorXd displacementSinceLastGridUpdate;
