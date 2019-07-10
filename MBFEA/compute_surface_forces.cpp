@@ -145,10 +145,9 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             }
             
             contactsEnergy += pars.penaltyStiffness/2 *(shortestPath[0]*shortestPath[0]);
-            
         }
     }
-    
+
     auto t4 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> d4 = t4 - t3;
     std::cout << "elapsed time in looping over gaps map:  " << d4.count() << std::endl;
