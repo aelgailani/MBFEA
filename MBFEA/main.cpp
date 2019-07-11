@@ -15,11 +15,11 @@
 #include "visualization.hpp"
 #include "BaseSysData.hpp"
 #include "Configuration.hpp"
-
+#include "solvers.hpp"
 
 int main(int argc, char* argv[])
 {
-   auto start0 = std::chrono::high_resolution_clock::now();
+   
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
@@ -104,168 +104,10 @@ int main(int argc, char* argv[])
     int stage = 0; // a dummy varaiable to be used in shearing mode
     mainSys.dump_global_data(pars, 'w', 'i');
 
-    //  Main loop
+    ///////////////  Main loop
     
-    if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
-        while (1)
-        {
-           
-            auto start = std::chrono::high_resolution_clock::now();
-            std::cout << timeStep << std::endl;
-
-            if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
-            {
-                mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
-            }
-
-     
-           
-            // Take an Euler step
-            if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep);
-            }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep);
-            }
-            
-            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
-                // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
-                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
-            }
-            
-            
-            // Postporcesseing calculations
-            mainSys.update_post_processing_data(baseData, pars);
- 
-            
-            //dump
-            mainSys.dump_global_data(pars, 'a', 'i');
-            if (timeStep % pars.dumpEvery == 0) {
-                mainSys.dump_per_node(baseData, pars, timeStep);
-                mainSys.dump_per_ele(baseData, pars,timeStep);
-                plotWithPython(timeStep);
-            }
-            
-            auto finish = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = finish - start;
-            std::chrono::duration<double> elapsed0 = finish - start0;
-            
-            timeStep++;
-            std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff()<< std::endl;
-            std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
-            std::cout << "\n" << std::endl;
-            
-            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
-                std::cout << "Foce condition met !" << std::endl;
-                break;
-            }
-            if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
-                std::cout << "System blew up !" << std::endl;
-                break;
-            }
-        }
-    }else if (pars.runMode=="shear"){  //  shearing ***********************************************************************************************
-        mainSys.maxR = 9999;
-        while (1)
-        {
-            double initialFiniteShear = 0.0;
-            auto start = std::chrono::high_resolution_clock::now();
-            std::cout << timeStep << std::endl;
-
-            
-            
-            if (timeStep * pars.deformationRate * pars.dt < initialFiniteShear )
-            {
-                mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
-                
-            }else if (mainSys.maxR >= pars.maxForceTol)
-            {
-                mainSys.hold(baseData, pars);
-            
-            }else if (stage==0){
-                
-                mainSys.shear(baseData, pars, pars.shearStep);
-                stage++;
-                
-            }else if (stage==1){
-                stage++;
-            }
-            
-
-            
-
-
-            
-            // Take an Euler step
-            if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep);
-            }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep);
-            }
-
-            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
-                // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
-                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
-            }
-            
-            // Postporcesseing calculations
-            mainSys.update_post_processing_data(baseData, pars);
-
-            
-            // Dump data
-            mainSys.dump_global_data(pars, 'a', 'i');
-            
-            if (stage==0){
-                
-                mainSys.dump_global_data(pars, 'w' , 'f');
-                mainSys.dump_global_data(pars, 'a' , 'f');
-                
-            }else if (stage==2){
-                
-                mainSys.dump_global_data(pars, 'a' , 'f');
-                
-            }
-            
-      
-            if (timeStep % pars.dumpEvery == 0) {
-                mainSys.dump_per_node(baseData, pars, timeStep);
-                mainSys.dump_per_ele(baseData, pars,timeStep);
-            }
-            
-            auto finish = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = finish - start;
-            std::chrono::duration<double> elapsed0 = finish - start0;
-            timeStep++;
-            std::cout << "stage  " << stage << std::endl;
-            std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff() << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
-            std::cout << "\n" << std::endl;
-            
-            if (stage==2){
-                std::cout << "Done !" << std::endl;
-                break;
-            }
-            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
-                std::cout << "Foce condition met !" << std::endl;
-                break;
-            }
-            if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
-                std::cout << "System blew up !" << std::endl;
-                break;
-            }
-        }
+    if (pars.solver=="GD") {
+        GD_solver(baseData,pars,timeStep,stage, mainSys);
     }
     
     

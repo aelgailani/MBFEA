@@ -27,15 +27,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lyCur =  baseData.lxRef;
         lyNew = lyCur;
         lxNew = lxCur;
-        
-//        numXBins = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-//        numYBins = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-//        verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXBins;
-//        verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYBins;
-//        cellListNodes.resize(numXBins*numYBins+baseData.numSurfaceNodes,-1);
-//        cellListSegments.resize(baseData.numSurfaceNodes+1, numXBins*numYBins);
 
-        
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
         inFile.open(pars.restartFile); //Make sure later that the file is open in "read" mode only
@@ -151,6 +143,14 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         gradX.insert(triID,b)=(baseData.refPosY[c]-baseData.refPosY[a])/area;
         gradX.insert(triID,c)=(baseData.refPosY[a]-baseData.refPosY[b])/area;
         
+    }
+    
+    // If slover is FIRE, initiate zero velocity vectors
+    if (pars.solver == "FIRE"){
+        velocityX.resize(baseData.numOriginalNodes);
+        velocityY.resize(baseData.numOriginalNodes);
+        velocityX.fill(0);
+        velocityY.fill(0);
     }
 }
 

@@ -37,6 +37,7 @@ public:
     double maxCompression;
     double dt;
     std::string wallStyle;
+    std::string solver;
     double HWallStiffness;
     double PLWallEnergyScale;
     double PLWallLJScale;
@@ -47,6 +48,15 @@ public:
     std::string restartFile;
     double shearStep;
     double maxForceTol;
+    double FIRE_dtmax;
+    double FIRE_Nmin;
+    double FIRE_finc;
+    double FIRE_fdec;
+    double FIRE_alpha_start;
+    double FIRE_falpha;
+    double FIRE_dt_start;
+    double RTolerance;
+    int numStrainSteps;
     void print_to_console(void) const;
     
     
