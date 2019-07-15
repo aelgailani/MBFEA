@@ -108,6 +108,8 @@ int main(int argc, char* argv[])
     
     if (pars.solver=="GD") {
         GD_solver(baseData,pars,timeStep,stage, mainSys);
+    }else if (pars.solver=="FIRE"){
+        FIRE_solver(baseData,pars,timeStep,stage, mainSys);
     }
     
     

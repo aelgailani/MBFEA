@@ -29,19 +29,19 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
     double FIRE_alpha =  pars.FIRE_alpha_start;
     double FIRE_N = 0;
     double FIRE_dt = pars.FIRE_dt_start;
-    double RTolerance;
+//    double RTolerance;
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         for (int strainStep = 0; strainStep<= pars.numStrainSteps ; strainStep++) {
             
             auto t1 = std::chrono::high_resolution_clock::now();
- 
+            
             
             mainSys.compress(baseData, pars, pars.maxCompression * float(strainStep)/float(pars.numStrainSteps));
 
             while (1)
             {
-                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.numStrainSteps<<std::endl;
-                std::cout << "energy  " << mainSys.totalEnergy << pars.numStrainSteps<<std::endl;
+                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.numStrainSteps <<std::endl;
+                std::cout << "energy  " << mainSys.totalEnergy <<std::endl;
                 std::cout << timeStep << std::endl;
                 // Take an Euler step
                 if (pars.boundaryType == "walls"){
@@ -59,7 +59,7 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                     mainSys.velocityY.fill(0);
                     FIRE_alpha = pars.FIRE_alpha_start;
                     FIRE_N = timeStep;
-                }else{
+                }else if ( (timeStep - FIRE_N) > pars.FIRE_Nmin){
                     FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
                     FIRE_alpha *= pars.FIRE_falpha;
                     Eigen::VectorXd force_magnitude = (mainSys.forceX.array().pow(2)+mainSys.forceY.array().pow(2)).pow(0.5);
@@ -67,10 +67,12 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                     mainSys.velocityX = (1 - FIRE_alpha)*mainSys.velocityX.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceX.array()/force_magnitude.array();
                     mainSys.velocityY = (1 - FIRE_alpha)*mainSys.velocityY.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceY.array()/force_magnitude.array();
                 }
+                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+                mainSys.curPosX += mainSys.velocityX*FIRE_dt;
+                mainSys.curPosY += mainSys.velocityY*FIRE_dt;
                 mainSys.velocityX += mainSys.forceX*FIRE_dt;
                 mainSys.velocityY += mainSys.forceY*FIRE_dt;
-                mainSys.curPosX = mainSys.velocityX*FIRE_dt;
-                mainSys.curPosY = mainSys.velocityY*FIRE_dt;
+
 
                 mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
                 
@@ -98,15 +100,15 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                 std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
                 std::cout << "\n" << std::endl;
                 
-                if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
+                if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < pars.RTolerance){
                     std::cout << "Foce condition met !" << std::endl;
                     break;
                 }
-                if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
-                    std::cout << "System blew up !" << std::endl;
-                    break;
-                }
+
             }
+            
+            FIRE_alpha = pars.FIRE_alpha_start;
+            FIRE_N = timeStep;
         }
         
     }else if (pars.runMode=="shear"){  //  shearing ***********************************************************************************************
