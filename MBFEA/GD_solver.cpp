@@ -63,7 +63,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             if (timeStep % pars.dumpEvery == 0) {
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);
-                plotWithPython(timeStep);
+//                plotWithPython(timeStep);
             }
             
             auto t2 = std::chrono::high_resolution_clock::now();
