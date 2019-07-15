@@ -60,7 +60,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
     std::getline(inFile, line);
     int meshID = 0;
     int nodeID;
-    int i =0;
+//    int i =0;
     assert(line=="Number of surfaces");
     std::getline(inFile, line);
     std::istringstream sb1(line);
@@ -68,20 +68,18 @@ BaseSysData::BaseSysData(const Parameters& pars){
     std::getline(inFile, line);
     std::istringstream sb2(line);
     sb2 >> numNodesPerMesh;
-    
+    numOriginalSurfaceNodes=numNodesPerMesh*numOriginalMeshes;
+
     while(meshID < numOriginalMeshes)
     {
-        i =0;
         while(std::getline(inFile, line))
         {
             if(line==""){break;}
             std::istringstream split(line);
             split >> nodeID;
             originalSurfaceMeshes[meshID].push_back(nodeID);
-//            flatSurfaceNodes.push_back(nodeID);
-            i++;
-            (numOriginalSurfaceNodes)++;
-        }        meshID++;
+        }
+        meshID++;
     }
     inFile.close();
     

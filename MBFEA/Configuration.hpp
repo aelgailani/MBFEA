@@ -38,6 +38,8 @@ public:
     Eigen::VectorXd invDefGradTransYY;
     Eigen::VectorXd forceX;
     Eigen::VectorXd forceY;
+    Eigen::VectorXd velocityX;
+    Eigen::VectorXd velocityY;
     Eigen::VectorXd interForceX;
     Eigen::VectorXd interForceY;
     Eigen::VectorXd PK1stressXX;
