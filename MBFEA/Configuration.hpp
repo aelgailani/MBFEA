@@ -112,8 +112,10 @@ public:
     double verletCellSizeY;
     double maxWallinterference;
     double maxInterference;
-    
+//    abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny
     std::map<std::pair<int,int>, std::vector<double>> gaps;
+    std::valarray<int> surNodes_gap;
+    std::valarray<int> surNodes_mSegment;
     std::valarray<int> nodesLinkedList;
     Eigen::MatrixXd segmentsLinkedList;
     Eigen::MatrixXd cellsHeads;

@@ -59,9 +59,11 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                     mainSys.velocityY.fill(0);
                     FIRE_alpha = pars.FIRE_alpha_start;
                     FIRE_N = timeStep;
-                }else if ( (timeStep - FIRE_N) > pars.FIRE_Nmin){
-                    FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
-                    FIRE_alpha *= pars.FIRE_falpha;
+                } else {
+                    if ((timeStep - FIRE_N) > pars.FIRE_Nmin){
+                        FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
+                        FIRE_alpha *= pars.FIRE_falpha;
+                    }
                     Eigen::VectorXd force_magnitude = (mainSys.forceX.array().pow(2)+mainSys.forceY.array().pow(2)).pow(0.5);
                     Eigen::VectorXd velocity_magnitude = (mainSys.velocityX.array().pow(2)+mainSys.velocityY.array().pow(2)).pow(0.5);
                     mainSys.velocityX = (1 - FIRE_alpha)*mainSys.velocityX.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceX.array()/force_magnitude.array();
@@ -81,13 +83,13 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                 
                 
                 //dump
-                mainSys.dump_global_data(pars, 'a', 'i');
-                if (timeStep % pars.dumpEvery == 0) {
-                    mainSys.dump_per_node(baseData, pars, timeStep);
-                    mainSys.dump_per_ele(baseData, pars,timeStep);
-                    plotWithPython(timeStep);
-                }
-                
+//                mainSys.dump_global_data(pars, 'a', 'i');
+//                if (timeStep % pars.dumpEvery == 0) {
+//                    mainSys.dump_per_node(baseData, pars, timeStep);
+//                    mainSys.dump_per_ele(baseData, pars,timeStep);
+//                    plotWithPython(timeStep);
+//                }
+//
                 auto t2 = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> elapsed = t2 - t1;
                 std::chrono::duration<double> elapsed0 = t2 - t0;
@@ -109,6 +111,10 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
             
             FIRE_alpha = pars.FIRE_alpha_start;
             FIRE_N = timeStep;
+            mainSys.dump_global_data(pars, 'a', 'i');
+            mainSys.dump_per_node(baseData, pars, timeStep);
+            mainSys.dump_per_ele(baseData, pars,timeStep);
+            plotWithPython(timeStep);
         }
         
     }else if (pars.runMode=="shear"){  //  shearing ***********************************************************************************************
