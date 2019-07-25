@@ -136,19 +136,20 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 
     auto finish15 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed15 = finish15 - start1;
-//    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
+    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
     compute_surface_forces(baseData,pars,timeStep);
     
     auto finish16 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed16 = finish16 - finish15;
-//    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
+    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
     
     internalEnergy = internalEnergyPerEle.dot(refArea) + contactsEnergy;
     totalEnergy= internalEnergy + wallsEnergy;
     
 //    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
 //    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
+    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;

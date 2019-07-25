@@ -121,6 +121,7 @@ public:
     std::valarray<int> surNodes_mSegment;
     std::valarray<int> surNodes_mSegmentWhichPart;
     std::valarray<int> nodesLinkedList;
+    Eigen::MatrixXd surNodes_masters;
     Eigen::MatrixXd segmentsLinkedList;
     Eigen::MatrixXd cellsHeads;
     
@@ -136,7 +137,7 @@ public:
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
-    void NTS_interaction(const int& node, const int& segment, const BaseSysData& baseData, const Parameters& pars);
+    void NTS_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);
