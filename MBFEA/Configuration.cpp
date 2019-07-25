@@ -96,9 +96,9 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         inFile.close();
     }
     
-    curPosXAtLastGridUpdate = curPosX;
-    curPosYAtLastGridUpdate = curPosY;
-    displacementSinceLastGridUpdate = curPosX - curPosX ;  // basically a zero vector, initially
+    curPosXAtLastStep = curPosX;
+    curPosYAtLastStep = curPosY;
+    displacementSinceLastStep = curPosX - curPosX ;  // basically a zero vector, initially
     defGradXX.resize(baseData.numElements,1);
     defGradXY.resize(baseData.numElements,1);
     defGradYX.resize(baseData.numElements,1);
@@ -149,8 +149,12 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     if (pars.solver == "FIRE"){
         velocityX.resize(baseData.numOriginalNodes);
         velocityY.resize(baseData.numOriginalNodes);
+        prevVelocityX.resize(baseData.numOriginalNodes);
+        prevVelocityY.resize(baseData.numOriginalNodes);
         velocityX.fill(0);
         velocityY.fill(0);
+        prevVelocityX.fill(0);
+        prevVelocityY.fill(0);
     }
 }
 
@@ -173,6 +177,10 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     e0 = 0.5*(ex+ey);
     e1 = (ex-ey);
     phi = pars.Ap / A;
+    deltaTotEnergy = totalEnergy - prevTotEnergy;
+    prevTotEnergy = totalEnergy;
+    L2NormResidual = - (forceX.dot(forceX) + forceY.dot(forceY));
+    
     shearVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
 }

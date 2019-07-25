@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <iomanip>
 #include <valarray>
+#include <thread>
 #include "Parameters.hpp"
 #include "BaseSysData.hpp"
 #include "solvers.hpp"
@@ -29,11 +30,14 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
     double FIRE_alpha =  pars.FIRE_alpha_start;
     double FIRE_N = 0;
     double FIRE_dt = pars.FIRE_dt_start;
+    double FIRE_prevDt = pars.FIRE_dt_start;
 //    double RTolerance;
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
-        for (int strainStep = 0; strainStep<= pars.numStrainSteps ; strainStep++) {
+        assert(pars.startingStrainStep <= pars.numStrainSteps);
+        
+        for (int strainStep = pars.startingStrainStep ; strainStep<= pars.numStrainSteps ; strainStep++) {
             
-            auto t1 = std::chrono::high_resolution_clock::now();
+//            auto t1 = std::chrono::high_resolution_clock::now();
             
             
             mainSys.compress(baseData, pars, pars.maxCompression * float(strainStep)/float(pars.numStrainSteps));
@@ -43,6 +47,7 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                 std::cout << "strainStep  " << strainStep<<"   out of  " << pars.numStrainSteps <<std::endl;
                 std::cout << "energy  " << mainSys.totalEnergy <<std::endl;
                 std::cout << timeStep << std::endl;
+                
                 // Take an Euler step
                 if (pars.boundaryType == "walls"){
                     mainSys.compute_forces_PBC(baseData, pars, timeStep);
@@ -53,7 +58,33 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                 double power = mainSys.forceX.dot(mainSys.velocityX)+ mainSys.forceY.dot(mainSys.velocityY);
                 std::cout << "power   " << power <<std::endl;
                 
-                if (power <=0) {
+//                if (timeStep>60178 && timeStep<60278){
+//                    mainSys.dump_per_node(baseData, pars, timeStep);
+//                    mainSys.dump_per_ele(baseData, pars,timeStep);
+//                    plotWithPython(timeStep);
+//                    std::this_thread::sleep_for (std::chrono::milliseconds(700));
+//                }
+                
+                // make sure nothing is screwed up
+                
+                
+                if (isnan(power) || isnan(mainSys.forceX.sum()) || isnan(mainSys.forceY.sum()) || isnan(mainSys.areaRatio.sum()) || isnan(mainSys.velocityX.sum()) || isnan(mainSys.velocityY.sum()) || mainSys.areaRatio.minCoeff()<= 1.0 ){
+                    
+                    mainSys.curPosX =  mainSys.curPosXAtLastStep;
+                    mainSys.curPosY = mainSys.curPosYAtLastStep;
+                    mainSys.velocityX = mainSys.prevVelocityX;
+                    mainSys.velocityY = mainSys.prevVelocityY;
+                    mainSys.forceX.fill(0);
+                    mainSys.forceY.fill(0);
+//                    FIRE_alpha = pars.FIRE_alpha_start;
+                    FIRE_N = timeStep;
+                    FIRE_dt = FIRE_prevDt * pars.FIRE_fdec;
+                    FIRE_prevDt = FIRE_dt;
+                    mainSys.curPosX += mainSys.velocityX*FIRE_dt;
+                    mainSys.curPosY += mainSys.velocityY*FIRE_dt;
+                    continue;
+                    
+                }else if (power <=0) {
                     FIRE_dt *= pars.FIRE_fdec;
                     mainSys.velocityX.fill(0);
                     mainSys.velocityY.fill(0);
@@ -61,6 +92,7 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                     FIRE_N = timeStep;
                 } else {
                     if ((timeStep - FIRE_N) > pars.FIRE_Nmin){
+                        FIRE_prevDt = FIRE_dt;
                         FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
                         FIRE_alpha *= pars.FIRE_falpha;
                     }
@@ -70,13 +102,18 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                     mainSys.velocityY = (1 - FIRE_alpha)*mainSys.velocityY.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceY.array()/force_magnitude.array();
                 }
                 std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+                mainSys.curPosXAtLastStep = mainSys.curPosX;
+                mainSys.curPosYAtLastStep = mainSys.curPosY;
+                mainSys.prevVelocityX =  mainSys.velocityX;
+                mainSys.prevVelocityY =  mainSys.velocityY;
+                
                 mainSys.curPosX += mainSys.velocityX*FIRE_dt;
                 mainSys.curPosY += mainSys.velocityY*FIRE_dt;
                 mainSys.velocityX += mainSys.forceX*FIRE_dt;
                 mainSys.velocityY += mainSys.forceY*FIRE_dt;
 
 
-                mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
+                mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
                 
                 // Postporcesseing calculations
                 mainSys.update_post_processing_data(baseData, pars);
@@ -90,16 +127,16 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
 //                    plotWithPython(timeStep);
 //                }
 //
-                auto t2 = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> elapsed = t2 - t1;
-                std::chrono::duration<double> elapsed0 = t2 - t0;
+//                auto t2 = std::chrono::high_resolution_clock::now();
+//                std::chrono::duration<double> elapsed = t2 - t1;
+//                std::chrono::duration<double> elapsed0 = t2 - t0;
                 
                 timeStep++;
-                std::cout << "maxForce  " << mainSys.maxR << std::endl;
-                std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff()<< std::endl;
-                std::cout << "phi  " << mainSys.phi << std::endl;
-                std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-                std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+//                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+                std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
+//                std::cout << "phi  " << mainSys.phi << std::endl;
+//                std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+//                std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
                 std::cout << "\n" << std::endl;
                 
                 if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < pars.RTolerance){
@@ -154,11 +191,11 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
+            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
+            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
                 // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
-                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
+                mainSys.curPosXAtLastStep = mainSys.curPosX;
+                mainSys.curPosYAtLastStep = mainSys.curPosY;
             }
             
             // Postporcesseing calculations
@@ -191,7 +228,7 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
             timeStep++;
             std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff() << std::endl;
+            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
             std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
             std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;

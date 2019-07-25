@@ -24,8 +24,8 @@ public:
 
     Eigen::VectorXd curPosX;
     Eigen::VectorXd curPosY;
-    Eigen::VectorXd curPosXAtLastGridUpdate;
-    Eigen::VectorXd curPosYAtLastGridUpdate;
+    Eigen::VectorXd curPosXAtLastStep;
+    Eigen::VectorXd curPosYAtLastStep;
     Eigen::VectorXd augmentedCurPosX;
     Eigen::VectorXd augmentedCurPosY;
     Eigen::VectorXd defGradXX;
@@ -40,6 +40,8 @@ public:
     Eigen::VectorXd forceY;
     Eigen::VectorXd velocityX;
     Eigen::VectorXd velocityY;
+    Eigen::VectorXd prevVelocityX;
+    Eigen::VectorXd prevVelocityY;
     Eigen::VectorXd interForceX;
     Eigen::VectorXd interForceY;
     Eigen::VectorXd PK1stressXX;
@@ -84,6 +86,7 @@ public:
     
     int segmentIinteractions, nodeIinteractions;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
+    double prevTotEnergy=0, deltaTotEnergy=0, L2NormResidual=0 ;
     double topPos, botPos, leftPos, rightPos;
     double xMid, yMid;
     double lyCur;
@@ -114,8 +117,9 @@ public:
     double maxInterference;
 //    abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny
     std::map<std::pair<int,int>, std::vector<double>> gaps;
-    std::valarray<int> surNodes_gap;
+    std::valarray<double> surNodes_gap;
     std::valarray<int> surNodes_mSegment;
+    std::valarray<int> surNodes_mSegmentWhichPart;
     std::valarray<int> nodesLinkedList;
     Eigen::MatrixXd segmentsLinkedList;
     Eigen::MatrixXd cellsHeads;
@@ -123,7 +127,7 @@ public:
     std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
-    Eigen::VectorXd displacementSinceLastGridUpdate;
+    Eigen::VectorXd displacementSinceLastStep;
 
     void update_cells(const BaseSysData& baseData, const Parameters& pars);
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);

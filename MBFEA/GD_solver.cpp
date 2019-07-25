@@ -46,11 +46,11 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
+            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
+            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
                 // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
-                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
+                mainSys.curPosXAtLastStep = mainSys.curPosX;
+                mainSys.curPosYAtLastStep = mainSys.curPosY;
             }
             
             
@@ -63,7 +63,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             if (timeStep % pars.dumpEvery == 0) {
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);
-//                plotWithPython(timeStep);
+                plotWithPython(timeStep);
             }
             
             auto t2 = std::chrono::high_resolution_clock::now();
@@ -72,10 +72,13 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff()<< std::endl;
+            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+            std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
+            std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
+            std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
+//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
@@ -124,11 +127,11 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastGridUpdate = ((mainSys.curPosX.array() - mainSys.curPosXAtLastGridUpdate.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastGridUpdate.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastGridUpdate.maxCoeff() >= pars.verletCellCutoff){
+            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
+            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
                 // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastGridUpdate = mainSys.curPosX;
-                mainSys.curPosYAtLastGridUpdate = mainSys.curPosY;
+                mainSys.curPosXAtLastStep = mainSys.curPosX;
+                mainSys.curPosYAtLastStep = mainSys.curPosY;
             }
             
             // Postporcesseing calculations
@@ -161,7 +164,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             timeStep++;
             std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastGridUpdate.maxCoeff() << std::endl;
+            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
             std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
             std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;

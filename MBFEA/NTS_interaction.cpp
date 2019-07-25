@@ -15,11 +15,10 @@
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
-void Configuration::NTS_interaction(const int& node, const int& segment,  const BaseSysData& baseData, const Parameters& pars)
+void Configuration::NTS_interaction(const int& slaveNodeId, const int& segment,  const BaseSysData& baseData, const Parameters& pars)
 {
 
-    int masterMesh = baseData.surfaceSegments[segment][2];
-    
+    int node = baseData.flatSurfaceNodes[slaveNodeId];
     int node0 = baseData.surfaceSegments[segment][0];
     int node1 = baseData.surfaceSegments[segment][1];
     
@@ -35,71 +34,45 @@ void Configuration::NTS_interaction(const int& node, const int& segment,  const 
     double L = sqrt(std::pow(dx,2)+std::pow(dy,2));
     double nx = dy/L;
     double ny = - dx/L;
+    double signedGap = (xi-x0)*nx+(yi-y0)*ny;
     double s = (xi-x0)*dx/std::pow(L,2)+(yi-y0)*dy/std::pow(L,2);
-    double gap = (xi-x0)*nx+(yi-y0)*ny;
     double gapSign = 1;
-    if (gap<0)
+    if (signedGap<0)
     {
-        gapSign = -1;
+       gapSign = -1.0;
     }
-    
-    if (s>=0 && s<=1)
-    {
-        double f = pars.penaltyStiffness * abs(gap);
-        double f0 = -f*(1-s);
-        double f1 = -f * s;
-        double fx = f * (nx);
-        double fy = f * (ny);
-        double f0x = -fx * (1-s);
-        double f0y = -fy * (1-s);
-        double f1x = -fx * (s);
-        double f1y = -fy * (s);
-        
-        if (gaps[{node,masterMesh}].size()==0) {
-            gaps[{node,masterMesh}]={abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny };
-            return;
+    if (s>=0 && s<=1){
+        if (abs(surNodes_gap[slaveNodeId]) > abs(signedGap))
+        {
+            surNodes_mSegment[slaveNodeId] = segment;
+            surNodes_mSegmentWhichPart[slaveNodeId] = 2;
+            surNodes_gap[slaveNodeId] = signedGap ;
+//            std::cout << "signedGap    "<< surNodes_gap[slaveNodeId] << std::endl;
         }
-        if (gaps[{node,masterMesh}][0]>abs(gap)){
-            gaps[{node,masterMesh}] = {abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny };
-            return;
-        };
     }else{
-        
         double r0ix = xi-x0 ;
         double r0iy = yi-y0;
         double r1ix = xi-x1;
         double r1iy = yi-y1;
+        double signedGap0 = sqrt( std::pow(r0ix,2) + std::pow(r0iy,2) ) * gapSign;
+        double signedGap1 = sqrt( std::pow(r1ix,2) + std::pow(r1iy,2) ) * gapSign;
         
-        double gap0 = sqrt( std::pow(r0ix,2) + std::pow(r0iy,2) );
-        double gap1 = sqrt( std::pow(r1ix,2) + std::pow(r1iy,2) );
-        
-        double f0i= pars.penaltyStiffness  * gap0;
-        double f0ix = -pars.penaltyStiffness  * r0ix;
-        double f0iy = -pars.penaltyStiffness  * r0iy;
-        double f00= -f0i;
-        double f00x = -f0ix;
-        double f00y = -f0iy;
-        
-        double f1i = pars.penaltyStiffness  * gap1;
-        double f1ix = -pars.penaltyStiffness  * r1ix;
-        double f1iy = -pars.penaltyStiffness  * r1iy;
-        double f11 = -f1i;
-        double f11x = -f1ix;
-        double f11y = -f1iy;
-        
-        if (gaps[{node,masterMesh}].size()==0){
-            gaps[{node,masterMesh}] = {gap0,gapSign,double(node),f0i,f0ix,f0iy,double(node0),f00,f00x,f00y,double(segment),r0ix,r0iy};
-            
+        if (abs(surNodes_gap[slaveNodeId])> abs(signedGap0))
+        {
+            surNodes_mSegment[slaveNodeId] = segment;
+            surNodes_mSegmentWhichPart[slaveNodeId] = 0;
+            surNodes_gap[slaveNodeId] = signedGap0 ;
+//            std::cout << "signedGap0    "<< signedGap0 << std::endl;
         }
         
-        if (gaps[{node,masterMesh}][0]>gap0){
-            gaps[{node,masterMesh}] = {gap0,gapSign,double(node),f0i,f0ix,f0iy,double(node0),f00,f00x,f00y,double(segment),r0ix,r0iy};
-            
+        if (abs(surNodes_gap[slaveNodeId])> abs(signedGap1))
+        {
+            surNodes_mSegment[slaveNodeId] = segment;
+            surNodes_mSegmentWhichPart[slaveNodeId] = 1;
+            surNodes_gap[slaveNodeId] = signedGap1 ;
+//            std::cout << "signedGap1    "<< signedGap1 << std::endl;
         }
-        
-        if (gaps[{node,masterMesh}][0]>gap1){
-            gaps[{node,masterMesh}] = {gap1,gapSign,double(node),f1i,f1ix,f1iy,double(node1),f11,f11x,f11y,double(segment),r1ix,r1iy};
-            
-        }
+
     }
+
 }

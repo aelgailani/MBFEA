@@ -57,6 +57,7 @@ public:
     double FIRE_dt_start;
     double RTolerance;
     int numStrainSteps;
+    int startingStrainStep;
     void print_to_console(void) const;
     
     
