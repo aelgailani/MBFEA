@@ -152,6 +152,17 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="startingStrainStep") {
             split >> d;
             startingStrainStep = d;
+        }else if (a=="targetNodes") {
+            while(split >> d){
+                targetNodes.push_back(d);
+                std::cout << d <<"\t";
+            }
+        }else if (a=="gammaX") {
+            split >> c;
+            gammaX = c;
+        }else if (a=="gammaY") {
+            split >> c;
+            gammaY = c;
         }
         if (runModeOverWrite=="shear"){
             runMode = "shear";

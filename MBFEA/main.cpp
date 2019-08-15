@@ -95,15 +95,17 @@ int main(int argc, char* argv[])
 
     //Fill in input data
     BaseSysData baseData(pars);
-
+//    baseData.dump_augmented_surface_meshes(pars);
     //Create system confgiuration
     Configuration mainSys(baseData, pars);
     
+   
     
     int timeStep = pars.startingTimeStep;
     int stage = 0; // a dummy varaiable to be used in shearing mode
     mainSys.dump_global_data(pars, 'w', 'i');
 
+    
     ///////////////  Main loop
     
     if (pars.solver=="GD") {

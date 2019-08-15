@@ -82,7 +82,12 @@ public:
     Eigen::VectorXd curPosYBL;
     Eigen::VectorXd curPosYBR ;
     Eigen::VectorXd curPosYTL;
-    Eigen::VectorXd curPosYTR ;
+    Eigen::VectorXd curPosYTR;
+    
+    Eigen::VectorXd consistencyFactorX;
+    Eigen::VectorXd consistencyFactorY;
+    Eigen::VectorXd consistencyErrorFactorX;
+    Eigen::VectorXd consistencyErrorFactorY;
     
     int segmentIinteractions, nodeIinteractions;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
@@ -98,6 +103,7 @@ public:
     double e1;
     double phi;
     double maxR;
+    double avgR;
     double LX;
     double LY;
     double Fh;
@@ -121,7 +127,20 @@ public:
     std::valarray<int> surNodes_mSegment;
     std::valarray<int> surNodes_mSegmentWhichPart;
     std::valarray<int> nodesLinkedList;
-    Eigen::MatrixXd surNodes_masters;
+
+    std::valarray<int> surNodes_mMesh1;
+    std::valarray<int> surNodes_mMesh2;
+    std::valarray<int> surNodes_mMesh3;
+    std::valarray<int> surNodes_mSegment1;
+    std::valarray<int> surNodes_mSegment2;
+    std::valarray<int> surNodes_mSegment3;
+    std::valarray<int> surNodes_mPart1;
+    std::valarray<int> surNodes_mPart2;
+    std::valarray<int> surNodes_mPart3;
+    std::valarray<double> surNodes_gap1;
+    std::valarray<double> surNodes_gap2;
+    std::valarray<double> surNodes_gap3;
+    
     Eigen::MatrixXd segmentsLinkedList;
     Eigen::MatrixXd cellsHeads;
     
@@ -129,16 +148,18 @@ public:
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
     Eigen::VectorXd displacementSinceLastStep;
-
+    void check_force_energy_consistency(const BaseSysData& baseData, const Parameters& pars);
     void update_cells(const BaseSysData& baseData, const Parameters& pars);
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);
     void dump_per_node(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
+    void dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
-    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
+    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions);
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void NTS_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
+    void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);
     void dump_global_data(const Parameters& pars, char mode, char purpose);  //mode: "w" for writing or "a" for appending. purpose: "i" for inspection or "f" for final results

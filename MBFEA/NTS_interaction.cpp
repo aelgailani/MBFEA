@@ -43,44 +43,47 @@ void Configuration::NTS_interaction(const int& slaveNodeId, const int& segment,c
     }
     if (s>=0 && s<=1){
         
-        if(surNodes_masters(slaveNodeId,0)==-1){
-            surNodes_masters(slaveNodeId,0) = masterMesh;
-            surNodes_masters(slaveNodeId,1) = segment;
-            surNodes_masters(slaveNodeId,2) = 2;
-            surNodes_masters(slaveNodeId,3) = signedGap;
-        }else if (surNodes_masters(slaveNodeId,0) == masterMesh){
+        if(surNodes_mMesh1[slaveNodeId]==-1){
+            surNodes_mMesh1[slaveNodeId] = masterMesh;
+            surNodes_mSegment1[slaveNodeId] = segment;
+            surNodes_mPart1[slaveNodeId] = 2;
+            surNodes_gap1[slaveNodeId] = signedGap;
             
-            if (abs(surNodes_masters(slaveNodeId,3)) > abs(signedGap))
+        }else if (surNodes_mMesh1[slaveNodeId] == masterMesh){
+            
+            if (abs(surNodes_gap1[slaveNodeId]) > abs(signedGap))
             {
-                surNodes_masters(slaveNodeId,1) = segment;
-                surNodes_masters(slaveNodeId,2) = 2;
-                surNodes_masters(slaveNodeId,3) = signedGap;
+                surNodes_mSegment1[slaveNodeId] = segment;
+                surNodes_mPart1[slaveNodeId] = 2;
+                surNodes_gap1[slaveNodeId] = signedGap;
             }
-        }else if(surNodes_masters(slaveNodeId,4)==-1){
-            surNodes_masters(slaveNodeId,4) = masterMesh;
-            surNodes_masters(slaveNodeId,5) = segment;
-            surNodes_masters(slaveNodeId,6) = 2;
-            surNodes_masters(slaveNodeId,7) = signedGap;
-        }else if (surNodes_masters(slaveNodeId,4) == masterMesh){
+        }else if(surNodes_mMesh2[slaveNodeId] ==-1){
+            surNodes_mMesh2[slaveNodeId] = masterMesh;
+            surNodes_mSegment2[slaveNodeId] = segment;
+            surNodes_mPart2[slaveNodeId] = 2;
+            surNodes_gap2[slaveNodeId] = signedGap;
             
-            if (abs(surNodes_masters(slaveNodeId,7)) > abs(signedGap))
+        }else if (surNodes_mMesh2[slaveNodeId] == masterMesh){
+            
+            if (abs(surNodes_gap2[slaveNodeId]) > abs(signedGap))
             {
-                surNodes_masters(slaveNodeId,5) = segment;
-                surNodes_masters(slaveNodeId,6) = 2;
-                surNodes_masters(slaveNodeId,7) = signedGap;
+                surNodes_mSegment2[slaveNodeId] = segment;
+                surNodes_mPart2[slaveNodeId] = 2;
+                surNodes_gap2[slaveNodeId] = signedGap;
             }
-        }else if(surNodes_masters(slaveNodeId,8)==-1){
-            surNodes_masters(slaveNodeId,8) = masterMesh;
-            surNodes_masters(slaveNodeId,9) = segment;
-            surNodes_masters(slaveNodeId,10) = 2;
-            surNodes_masters(slaveNodeId,11) = signedGap;
-        }else if (surNodes_masters(slaveNodeId,8) == masterMesh){
+        }else if(surNodes_mMesh3[slaveNodeId]==-1){
+            surNodes_mMesh3[slaveNodeId] = masterMesh;
+            surNodes_mSegment3[slaveNodeId] = segment;
+            surNodes_mPart3[slaveNodeId] = 2;
+            surNodes_gap3[slaveNodeId] = signedGap;
             
-            if (abs(surNodes_masters(slaveNodeId,11)) > abs(signedGap))
+        }else if (surNodes_mMesh3[slaveNodeId] == masterMesh){
+            
+            if (abs(surNodes_gap3[slaveNodeId]) > abs(signedGap))
             {
-                surNodes_masters(slaveNodeId,9) = segment;
-                surNodes_masters(slaveNodeId,10) = 2;
-                surNodes_masters(slaveNodeId,11) = signedGap;
+                surNodes_mSegment3[slaveNodeId] = segment;
+                surNodes_mPart3[slaveNodeId] = 2;
+                surNodes_gap3[slaveNodeId] = signedGap;
             }
         }
         
@@ -93,107 +96,107 @@ void Configuration::NTS_interaction(const int& slaveNodeId, const int& segment,c
         double signedGap0 = sqrt( std::pow(r0ix,2) + std::pow(r0iy,2) ) * gapSign;
         double signedGap1 = sqrt( std::pow(r1ix,2) + std::pow(r1iy,2) ) * gapSign;
         
-        if(surNodes_masters(slaveNodeId,0)==-1){
+        if(surNodes_mMesh1[slaveNodeId]==-1){
             
-            surNodes_masters(slaveNodeId,0) = masterMesh;
-            surNodes_masters(slaveNodeId,1) = segment;
-            
-            if ( abs(signedGap0) <= abs(signedGap1))
-            {
-                surNodes_masters(slaveNodeId,2) = 0;
-                surNodes_masters(slaveNodeId,3) = signedGap0;
-            }else{
-                
-                surNodes_masters(slaveNodeId,2) = 1;
-                surNodes_masters(slaveNodeId,3) = signedGap1;
-            }
-            
-        }else if (surNodes_masters(slaveNodeId,0) == masterMesh){
-            
-            if (abs(surNodes_masters(slaveNodeId,3)) > abs(signedGap0))
-            {
-                surNodes_masters(slaveNodeId,1) = segment;
-                if ( abs(signedGap0) <= abs(signedGap1))
-                {
-                    surNodes_masters(slaveNodeId,2) = 0;
-                    surNodes_masters(slaveNodeId,3) = signedGap0;
-                }else{
-                    
-                    surNodes_masters(slaveNodeId,2) = 1;
-                    surNodes_masters(slaveNodeId,3) = signedGap1;
-                }
-            }else if (abs(surNodes_masters(slaveNodeId,3)) > abs(signedGap1)){
-                surNodes_masters(slaveNodeId,1) = segment;
-                surNodes_masters(slaveNodeId,2) = 1;
-                surNodes_masters(slaveNodeId,3) = signedGap1;
-            }
-        }else if(surNodes_masters(slaveNodeId,4)==-1){
-            
-            surNodes_masters(slaveNodeId,4) = masterMesh;
-            surNodes_masters(slaveNodeId,5) = segment;
+            surNodes_mMesh1[slaveNodeId] = masterMesh;
+            surNodes_mSegment1[slaveNodeId] = segment;
             
             if ( abs(signedGap0) <= abs(signedGap1))
             {
-                surNodes_masters(slaveNodeId,6) = 0;
-                surNodes_masters(slaveNodeId,7) = signedGap0;
+                surNodes_mPart1[slaveNodeId] = 0;
+                surNodes_gap1[slaveNodeId] = signedGap0;
             }else{
                 
-                surNodes_masters(slaveNodeId,6) = 1;
-                surNodes_masters(slaveNodeId,7) = signedGap1;
+                surNodes_mPart1[slaveNodeId] = 1;
+                surNodes_gap1[slaveNodeId] = signedGap1;
             }
             
-        }else if (surNodes_masters(slaveNodeId,4) == masterMesh){
+        }else if (surNodes_mMesh1[slaveNodeId] == masterMesh){
             
-            if (abs(surNodes_masters(slaveNodeId,7)) > abs(signedGap0))
+            if (abs(surNodes_gap1[slaveNodeId]) > abs(signedGap0))
             {
-                surNodes_masters(slaveNodeId,5) = segment;
+                surNodes_mSegment1[slaveNodeId] = segment;
                 if ( abs(signedGap0) <= abs(signedGap1))
                 {
-                    surNodes_masters(slaveNodeId,6) = 0;
-                    surNodes_masters(slaveNodeId,7) = signedGap0;
+                    surNodes_mPart1[slaveNodeId] = 0;
+                    surNodes_gap1[slaveNodeId] = signedGap0;
                 }else{
                     
-                    surNodes_masters(slaveNodeId,6) = 1;
-                    surNodes_masters(slaveNodeId,7) = signedGap1;
+                    surNodes_mPart1[slaveNodeId] = 1;
+                    surNodes_gap1[slaveNodeId] = signedGap1;
                 }
-            }else if (abs(surNodes_masters(slaveNodeId,7)) > abs(signedGap1)){
-                surNodes_masters(slaveNodeId,5) = segment;
-                surNodes_masters(slaveNodeId,6) = 1;
-                surNodes_masters(slaveNodeId,7) = signedGap1;
+            }else if (abs(surNodes_gap1[slaveNodeId]) > abs(signedGap1)){
+                surNodes_mSegment1[slaveNodeId] = segment;
+                surNodes_mPart1[slaveNodeId] = 1;
+                surNodes_gap1[slaveNodeId] = signedGap1;
             }
-        }else if(surNodes_masters(slaveNodeId,8)==-1){
+        }else if(surNodes_mMesh2[slaveNodeId]==-1){
             
-            surNodes_masters(slaveNodeId,8) = masterMesh;
-            surNodes_masters(slaveNodeId,9) = segment;
+            surNodes_mMesh2[slaveNodeId] = masterMesh;
+            surNodes_mSegment2[slaveNodeId] = segment;
             
             if ( abs(signedGap0) <= abs(signedGap1))
             {
-                surNodes_masters(slaveNodeId,10) = 0;
-                surNodes_masters(slaveNodeId,11) = signedGap0;
+                surNodes_mPart2[slaveNodeId] = 0;
+                surNodes_gap2[slaveNodeId] = signedGap0;
             }else{
                 
-                surNodes_masters(slaveNodeId,10) = 1;
-                surNodes_masters(slaveNodeId,11) = signedGap1;
+                surNodes_mPart2[slaveNodeId] = 1;
+                surNodes_gap2[slaveNodeId] = signedGap1;
             }
             
-        }else if (surNodes_masters(slaveNodeId,8) == masterMesh){
+        }else if (surNodes_mMesh2[slaveNodeId] == masterMesh){
             
-            if (abs(surNodes_masters(slaveNodeId,11)) > abs(signedGap0))
+            if (abs(surNodes_gap2[slaveNodeId]) > abs(signedGap0))
             {
-                surNodes_masters(slaveNodeId,9) = segment;
+                surNodes_mSegment2[slaveNodeId] = segment;
                 if ( abs(signedGap0) <= abs(signedGap1))
                 {
-                    surNodes_masters(slaveNodeId,10) = 0;
-                    surNodes_masters(slaveNodeId,11) = signedGap0;
+                    surNodes_mPart2[slaveNodeId] = 0;
+                    surNodes_gap2[slaveNodeId] = signedGap0;
                 }else{
                     
-                    surNodes_masters(slaveNodeId,10) = 1;
-                    surNodes_masters(slaveNodeId,11) = signedGap1;
+                    surNodes_mPart2[slaveNodeId] = 1;
+                    surNodes_gap2[slaveNodeId] = signedGap1;
                 }
-            }else if (abs(surNodes_masters(slaveNodeId,11)) > abs(signedGap1)){
-                surNodes_masters(slaveNodeId,9) = segment;
-                surNodes_masters(slaveNodeId,10) = 1;
-                surNodes_masters(slaveNodeId,11) = signedGap1;
+            }else if (abs(surNodes_gap2[slaveNodeId]) > abs(signedGap1)){
+                surNodes_mSegment2[slaveNodeId] = segment;
+                surNodes_mPart2[slaveNodeId] = 1;
+                surNodes_gap2[slaveNodeId] = signedGap1;
+            }
+        }else if(surNodes_mMesh3[slaveNodeId]==-1){
+            
+            surNodes_mMesh3[slaveNodeId] = masterMesh;
+            surNodes_mSegment3[slaveNodeId] = segment;
+            
+            if ( abs(signedGap0) <= abs(signedGap1))
+            {
+                surNodes_mPart3[slaveNodeId] = 0;
+                surNodes_gap3[slaveNodeId] = signedGap0;
+            }else{
+                
+                surNodes_mPart3[slaveNodeId] = 1;
+                surNodes_gap3[slaveNodeId] = signedGap1;
+            }
+            
+        }else if (surNodes_mMesh3[slaveNodeId] == masterMesh){
+            
+            if (abs(surNodes_gap3[slaveNodeId]) > abs(signedGap0))
+            {
+                surNodes_mSegment3[slaveNodeId] = segment;
+                if ( abs(signedGap0) <= abs(signedGap1))
+                {
+                    surNodes_mPart3[slaveNodeId] = 0;
+                    surNodes_gap3[slaveNodeId] = signedGap0;
+                }else{
+                    
+                    surNodes_mPart3[slaveNodeId] = 1;
+                    surNodes_gap3[slaveNodeId] = signedGap1;
+                }
+            }else if (abs(surNodes_gap3[slaveNodeId]) > abs(signedGap1)){
+                surNodes_mSegment3[slaveNodeId] = segment;
+                surNodes_mPart3[slaveNodeId] = 1;
+                surNodes_gap3[slaveNodeId] = signedGap1;
             }
         }
 

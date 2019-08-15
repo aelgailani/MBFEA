@@ -17,7 +17,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep)
+void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions)
 {
     auto start1 = std::chrono::high_resolution_clock::now();
     contactsEnergy=0; //erase previous step data
@@ -138,14 +138,16 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     std::chrono::duration<double> elapsed15 = finish15 - start1;
     std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
-    compute_surface_forces(baseData,pars,timeStep);
+    if (surfaceInteractions){
+        compute_surface_forces(baseData,pars,timeStep);
+    }
     
     auto finish16 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed16 = finish16 - finish15;
     std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
     
-    internalEnergy = internalEnergyPerEle.dot(refArea) + contactsEnergy;
-    totalEnergy= internalEnergy + wallsEnergy;
+    internalEnergy = internalEnergyPerEle.dot(refArea);
+    totalEnergy= internalEnergy + contactsEnergy;
     
 //    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
 //    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
