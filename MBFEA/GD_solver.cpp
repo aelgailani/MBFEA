@@ -29,7 +29,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
         while (1)
         {
             
-//            auto t1 = std::chrono::high_resolution_clock::now();
+            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
             if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
@@ -69,16 +69,16 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             //dump
             mainSys.dump_global_data(pars, 'a', 'i');
             if (timeStep % pars.dumpEvery == 0) {
-                mainSys.check_force_energy_consistency(baseData, pars);
+//                mainSys.check_force_energy_consistency(baseData, pars);
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);
                 plotWithPython(timeStep);
             }
-            
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            std::chrono::duration<double> elapsed = t2 - t1;
-//            std::chrono::duration<double> elapsed0 = t2 - t0;
+
+            auto t2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = t2 - t1;
+            std::chrono::duration<double> elapsed0 = t2 - t0;
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
@@ -87,8 +87,8 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
             std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
             std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
-//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50000.0){
@@ -230,22 +230,22 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             //dump
             mainSys.dump_global_data(pars, 'a', 'i');
-            if (timeStep % pars.dumpEvery == 0) {
-//                mainSys.check_force_energy_consistency(baseData, pars);
-                mainSys.dump_per_node(baseData, pars, timeStep);
-                mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
-                mainSys.dump_per_ele(baseData, pars,timeStep);
-                plotWithPython(timeStep);
-            }
+//            if (timeStep % pars.dumpEvery == 0) {
+////                mainSys.check_force_energy_consistency(baseData, pars);
+//                mainSys.dump_per_node(baseData, pars, timeStep);
+//                mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+//                mainSys.dump_per_ele(baseData, pars,timeStep);
+//                plotWithPython(timeStep);
+//            }
 
             
             timeStep++;
-            std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
-            std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
-            std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
-            std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
+//            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+//            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
+//            std::cout << "phi  " << mainSys.phi << std::endl;
+//            std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
+//            std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
+//            std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
 
             std::cout << "\n" << std::endl;
             
