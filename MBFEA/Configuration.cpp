@@ -435,10 +435,10 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
 
 void Configuration::special_localized_deformation(const BaseSysData& baseData, const Parameters& pars, const double& gammaX,const double& gammaY,const std::vector<int>& targetNodes){
 
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    yMid=0.5*(curPosY.maxCoeff()+ curPosY.minCoeff());
+    xMid=0.5*(curPosX.maxCoeff()+ curPosX.minCoeff());
+    lyCur= curPosY.maxCoeff()-curPosY.minCoeff() ;
+    lxCur= curPosX.maxCoeff()-curPosX.minCoeff() ;
     
     lxNew=lxCur;
     lyNew=lyCur ;
@@ -448,14 +448,14 @@ void Configuration::special_localized_deformation(const BaseSysData& baseData, c
     botPos= yMid-0.5 * lyNew;
     topPos= yMid+0.5 * lyNew;
     
-    for (int node: targetNodes){
-        curPosX(node)-=xMid;
-        curPosX(node)*=(1+gammaX);
-        curPosX(node)+=xMid;
-        curPosY(node)-=yMid;
-        curPosY(node)*=(1+gammaY);
-        curPosY(node)+=yMid;
-    }
+
+    curPosX=curPosX.array()-xMid;
+    curPosX *= exp(gammaX);
+    curPosX=curPosX.array()+xMid;
+    curPosY=curPosY.array()-yMid;
+    curPosY *= exp(gammaY);
+    curPosY=curPosY.array()+yMid;
+    
 
 }
 
