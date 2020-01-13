@@ -53,13 +53,13 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
                 mainSys.curPosYAtLastStep = mainSys.curPosY;
             }
             
-            // consistency check (for debugging mainly)
+            // consistency check (for debugging)
 //            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
 //                mainSys.check_force_energy_consistency(baseData, pars);
 //                mainSys.dump_per_node(baseData, pars, timeStep);
 //                mainSys.dump_per_ele(baseData, pars,timeStep);
 //            }
-//
+
 
             
             // Postporcesseing calculations
@@ -69,7 +69,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             //dump
             mainSys.dump_global_data(pars, 'a', 'i');
             if (timeStep % pars.dumpEvery == 0) {
-//                mainSys.check_force_energy_consistency(baseData, pars);
+                mainSys.check_force_energy_consistency(baseData, pars);
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);

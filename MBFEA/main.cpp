@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
     //Fill in input data
     BaseSysData baseData(pars);
-//    baseData.dump_augmented_surface_meshes(pars);
+    baseData.dump_augmented_surface_meshes(pars);   // uncomment it for debugging purposes if you like to use it
     //Create system confgiuration
     Configuration mainSys(baseData, pars);
     
