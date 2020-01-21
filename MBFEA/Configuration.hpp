@@ -44,6 +44,8 @@ public:
     Eigen::VectorXd prevVelocityY;
     Eigen::VectorXd interForceX;
     Eigen::VectorXd interForceY;
+    Eigen::VectorXd surfaceForceX;
+    Eigen::VectorXd surfaceForceY;
     Eigen::VectorXd PK1stressXX;
     Eigen::VectorXd PK1stressXY;
     Eigen::VectorXd PK1stressYX;
@@ -155,7 +157,7 @@ public:
     void dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
-    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions);
+    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC);
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void NTS_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);

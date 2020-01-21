@@ -39,9 +39,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
 
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
             }
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
@@ -130,9 +130,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
             }
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
@@ -205,9 +205,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1);
             }
             for(int nodeID: pars.targetNodes){
                 mainSys.forceX(nodeID) = 0;

@@ -142,6 +142,7 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             int node0 = baseData.surfaceSegments[segment][0];
             int node1 = baseData.surfaceSegments[segment][1];
         
+        
             if (whichPart==2){
                 
 
@@ -167,17 +168,40 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                 {
                     forceX(node) = forceX(node) + fx ;
                     forceY(node) = forceY(node) + fy ;
+                    surfaceForceX(node) = surfaceForceX(node) + fx; // the surfaceForces vectors are just for debugging purposes here
+                    surfaceForceY(node) = surfaceForceY(node) + fy;
+                    
                 }
                 if ( node0 < baseData.numOriginalNodes){
                     forceX(node0) = forceX(node0) + f0x ;
                     forceY(node0) = forceY(node0) + f0y ;
+                    surfaceForceX(node0) = surfaceForceX(node0) + f0x;
+                    surfaceForceY(node0) = surfaceForceY(node0) + f0y;
                 }
                 if ( node1 < baseData.numOriginalNodes){
                     forceX(node1) = forceX(node1) + f1x ;
                     forceY(node1) = forceY(node1) + f1y ;
+                    surfaceForceX(node1) = surfaceForceX(node1) + f1x;
+                    surfaceForceY(node1) = surfaceForceY(node1) + f1y;
+                    
                 }
+                
+                if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
                 contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
                 segmentIinteractions++ ;
+//                std::cout << "sNode:  " << node << std::endl;
+//                std::cout << "mNode0:  " << node0 << std::endl;
+//                std::cout << "mNode1:  " << node1 << std::endl;
+//                std::cout << "gap:  " << gap << std::endl;
+//                std::cout << "fx:  " << fx << std::endl;
+//                std::cout << "fy:  " << fy << std::endl;
+//                std::cout << "f0x:  " << f0x << std::endl;
+//                std::cout << "f0y:  " << f0y << std::endl;
+//                std::cout << "f1x:  " << f1x << std::endl;
+//                std::cout << "f1y:  " << f1y << std::endl;
+//                std::cout << "contactsEnergy +=  " << pars.penaltyStiffness/2 *(gap*gap) << std::endl;
+//                std::cout << "contactsEnergy =  " << contactsEnergy << std::endl;
+                }
                 
             }else if(whichPart==0){
                 
@@ -194,14 +218,33 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                 {
                     forceX(node) = forceX(node) + f0ix ;
                     forceY(node) = forceY(node) + f0iy ;
+                    surfaceForceX(node) = surfaceForceX(node) + f0ix;
+                    surfaceForceY(node) = surfaceForceY(node) + f0iy;
                 }
                 if ( node0 < baseData.numOriginalNodes){
                     
                     forceX(node0) = forceX(node0) + f00x ;
                     forceY(node0) = forceY(node0) + f00y ;
+                    surfaceForceX(node0) = surfaceForceX(node0) + f00x;
+                    surfaceForceY(node0) = surfaceForceY(node0) + f00y;
                 }
-                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-                nodeIinteractions++ ;
+                
+                if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
+                    contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                    segmentIinteractions++ ;
+//                    std::cout << "sNode:  " << node << std::endl;
+//                    std::cout << "mNode0:  " << node0 << std::endl;
+//                    std::cout << "mNode1:  " << node1 << std::endl;
+//                    std::cout << "gap:  " << gap << std::endl;
+//                    std::cout << "f0ix:  " << f0ix << std::endl;
+//                    std::cout << "f0iy:  " << f0iy << std::endl;
+//                    std::cout << "f00x:  " << f00x << std::endl;
+//                    std::cout << "f00y:  " << f00y << std::endl;
+//                    std::cout << "contactsEnergy +=  " << pars.penaltyStiffness/2 *(gap*gap) << std::endl;
+//                    std::cout << "contactsEnergy =  " << contactsEnergy << std::endl;
+                    
+                }
+                
             }else if(whichPart==1){
                 
                 double x1 = augmentedCurPosX[node1];
@@ -218,14 +261,30 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
                 {
                     forceX(node) = forceX(node) + f1ix ;
                     forceY(node) = forceY(node) + f1iy ;
+                    surfaceForceX(node) = surfaceForceX(node) + f1ix;
+                    surfaceForceY(node) = surfaceForceY(node) + f1iy;
                 }
                 if ( node1 < baseData.numOriginalNodes){
                     
                     forceX(node1) = forceX(node1) + f11x ;
                     forceY(node1) = forceY(node1) + f11y ;
+                    surfaceForceX(node1) = surfaceForceX(node1) + f11x;
+                    surfaceForceY(node1) = surfaceForceY(node1) + f11y;
                 }
-                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-                nodeIinteractions++ ;
+                if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
+                    contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                    segmentIinteractions++ ;
+//                    std::cout << "sNode:  " << node << std::endl;
+//                    std::cout << "mNode0:  " << node0 << std::endl;
+//                    std::cout << "mNode1:  " << node1 << std::endl;
+//                    std::cout << "gap:  " << gap << std::endl;
+//                    std::cout << "f1ix:  " << f1ix << std::endl;
+//                    std::cout << "f1iy:  " << f1iy << std::endl;
+//                    std::cout << "f11x:  " << f11x << std::endl;
+//                    std::cout << "f11y:  " << f11y << std::endl;
+//                    std::cout << "contactsEnergy +=  " << pars.penaltyStiffness/2 *(gap*gap) << std::endl;
+//                    std::cout << "contactsEnergy =  " << contactsEnergy << std::endl;
+                }
             }
         
     }
@@ -282,17 +341,30 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + fx ;
                 forceY(node) = forceY(node) + fy ;
+                surfaceForceX(node) = surfaceForceX(node) + fx; // the surfaceForces vectors are just for debugging purposes here
+                surfaceForceY(node) = surfaceForceY(node) + fy;
+                
             }
             if ( node0 < baseData.numOriginalNodes){
                 forceX(node0) = forceX(node0) + f0x ;
                 forceY(node0) = forceY(node0) + f0y ;
+                surfaceForceX(node0) = surfaceForceX(node0) + f0x;
+                surfaceForceY(node0) = surfaceForceY(node0) + f0y;
+                
             }
             if ( node1 < baseData.numOriginalNodes){
                 forceX(node1) = forceX(node1) + f1x ;
                 forceY(node1) = forceY(node1) + f1y ;
+                surfaceForceX(node1) = surfaceForceX(node1) + f1x;
+                surfaceForceY(node1) = surfaceForceY(node1) + f1y;
+                
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            segmentIinteractions++ ;
+            
+            if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+                
+            }
             
         }else if(whichPart==0){
             
@@ -309,14 +381,22 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + f0ix ;
                 forceY(node) = forceY(node) + f0iy ;
+                surfaceForceX(node) = surfaceForceX(node) + f0ix;
+                surfaceForceY(node) = surfaceForceY(node) + f0iy;
             }
             if ( node0 < baseData.numOriginalNodes){
                 
                 forceX(node0) = forceX(node0) + f00x ;
                 forceY(node0) = forceY(node0) + f00y ;
+                surfaceForceX(node0) = surfaceForceX(node0) + f00x;
+                surfaceForceY(node0) = surfaceForceY(node0) + f00y;
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            nodeIinteractions++ ;
+            
+            if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+            }
+            
         }else if(whichPart==1){
             
             double x1 = augmentedCurPosX[node1];
@@ -333,14 +413,20 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + f1ix ;
                 forceY(node) = forceY(node) + f1iy ;
+                surfaceForceX(node) = surfaceForceX(node) + f1ix;
+                surfaceForceY(node) = surfaceForceY(node) + f1iy;
             }
             if ( node1 < baseData.numOriginalNodes){
                 
                 forceX(node1) = forceX(node1) + f11x ;
                 forceY(node1) = forceY(node1) + f11y ;
+                surfaceForceX(node1) = surfaceForceX(node1) + f11x;
+                surfaceForceY(node1) = surfaceForceY(node1) + f11y;
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            nodeIinteractions++ ;
+            if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+            }
         }
         
     }
@@ -398,17 +484,29 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + fx ;
                 forceY(node) = forceY(node) + fy ;
+                surfaceForceX(node) = surfaceForceX(node) + fx; // the surfaceForces vectors are just for debugging purposes here
+                surfaceForceY(node) = surfaceForceY(node) + fy;
+                
             }
             if ( node0 < baseData.numOriginalNodes){
                 forceX(node0) = forceX(node0) + f0x ;
                 forceY(node0) = forceY(node0) + f0y ;
+                surfaceForceX(node0) = surfaceForceX(node0) + f0x;
+                surfaceForceY(node0) = surfaceForceY(node0) + f0y;
             }
             if ( node1 < baseData.numOriginalNodes){
                 forceX(node1) = forceX(node1) + f1x ;
                 forceY(node1) = forceY(node1) + f1y ;
+                surfaceForceX(node1) = surfaceForceX(node1) + f1x;
+                surfaceForceY(node1) = surfaceForceY(node1) + f1y;
+                
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            segmentIinteractions++ ;
+            
+            if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+                
+            }
             
         }else if(whichPart==0){
             
@@ -425,14 +523,22 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + f0ix ;
                 forceY(node) = forceY(node) + f0iy ;
+                surfaceForceX(node) = surfaceForceX(node) + f0ix;
+                surfaceForceY(node) = surfaceForceY(node) + f0iy;
             }
             if ( node0 < baseData.numOriginalNodes){
                 
                 forceX(node0) = forceX(node0) + f00x ;
                 forceY(node0) = forceY(node0) + f00y ;
+                surfaceForceX(node0) = surfaceForceX(node0) + f00x;
+                surfaceForceY(node0) = surfaceForceY(node0) + f00y;
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            nodeIinteractions++ ;
+            
+            if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+            }
+            
         }else if(whichPart==1){
             
             double x1 = augmentedCurPosX[node1];
@@ -449,14 +555,20 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
             {
                 forceX(node) = forceX(node) + f1ix ;
                 forceY(node) = forceY(node) + f1iy ;
+                surfaceForceX(node) = surfaceForceX(node) + f1ix;
+                surfaceForceY(node) = surfaceForceY(node) + f1iy;
             }
             if ( node1 < baseData.numOriginalNodes){
                 
                 forceX(node1) = forceX(node1) + f11x ;
                 forceY(node1) = forceY(node1) + f11y ;
+                surfaceForceX(node1) = surfaceForceX(node1) + f11x;
+                surfaceForceY(node1) = surfaceForceY(node1) + f11y;
             }
-            contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-            nodeIinteractions++ ;
+            if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
+                contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                segmentIinteractions++ ;
+            }
         }
         
     }
