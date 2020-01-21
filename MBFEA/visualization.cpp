@@ -16,7 +16,7 @@
 void plotWithPython(int& timeStep){
 
     std::string str = "python plot.py " + std::to_string(timeStep)+"&";
-
     system(str.c_str());
+    
     return;
 }

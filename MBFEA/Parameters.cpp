@@ -140,18 +140,29 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="FIRE_falpha") {
             split >> c;
             FIRE_falpha = c;
-        }
-        else if (a=="FIRE_dt_start") {
+        }else if (a=="FIRE_dt_start") {
             split >> c;
             FIRE_dt_start = c;
-        }
-        else if (a=="RTolerance") {
+        }else if (a=="RTolerance") {
             split >> c;
             RTolerance = c;
-        }
-        else if (a=="numStrainSteps") {
+        }else if (a=="numStrainSteps") {
             split >> d;
             numStrainSteps = d;
+        }else if (a=="startingStrainStep") {
+            split >> d;
+            startingStrainStep = d;
+        }else if (a=="targetNodes") {
+            while(split >> d){
+                targetNodes.push_back(d);
+                std::cout << d <<"\t";
+            }
+        }else if (a=="gammaX") {
+            split >> c;
+            gammaX = c;
+        }else if (a=="gammaY") {
+            split >> c;
+            gammaY = c;
         }
         if (runModeOverWrite=="shear"){
             runMode = "shear";
@@ -198,6 +209,8 @@ void Parameters::print_to_console(void) const {
             printit("shearStep",shearStep);
             printit("maxForceTol",maxForceTol);
             printit("solver",solver);
+            printit("numStrainSteps",numStrainSteps);
+            printit("startingStrainStep",startingStrainStep);
             std::cout << std::endl;
 }
 

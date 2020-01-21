@@ -286,9 +286,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/,
-					/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/include,
+					/usr/local/Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/lib;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/lib;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-lpython3.7m",
 					"-ldl",
@@ -305,9 +306,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/,
-					/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/include,
+					/usr/local/Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/lib;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/lib;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-lpython3.7m",
 					"-ldl",

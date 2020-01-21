@@ -131,7 +131,9 @@ BaseSysData::BaseSysData(const Parameters& pars){
         printf("Please specifiy a valid boundries type ['periodic' or 'walls']!");
         exit(1);
     }
+   
     
+
 //**************  Read triangles data  ********************************************************************************************
     
     inFile.open(pars.trianglesFileName); //Make sure later that the file is open in "read" mode only
@@ -213,3 +215,16 @@ BaseSysData::BaseSysData(const Parameters& pars){
 
 }
 
+void BaseSysData::dump_augmented_surface_meshes(const Parameters& pars){
+    std::ofstream myfile;
+    myfile.open (pars.outputFolderName+"/augmentedSurfaceMeshes.txt");
+    myfile << "Number of surfaces" << "\n" << numMeshes << "\n" << numNodesPerMesh << std::endl;
+    for (int meshID=0; meshID < numMeshes;meshID++ ) {
+        for(int& d : surfaceMeshes[meshID] ){
+            myfile << d << std::endl;
+        }
+        myfile << "\n";
+        
+    }
+    myfile.close();
+}

@@ -96,9 +96,9 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         inFile.close();
     }
     
-    curPosXAtLastGridUpdate = curPosX;
-    curPosYAtLastGridUpdate = curPosY;
-    displacementSinceLastGridUpdate = curPosX - curPosX ;  // basically a zero vector, initially
+    curPosXAtLastStep = curPosX;
+    curPosYAtLastStep = curPosY;
+    displacementSinceLastStep = curPosX - curPosX ;  // basically a zero vector, initially
     defGradXX.resize(baseData.numElements,1);
     defGradXY.resize(baseData.numElements,1);
     defGradYX.resize(baseData.numElements,1);
@@ -145,12 +145,21 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         
     }
     
+    consistencyFactorX.resize(baseData.numOriginalNodes);
+    consistencyFactorY.resize(baseData.numOriginalNodes);
+    consistencyErrorFactorY.resize(baseData.numOriginalNodes);
+    consistencyErrorFactorX.resize(baseData.numOriginalNodes);
+    
     // If slover is FIRE, initiate zero velocity vectors
     if (pars.solver == "FIRE"){
         velocityX.resize(baseData.numOriginalNodes);
         velocityY.resize(baseData.numOriginalNodes);
+        prevVelocityX.resize(baseData.numOriginalNodes);
+        prevVelocityY.resize(baseData.numOriginalNodes);
         velocityX.fill(0);
         velocityY.fill(0);
+        prevVelocityX.fill(0);
+        prevVelocityY.fill(0);
     }
 }
 
@@ -159,6 +168,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
 void Configuration::update_post_processing_data(const BaseSysData& baseData, const Parameters& pars){
     
     maxR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).maxCoeff());
+    avgR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).mean());
     LX = (curPosX.maxCoeff()-curPosX.minCoeff());
     LY = (curPosY.maxCoeff()-curPosY.minCoeff());
     Fh = 0.5*(-wallForceRight.sum()+wallForceLeft.sum());
@@ -173,6 +183,10 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     e0 = 0.5*(ex+ey);
     e1 = (ex-ey);
     phi = pars.Ap / A;
+    deltaTotEnergy = totalEnergy - prevTotEnergy;
+    prevTotEnergy = totalEnergy;
+    L2NormResidual = - (forceX.dot(forceX) + forceY.dot(forceY));
+    
     shearVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
 }
@@ -240,7 +254,9 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     <<  "x"  << std::setw(20)
     <<  "y"  << std::setw(20)
     <<  "fx"  << std::setw(20)
-    <<  "fy"  << std::endl;
+    <<  "fy"  << std::setw(20)
+    <<  "errfx"  << std::setw(20)
+    <<  "errfy"  << std::endl;
     
     for (int i=0; i<curPosX.size();i++ ) {
         myfile
@@ -248,12 +264,48 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << i << std::setw(20)
         << curPosX[i] << std::setw(20)
         << curPosY[i] << std::setw(20)
-        << forceX[i] << std::setw(20)
-        << forceY[i] << std::endl;
+        << surfaceForceX[i] << std::setw(20) // this is just for debugging. REMEMBER to change it back to forceX an
+        << surfaceForceY[i] << std::setw(20)
+        << consistencyFactorX[i] << std::setw(20)
+        << consistencyFactorY[i] << std::endl;
     }
     
     myfile.close();
 
+}
+
+void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep){
+    std::string step = std::to_string(timeStep);
+    std::ofstream myfile;
+    myfile.open (pars.outputFolderName+"/dataPerNodePeriodicImages-"+step+".txt");
+    myfile << "numNodes" << "\t" << baseData.numNodes << std::endl;
+    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
+    myfile << "phi" << "\t" << phi << std::endl;
+    myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << std::endl;
+    myfile << "cellSizeX" << "\t" << verletCellSizeX << std::endl;
+    myfile << "cellSizeY" << "\t" << verletCellSizeY << std::endl;
+    myfile << "effectiveLeftPos" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
+    myfile << "effectiveBotPos" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
+    myfile << "numCellsX" << "\t" << numXCells << std::endl;
+    myfile << "numCellsY" << "\t" << numYCells << std::endl;
+    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  std::endl;
+    
+    myfile
+    << "id"  << std::setw(20)
+    <<  "x"  << std::setw(20)
+    <<  "y"  << std::endl;
+    
+    for (int i=0; i<augmentedCurPosX.size();i++ ) {
+        myfile
+        <<  std::setprecision(9)
+        << i << std::setw(20)
+        << augmentedCurPosX[i] << std::setw(20)
+        << augmentedCurPosY[i] << std::endl;
+    }
+    
+    myfile.close();
+    
 }
 
 
@@ -344,7 +396,7 @@ void Configuration::compress(const BaseSysData& baseData, const Parameters& pars
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lxCur*lxNew;
+    curPosY *= 1.0/lyCur*lyNew;
     curPosY = curPosY.array() + yMid;
     
 }
@@ -373,7 +425,7 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lxCur*lxNew;
+    curPosY *= 1.0/lyCur*lyNew;
     curPosY = curPosY.array() + yMid;
     
     std::cout << "shearing ... " << std::endl;
@@ -381,6 +433,31 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     std::cout << "phi  " << phi <<std::endl;
 }
 
+void Configuration::special_localized_deformation(const BaseSysData& baseData, const Parameters& pars, const double& gammaX,const double& gammaY,const std::vector<int>& targetNodes){
+
+    yMid=0.5*(curPosY.maxCoeff()+ curPosY.minCoeff());
+    xMid=0.5*(curPosX.maxCoeff()+ curPosX.minCoeff());
+    lyCur= curPosY.maxCoeff()-curPosY.minCoeff() ;
+    lxCur= curPosX.maxCoeff()-curPosX.minCoeff() ;
+    
+    lxNew=lxCur;
+    lyNew=lyCur ;
+    
+    leftPos= xMid-0.5 * lxNew;
+    rightPos= xMid+0.5 * lxNew;
+    botPos= yMid-0.5 * lyNew;
+    topPos= yMid+0.5 * lyNew;
+    
+
+    curPosX=curPosX.array()-xMid;
+    curPosX *= exp(gammaX);
+    curPosX=curPosX.array()+xMid;
+    curPosY=curPosY.array()-yMid;
+    curPosY *= exp(gammaY);
+    curPosY=curPosY.array()+yMid;
+    
+
+}
 
 void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
 {
@@ -476,4 +553,31 @@ void Configuration::update_cells(const BaseSysData& baseData, const Parameters& 
     
 }
     
-
+void Configuration::check_force_energy_consistency(const BaseSysData& baseData, const Parameters& pars)
+{
+    for (int nodeID=0; nodeID < baseData.numOriginalNodes; nodeID++)
+    {
+        float d = 0.00001;
+        compute_forces_PBC(baseData, pars, 0,1,0);
+        double E1 = totalEnergy;
+        curPosX(nodeID) += d;
+        compute_forces_PBC(baseData, pars, 0, 1,0);
+        double E2 = totalEnergy;
+        consistencyFactorX(nodeID) = (forceX(nodeID))*d/(E1-E2);
+        consistencyErrorFactorX(nodeID) = (forceX(nodeID)*d-(E1-E2))/forceY(nodeID);
+        curPosX(nodeID) -= d;
+        
+        compute_forces_PBC(baseData, pars, 0, 1,0);
+        E1 = totalEnergy;
+        curPosY(nodeID) += d;
+        compute_forces_PBC(baseData, pars, 0, 1,0);
+        E2 = totalEnergy;
+        consistencyFactorY(nodeID) = (forceY(nodeID)*d)/(E1-E2);
+        consistencyErrorFactorY(nodeID) = (forceY(nodeID)*d-(E1-E2))/forceY(nodeID);
+        curPosY(nodeID) -= d;
+    }
+//    std::cout<<"X"<<std::endl;
+//    std::cout<<consistencyFactorX<<std::endl;
+//    std::cout<<"Y"<<std::endl;
+//    std::cout<<consistencyErrorFactorX<<std::endl;
+}

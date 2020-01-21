@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 class Parameters {
 private:
     template <typename T>
@@ -57,7 +58,12 @@ public:
     double FIRE_dt_start;
     double RTolerance;
     int numStrainSteps;
+    int startingStrainStep;
+    double  gammaX;
+    double  gammaY;
+    std::vector<int> targetNodes;
     void print_to_console(void) const;
+
     
     
 };

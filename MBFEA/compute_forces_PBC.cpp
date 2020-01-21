@@ -17,10 +17,18 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep)
+void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC)
 {
     auto start1 = std::chrono::high_resolution_clock::now();
-    contactsEnergy=0; //erase previous step data
+    
+    //erase previous step data
+    contactsEnergy=0;
+    
+    // initialize surface interaction forces on nodes to zero
+    surfaceForceX.resize(baseData.numOriginalNodes);
+    surfaceForceY.resize(baseData.numOriginalNodes);
+    surfaceForceX.fill(0);
+    surfaceForceY.fill(0);
     //compute the deformation gradient
     defGradXX = gradX * curPosX;
     defGradYX = gradX * curPosY;
@@ -103,23 +111,26 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 //    std::cout << "elapsed time in internal forces:  " << elapsed12.count() << std::endl;
     
     // Create images x y
-    curPosXL = curPosX.array()-lxNew;
-    curPosXR = curPosX.array()+lxNew;
-    curPosXB = curPosX;
-    curPosXT = curPosX;
-    curPosXBL = curPosX.array()-lxNew;
-    curPosXBR = curPosX.array()+lxNew;
-    curPosXTL = curPosX.array()-lxNew;
-    curPosXTR = curPosX.array()+lxNew;
+    if (updatePBC) {
+        curPosXL = curPosX.array()-lxNew;
+        curPosXR = curPosX.array()+lxNew;
+        curPosXB = curPosX;
+        curPosXT = curPosX;
+        curPosXBL = curPosX.array()-lxNew;
+        curPosXBR = curPosX.array()+lxNew;
+        curPosXTL = curPosX.array()-lxNew;
+        curPosXTR = curPosX.array()+lxNew;
+        
+        curPosYL = curPosY;
+        curPosYR = curPosY;
+        curPosYB = curPosY.array()-lyNew;
+        curPosYT = curPosY.array()+lyNew;
+        curPosYBL = curPosY.array()-lyNew;
+        curPosYBR = curPosY.array()-lyNew;
+        curPosYTL = curPosY.array()+lyNew;
+        curPosYTR = curPosY.array()+lyNew;
+    }
     
-    curPosYL = curPosY;
-    curPosYR = curPosY;
-    curPosYB = curPosY.array()-lyNew;
-    curPosYT = curPosY.array()+lyNew;
-    curPosYBL = curPosY.array()-lyNew;
-    curPosYBR = curPosY.array()-lyNew;
-    curPosYTL = curPosY.array()+lyNew;
-    curPosYTR = curPosY.array()+lyNew;
     
 //    auto finish13 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> elapsed13 = finish13 - finish12;
@@ -138,19 +149,22 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     std::chrono::duration<double> elapsed15 = finish15 - start1;
     std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
-    compute_surface_forces(baseData,pars,timeStep);
+    if (surfaceInteractions){
+        compute_surface_forces(baseData,pars,timeStep);
+    }
     
     auto finish16 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed16 = finish16 - finish15;
     std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
     
-    internalEnergy = internalEnergyPerEle.dot(refArea) + contactsEnergy;
-    totalEnergy= internalEnergy + wallsEnergy;
+    internalEnergy = internalEnergyPerEle.dot(refArea);
+    totalEnergy= internalEnergy + contactsEnergy;
     
-    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
-    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
-    std::cout << "max skin interference   " << maxInterference << std::endl;
-    std::cout << "max wall interference   " << maxWallinterference << std::endl;
-    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
-    
+//    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
+//    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
+    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
+//    std::cout << "max skin interference   " << maxInterference << std::endl;
+//    std::cout << "max wall interference   " << maxWallinterference << std::endl;
+//    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
+//    
 }
