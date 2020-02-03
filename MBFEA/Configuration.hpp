@@ -129,6 +129,9 @@ public:
     std::valarray<int> surNodes_mSegment;
     std::valarray<int> surNodes_mSegmentWhichPart;
     std::valarray<int> nodesLinkedList;
+    std::valarray<int> segmentsLinkedList_1;
+    Eigen::MatrixXd segmentsLinkedList_2;
+    Eigen::MatrixXd cellsHeads;
 
     std::valarray<int> surNodes_mMesh1;
     std::valarray<int> surNodes_mMesh2;
@@ -143,22 +146,26 @@ public:
     std::valarray<double> surNodes_gap2;
     std::valarray<double> surNodes_gap3;
     
-    Eigen::MatrixXd segmentsLinkedList;
-    Eigen::MatrixXd cellsHeads;
+    
     
     std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
     Eigen::VectorXd displacementSinceLastStep;
     void check_force_energy_consistency(const BaseSysData& baseData, const Parameters& pars);
-    void update_cells(const BaseSysData& baseData, const Parameters& pars);
+    void update_cells_1(const BaseSysData& baseData, const Parameters& pars); // used with segmentCellList method 1
+    void update_cells_2(const BaseSysData& baseData, const Parameters& pars);// used with segmentCellList method 2
     void update_post_processing_data(const BaseSysData& baseData, const Parameters& pars);
     void dump_per_node(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
     void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC);
-    void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
+    void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars);
+    void detect_contacts_method_1(const BaseSysData& baseData, const Parameters& pars);
+    void detect_contacts_method_2(const BaseSysData& baseData, const Parameters& pars);
+    void apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap);
+
     void NTS_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
     void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);

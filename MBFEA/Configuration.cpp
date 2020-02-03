@@ -255,8 +255,8 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     <<  "y"  << std::setw(20)
     <<  "fx"  << std::setw(20)
     <<  "fy"  << std::setw(20)
-    <<  "errfx"  << std::setw(20)
-    <<  "errfy"  << std::endl;
+    <<  "contactFx"  << std::setw(20)
+    <<  "contactFy"  << std::endl;
     
     for (int i=0; i<curPosX.size();i++ ) {
         myfile
@@ -264,10 +264,10 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << i << std::setw(20)
         << curPosX[i] << std::setw(20)
         << curPosY[i] << std::setw(20)
-        << surfaceForceX[i] << std::setw(20) // this is just for debugging. REMEMBER to change it back to forceX an
-        << surfaceForceY[i] << std::setw(20)
-        << consistencyFactorX[i] << std::setw(20)
-        << consistencyFactorY[i] << std::endl;
+        << forceX[i] << std::setw(20)
+        << forceY[i] << std::setw(20)
+        << surfaceForceX[i] << std::setw(20)
+        << surfaceForceY[i] << std::endl;
     }
     
     myfile.close();
@@ -428,7 +428,7 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     curPosY *= 1.0/lyCur*lyNew;
     curPosY = curPosY.array() + yMid;
     
-    std::cout << "shearing ... " << std::endl;
+    std::cout << "*** shearing ... *** " << std::endl;
     std::cout << "e1  " << e1 <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
 }
@@ -462,7 +462,7 @@ void Configuration::special_localized_deformation(const BaseSysData& baseData, c
 void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
 {
     
-    std::cout << "holding ... " << std::endl;
+    std::cout << "*** holding ... ***" << std::endl;
     std::cout << "e1  " << e1 <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
 
@@ -489,10 +489,10 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
     curPosY = curPosY.array() + yMid;
 }
 
-void Configuration::update_cells(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::update_cells_1(const BaseSysData& baseData, const Parameters& pars)
 {
     
-    int xCell, yCell, cellId_1, cellId_2, segment0, segment1;
+    int xCell, yCell, cellId, segment0;
     double x, y;
 
     
@@ -510,49 +510,84 @@ void Configuration::update_cells(const BaseSysData& baseData, const Parameters& 
         }
         
         segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
+        
+        cellId = numXCells*yCell+xCell+baseData.numSurfaceNodes;
+
+        
+        nodesLinkedList[nodeID] = nodesLinkedList[cellId]; // Note that nodeID is its local ordinal number not the golbal node name assigned in the mesh
+        nodesLinkedList[cellId] = nodeID;
+        
+        segmentsLinkedList_1[segment0] = segmentsLinkedList_1[cellId];
+        segmentsLinkedList_1[cellId] = segment0;
+        
+    }
+    
+}
+
+void Configuration::update_cells_2(const BaseSysData& baseData, const Parameters& pars)
+{
+    
+    int xCell, yCell, cellId_1, cellId_2, segment0, segment1;
+    double x, y;
+    
+    
+    
+    for (int nodeID=0; nodeID < baseData.numSurfaceNodes; nodeID++)
+    {
+        x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
+        y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
+        xCell = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
+        yCell = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+        
+        if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
+        {
+            continue;
+        }
+        
+        segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
         segment1 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][1];
         
         cellId_1 = numXCells*yCell+xCell+baseData.numSurfaceNodes;
         cellId_2 = numXCells*yCell+xCell;
         
-        nodesLinkedList[nodeID] = nodesLinkedList[cellId_1];
+        nodesLinkedList[nodeID] = nodesLinkedList[cellId_1]; // Note that nodeID is its local ordinal number not the golbal node name assigned in the mesh
         nodesLinkedList[cellId_1] = nodeID;
         
-        if (segmentsLinkedList(segment1,0) == -2) {
-            segmentsLinkedList(segment1,0) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment1,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
+        if (segmentsLinkedList_2(segment1,0) == -2) {
+            segmentsLinkedList_2(segment1,0) = cellsHeads(cellId_2,0);
+            segmentsLinkedList_2(segment1,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
             cellsHeads(cellId_2,0) = segment1;
             cellsHeads(cellId_2,1) = 0;  //column 0 of segmentsLinkedList
-            segmentsLinkedList(segment1,4) = cellId_2;
-        }else if(segmentsLinkedList(segment1,2) == -2 && segmentsLinkedList(segment1,4) != cellId_2) {
-            segmentsLinkedList(segment1,2) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment1,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
+            segmentsLinkedList_2(segment1,4) = cellId_2;
+        }else if(segmentsLinkedList_2(segment1,2) == -2 && segmentsLinkedList_2(segment1,4) != cellId_2) {
+            segmentsLinkedList_2(segment1,2) = cellsHeads(cellId_2,0);
+            segmentsLinkedList_2(segment1,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
             cellsHeads(cellId_2,0) = segment1;
             cellsHeads(cellId_2,1) = 2;  //column 2 of segmentsLinkedList
             
-            segmentsLinkedList(segment1,4) = cellId_2;
+            segmentsLinkedList_2(segment1,4) = cellId_2;
         }
         
-        if (segmentsLinkedList(segment0,0) == -2) {
-            segmentsLinkedList(segment0,0) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment0,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
+        if (segmentsLinkedList_2(segment0,0) == -2) {
+            segmentsLinkedList_2(segment0,0) = cellsHeads(cellId_2,0);
+            segmentsLinkedList_2(segment0,1) = cellsHeads(cellId_2,1); //inheret the column of the segment associated with this cell
             cellsHeads(cellId_2,0) = segment0;
             cellsHeads(cellId_2,1) = 0;  //column 0 of segmentsLinkedList
             
-            segmentsLinkedList(segment0,4) = cellId_2;
-        }else if(segmentsLinkedList(segment0,2) == -2 && segmentsLinkedList(segment0,4)!= cellId_2 ) {
-            segmentsLinkedList(segment0,2) = cellsHeads(cellId_2,0);
-            segmentsLinkedList(segment0,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
+            segmentsLinkedList_2(segment0,4) = cellId_2;
+        }else if(segmentsLinkedList_2(segment0,2) == -2 && segmentsLinkedList_2(segment0,4)!= cellId_2 ) {
+            segmentsLinkedList_2(segment0,2) = cellsHeads(cellId_2,0);
+            segmentsLinkedList_2(segment0,3) = cellsHeads(cellId_2,1);//inheret the column of the segment associated with this cell
             cellsHeads(cellId_2,0) = segment0;
             cellsHeads(cellId_2,1) = 2;  //column 2 of segmentsLinkedList
             
-            segmentsLinkedList(segment0,4) = cellId_2;
+            segmentsLinkedList_2(segment0,4) = cellId_2;
         }
         
     }
     
 }
-    
+
 void Configuration::check_force_energy_consistency(const BaseSysData& baseData, const Parameters& pars)
 {
     for (int nodeID=0; nodeID < baseData.numOriginalNodes; nodeID++)

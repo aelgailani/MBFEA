@@ -18,6 +18,7 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
     std::string a,b,f;
     double c;
     int d;
+    bool trueFalse;
     while (std::getline(inFile, line)) {
         std::istringstream split(line);
         split >> a;
@@ -108,9 +109,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="restartFile") {
             split >> b;
             restartFile = b;
-        }else if (a=="shearStep") {
+        }else if (a=="maxShear") {
             split >> c;
-            shearStep = c;
+            maxShear = c;
         }else if (a=="maxForceTol") {
             split >> c;
             maxForceTol = c;
@@ -155,7 +156,7 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="targetNodes") {
             while(split >> d){
                 targetNodes.push_back(d);
-                std::cout << d <<"\t";
+//                std::cout << d <<"\t";
             }
         }else if (a=="gammaX") {
             split >> c;
@@ -163,14 +164,35 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="gammaY") {
             split >> c;
             gammaY = c;
-        }
-        if (runModeOverWrite=="shear"){
-            runMode = "shear";
-            startingMode = "restart";
-            restartFile = f+"/dataPerNode-"+restartStepOverwrite+".txt";
-            outputFolderName = "shearing/step-"+restartStepOverwrite;
+        }else if (a=="segmentCellMethod") {
+            split >> d;;
+            segmentCellMethod = d;
+        }else if (a=="dumpPeriodicImagesXY") {
+        split >> trueFalse;
+        dumpPeriodicImagesXY = trueFalse;
+        }else if (a=="callPythonPlot") {
+        split >> trueFalse;
+        callPythonPlot = trueFalse;
         }
     }
+    
+    if (runModeOverWrite=="stepShear"){
+        runMode = "stepShear";
+        startingMode = "restart";
+        startingTimeStep = std::stoi(restartStepOverwrite);
+        restartFile = f+"/dataPerNode-"+restartStepOverwrite+".txt";
+        
+    }
+    if (runModeOverWrite=="contineousShear"){
+        runMode = "contineousShear";
+        startingMode = "restart";
+        startingTimeStep = std::stoi(restartStepOverwrite);
+        restartFile = f+"/dataPerNode-"+restartStepOverwrite+".txt";
+    }
+    if (outputFolderName=="auto"){
+        outputFolderName = runMode;
+    }
+    
 
 }
 
@@ -206,11 +228,14 @@ void Parameters::print_to_console(void) const {
             printit("runMode",runMode);
             printit("startingMode",startingMode);
             printit("restartFile",restartFile);
-            printit("shearStep",shearStep);
+            printit("maxShear",maxShear);
             printit("maxForceTol",maxForceTol);
             printit("solver",solver);
             printit("numStrainSteps",numStrainSteps);
             printit("startingStrainStep",startingStrainStep);
+            printit("segmentCellMethod",segmentCellMethod);
+            printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
+            printit("callPythonPlot",callPythonPlot);
             std::cout << std::endl;
 }
 

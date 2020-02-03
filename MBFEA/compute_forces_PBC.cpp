@@ -129,17 +129,18 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
         curPosYBR = curPosY.array()-lyNew;
         curPosYTL = curPosY.array()+lyNew;
         curPosYTR = curPosY.array()+lyNew;
+
     }
-    
-    
-//    auto finish13 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed13 = finish13 - finish12;
-//    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
     augmentedCurPosX.resize(baseData.numNodes);
     augmentedCurPosY.resize(baseData.numNodes);
     augmentedCurPosX << curPosX, curPosXL, curPosXR, curPosXB, curPosXT, curPosXBL, curPosXBR, curPosXTL, curPosXTR;
     augmentedCurPosY << curPosY, curPosYL, curPosYR, curPosYB, curPosYT, curPosYBL, curPosYBR, curPosYTL, curPosYTR;
+//    auto finish13 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed13 = finish13 - finish12;
+//    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
+    
+    
    
 //    auto finish14 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> elapsed14 = finish14 - finish13;
@@ -150,7 +151,8 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
     if (surfaceInteractions){
-        compute_surface_forces(baseData,pars,timeStep);
+        
+        compute_surface_forces(baseData,pars);
     }
     
     auto finish16 = std::chrono::high_resolution_clock::now();

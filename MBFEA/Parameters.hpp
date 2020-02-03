@@ -47,7 +47,7 @@ public:
     std::string runMode;
     std::string startingMode;
     std::string restartFile;
-    double shearStep;
+    double maxShear;
     double maxForceTol;
     double FIRE_dtmax;
     double FIRE_Nmin;
@@ -61,8 +61,12 @@ public:
     int startingStrainStep;
     double  gammaX;
     double  gammaY;
+    int segmentCellMethod;
     std::vector<int> targetNodes;
+    bool dumpPeriodicImagesXY;
+    bool callPythonPlot;
     void print_to_console(void) const;
+    
 
     
     
