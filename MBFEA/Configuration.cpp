@@ -145,10 +145,15 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         
     }
     
+    // These are for debugging mainly
     consistencyFactorX.resize(baseData.numOriginalNodes);
     consistencyFactorY.resize(baseData.numOriginalNodes);
     consistencyErrorFactorY.resize(baseData.numOriginalNodes);
     consistencyErrorFactorX.resize(baseData.numOriginalNodes);
+    
+    // These variables are for the linearization of the second energy derivitive:
+//    Wm_primePrime.resize(baseData.numElements,1);
+    
     
     // If slover is FIRE, initiate zero velocity vectors
     if (pars.solver == "FIRE"){

@@ -58,6 +58,8 @@ public:
     Eigen::VectorXd swellingPressurePerEle;
     Eigen::VectorXd elasticEnergyPerEle;
     Eigen::VectorXd mixingEnergyPerEle;
+    Eigen::VectorXd WmPrimePrimePerEle;
+    
     Eigen::VectorXd internalEnergyPerEle;
     Eigen::VectorXd refArea;
     Eigen::VectorXd areaRatio;

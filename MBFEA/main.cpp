@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     
     
     //Open/create directory to dump the outputs
-    if (pars.startingMode == "new")
+    if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") )
     {    DIR* dir = opendir(pars.outputFolderName.c_str());
         if (dir)
         {
