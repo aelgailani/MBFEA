@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		680CCD0723F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 680CCD0623F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp */; };
 		682D8F2222939207001EB3C9 /* compute_forces_PBC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2122939207001EB3C9 /* compute_forces_PBC.cpp */; };
 		682D8F2422A1D427001EB3C9 /* compute_surface_forces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2322A1D427001EB3C9 /* compute_surface_forces.cpp */; };
 		682D8F2622A1E5F0001EB3C9 /* NTS_interaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2522A1E5F0001EB3C9 /* NTS_interaction.cpp */; };
@@ -15,6 +16,7 @@
 		683CA5D823DBA39B00832DD6 /* detect_contacts_method_1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D723DBA39B00832DD6 /* detect_contacts_method_1.cpp */; };
 		684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853BD228F5FE500DBFE52 /* Configuration.cpp */; };
 		684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853C0228F6FD600DBFE52 /* BaseSysData.cpp */; };
+		68683D7923F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68683D7823F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp */; };
 		689D407A22D68B1000EA4BBD /* GD_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407822D68B1000EA4BBD /* GD_solver.cpp */; };
 		689D407D22D7ADED00EA4BBD /* FIRE_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407B22D7ADED00EA4BBD /* FIRE_solver.cpp */; };
 		68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B4E1226562DF00D1CB68 /* main.cpp */; };
@@ -35,6 +37,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		680CCD0623F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = calculate_stiffness_tensor_K.cpp; sourceTree = "<group>"; };
 		682D8F2122939207001EB3C9 /* compute_forces_PBC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_forces_PBC.cpp; sourceTree = "<group>"; };
 		682D8F2322A1D427001EB3C9 /* compute_surface_forces.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_surface_forces.cpp; sourceTree = "<group>"; };
 		682D8F2522A1E5F0001EB3C9 /* NTS_interaction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NTS_interaction.cpp; sourceTree = "<group>"; };
@@ -45,6 +48,7 @@
 		684853BE228F5FE500DBFE52 /* Configuration.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Configuration.hpp; sourceTree = "<group>"; };
 		684853C0228F6FD600DBFE52 /* BaseSysData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BaseSysData.cpp; sourceTree = "<group>"; };
 		684853C1228F6FD600DBFE52 /* BaseSysData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BaseSysData.hpp; sourceTree = "<group>"; };
+		68683D7823F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = calculate_the_Hessian_H.cpp; sourceTree = "<group>"; };
 		689D407822D68B1000EA4BBD /* GD_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GD_solver.cpp; sourceTree = "<group>"; };
 		689D407922D68B1000EA4BBD /* solvers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solvers.hpp; sourceTree = "<group>"; };
 		689D407B22D7ADED00EA4BBD /* FIRE_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FIRE_solver.cpp; sourceTree = "<group>"; };
@@ -93,10 +97,12 @@
 				68A7B50C2280F77300D1CB68 /* visualization.hpp */,
 				68A7B4E1226562DF00D1CB68 /* main.cpp */,
 				684853BD228F5FE500DBFE52 /* Configuration.cpp */,
+				680CCD0623F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp */,
 				684853BE228F5FE500DBFE52 /* Configuration.hpp */,
 				682D8F2522A1E5F0001EB3C9 /* NTS_interaction.cpp */,
 				689D407B22D7ADED00EA4BBD /* FIRE_solver.cpp */,
 				684853C0228F6FD600DBFE52 /* BaseSysData.cpp */,
+				68683D7823F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp */,
 				683CA5D323DB9DD100832DD6 /* apply_contacts_penalty.cpp */,
 				684853C1228F6FD600DBFE52 /* BaseSysData.hpp */,
 				683CA5D723DBA39B00832DD6 /* detect_contacts_method_1.cpp */,
@@ -170,12 +176,14 @@
 				689D407D22D7ADED00EA4BBD /* FIRE_solver.cpp in Sources */,
 				684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */,
 				683CA5D823DBA39B00832DD6 /* detect_contacts_method_1.cpp in Sources */,
+				68683D7923F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp in Sources */,
 				684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */,
 				682D8F2222939207001EB3C9 /* compute_forces_PBC.cpp in Sources */,
 				683CA5D423DB9DD100832DD6 /* apply_contacts_penalty.cpp in Sources */,
 				689D407A22D68B1000EA4BBD /* GD_solver.cpp in Sources */,
 				68A7B50D2280F77300D1CB68 /* visualization.cpp in Sources */,
 				68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */,
+				680CCD0723F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp in Sources */,
 				682D8F2622A1E5F0001EB3C9 /* NTS_interaction.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -168,5 +168,7 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
-//    
+//
+    
+    calculate_the_Hessian_H(pars);
 }

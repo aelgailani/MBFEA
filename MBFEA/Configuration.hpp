@@ -58,7 +58,7 @@ public:
     Eigen::VectorXd swellingPressurePerEle;
     Eigen::VectorXd elasticEnergyPerEle;
     Eigen::VectorXd mixingEnergyPerEle;
-    Eigen::VectorXd WmPrimePrimePerEle;
+    
     
     Eigen::VectorXd internalEnergyPerEle;
     Eigen::VectorXd refArea;
@@ -92,6 +92,9 @@ public:
     Eigen::VectorXd consistencyFactorY;
     Eigen::VectorXd consistencyErrorFactorX;
     Eigen::VectorXd consistencyErrorFactorY;
+    
+    
+
     
     int segmentIinteractions, nodeIinteractions;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
@@ -174,6 +177,40 @@ public:
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);
     void dump_global_data(const Parameters& pars, char mode, char purpose);  //mode: "w" for writing or "a" for appending. purpose: "i" for inspection or "f" for final results
+    
+    
+    
+    // Variables and functions needed for the Hessian
+    Eigen::VectorXd WmPrimePrimeJSquared; // Wm is mixing energy. PrimePrime is the second deriviative w/r/t areaRatio (aka J)
+    Eigen::VectorXd prefactorA; // = (NkT + Wm" J^2)
+    Eigen::VectorXd prefactorB;  // = (NkT - Wm'J)
+    Eigen::VectorXd prefactorC; // = (Wm" J^2 + Wm' J)
+    Eigen::VectorXd Kxxxx;
+    Eigen::VectorXd Kxxxy;
+    Eigen::VectorXd Kxxyx;
+    Eigen::VectorXd Kxxyy;
+    Eigen::VectorXd Kxyxy;
+    Eigen::VectorXd Kxyyx;
+    Eigen::VectorXd Kxyyy;
+    Eigen::VectorXd Kyxyx;
+    Eigen::VectorXd Kyxyy;
+    Eigen::VectorXd Kyyyy;
+    Eigen::SparseMatrix<double> KMxxjx;
+    Eigen::SparseMatrix<double> KMxxjy;
+    Eigen::SparseMatrix<double> KMxyjx;
+    Eigen::SparseMatrix<double> KMxyjy;
+    Eigen::SparseMatrix<double> KMyxjx;
+    Eigen::SparseMatrix<double> KMyxjy;
+    Eigen::SparseMatrix<double> KMyyjx;
+    Eigen::SparseMatrix<double> KMyyjy;
+    Eigen::SparseMatrix<double> Hixjx;
+    Eigen::SparseMatrix<double> Hixjy;
+    Eigen::SparseMatrix<double> Hiyjx;
+    Eigen::SparseMatrix<double> Hiyjy;
+    void calculate_monolithic_stiffness_tensor_K(const Parameters& pars);
+    void calculate_the_Hessian_H(const Parameters& pars);
+
+    
 };
 
 #endif /* Configuration_hpp */

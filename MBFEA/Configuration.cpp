@@ -124,6 +124,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     
     gradX.resize(baseData.numElements,baseData.numOriginalNodes);
     gradY.resize(baseData.numElements,baseData.numOriginalNodes);
+    
     for (int triID=0; triID<baseData.numElements; triID++) {
         double area = 0.0;
         int a = baseData.triangles.at(triID)[0];
@@ -153,8 +154,19 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     
     // These variables are for the linearization of the second energy derivitive:
 //    Wm_primePrime.resize(baseData.numElements,1);
-    
-    
+    KMxxjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMxxjy.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMxyjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMxyjy.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMyxjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMyxjy.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMyyjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    KMyyjy.resize(baseData.numElements,baseData.numOriginalNodes);
+    Hixjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    Hixjy.resize(baseData.numElements,baseData.numOriginalNodes);
+    Hiyjx.resize(baseData.numElements,baseData.numOriginalNodes);
+    Hiyjy.resize(baseData.numElements,baseData.numOriginalNodes);
+
     // If slover is FIRE, initiate zero velocity vectors
     if (pars.solver == "FIRE"){
         velocityX.resize(baseData.numOriginalNodes);
