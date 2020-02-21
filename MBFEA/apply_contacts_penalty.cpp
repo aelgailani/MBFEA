@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
-#include <chrono>
+//#include <chrono>
 #include <valarray>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
@@ -95,6 +95,12 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     segmentIinteractions++ ;
                     }
                     
+                    // add the Hessian part
+                    if (pars.calculateHessian) {
+                        add_d1_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
+                    }
+                    
+                    
                 }else if(whichPart==0){
                     
                     double x0 = augmentedCurPosX[node0];
@@ -126,7 +132,11 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         segmentIinteractions++ ;
                         
                     }
-                    
+                     
+                    if (pars.calculateHessian) {
+                    add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
+                     }
+//
                 }else if(whichPart==1){
                     
                     double x1 = augmentedCurPosX[node1];
@@ -156,6 +166,11 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
                         contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
                         segmentIinteractions++ ;
+                        
+                    }
+                    
+                    if (pars.calculateHessian){
+                    add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
                     }
                 }
             

@@ -24,12 +24,54 @@
 #include "visualization.hpp"
 
 void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep, int stage, Configuration& mainSys){
-    auto t0 = std::chrono::high_resolution_clock::now();
+//    auto t0 = std::chrono::high_resolution_clock::now();
     if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
         while (1)
         {
             
-            auto t1 = std::chrono::high_resolution_clock::now();
+            //for debugging only (done its purpose but could be needed)
+//            if (timeStep>500) {
+//
+//                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 0);
+//
+//                mainSys.FXref = mainSys.forceX;
+//                mainSys.FYref = mainSys.forceY;
+//                mainSys.refY = mainSys.curPosY;
+//                mainSys.refX = mainSys.curPosX;
+//
+//                mainSys.curPosX(0)= mainSys.curPosX(0)+0.000001;
+//                mainSys.curPosY(18)= mainSys.curPosY(18)+0.000001;
+//                mainSys.curPosX(5)= mainSys.curPosX(5)+0.000001;
+//                mainSys.curPosY(120)= mainSys.curPosY(120)+0.000001;
+//                mainSys.curPosY(4)= mainSys.curPosY(4)+0.0003;
+//                mainSys.curPosX(5)= mainSys.curPosX(5)+0.0001;
+//                mainSys.curPosY(5)= mainSys.curPosY(5)+0.0005;
+//                mainSys.curPosX(70)= mainSys.curPosX(70)+0.0001;
+//                mainSys.curPosY(70)= mainSys.curPosY(70)+0.0005;
+//
+//                mainSys.HessianFX = mainSys.Hixjx * (mainSys.curPosX - mainSys.refX) + mainSys.Hixjy * (mainSys.curPosY - mainSys.refY);
+//                mainSys.HessianFY = mainSys.Hiyjx * (mainSys.curPosX - mainSys.refX) + mainSys.Hiyjy * (mainSys.curPosY - mainSys.refY);
+//
+//                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 0);
+//
+//                mainSys.DeltaForceXRatio = (mainSys.forceX - mainSys.FXref).array()/mainSys.HessianFX.array();
+//                mainSys.DeltaForceYRatio = (mainSys.forceY - mainSys.FYref).array()/mainSys.HessianFY.array();
+//
+//                std::cout << "DeltaForceXRatio \n " <<mainSys.DeltaForceXRatio<< std::endl;
+//                std::cout << "DeltaForceYRatio \n " <<mainSys.DeltaForceYRatio<< std::endl;
+//
+//                mainSys.dump_per_node(baseData, pars, timeStep);
+//                mainSys.dump_per_ele(baseData, pars,timeStep);
+//
+//                mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+//
+//
+//                plotWithPython(timeStep);
+//
+//                exit(1);
+//            }
+            
+//            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
             if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
@@ -71,19 +113,20 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
                 }
             }
 
-            auto t2 = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = t2 - t1;
-            std::chrono::duration<double> elapsed0 = t2 - t0;
+//            auto t2 = std::chrono::high_resolution_clock::now();
+//            std::chrono::duration<double> elapsed = t2 - t1;
+//            std::chrono::duration<double> elapsed0 = t2 - t0;
             
             timeStep++;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
             std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
             std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
             std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50000.0){
@@ -100,7 +143,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
         while (1)
         {
            
-            auto t1 = std::chrono::high_resolution_clock::now();
+//            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
             
@@ -163,15 +206,16 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
                 mainSys.dump_per_ele(baseData, pars,timeStep);
             }
             
-            auto t2 = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = t2 - t1;
-            std::chrono::duration<double> elapsed0 = t2 - t0;
+//            auto t2 = std::chrono::high_resolution_clock::now();
+//            std::chrono::duration<double> elapsed = t2 - t1;
+//            std::chrono::duration<double> elapsed0 = t2 - t0;
             timeStep++;
             std::cout << "stage  " << stage << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if (stage==2){
@@ -258,7 +302,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
         while (1)
         {
         
-            auto t1 = std::chrono::high_resolution_clock::now();
+//            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
             
@@ -310,15 +354,16 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
                     
             }
             
-            auto t2 = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = t2 - t1;
-            std::chrono::duration<double> elapsed0 = t2 - t0;
+//            auto t2 = std::chrono::high_resolution_clock::now();
+//            std::chrono::duration<double> elapsed = t2 - t1;
+//            std::chrono::duration<double> elapsed0 = t2 - t0;
             timeStep++;
             
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
-            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+//            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
+//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
+//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
            if (timeStep * pars.deformationRate * pars.dt >= pars.maxShear )

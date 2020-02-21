@@ -49,5 +49,5 @@ void Configuration::calculate_the_Hessian_H(const Parameters &pars){
     Hiyjx = gradX.transpose()*KMyxjx + gradY.transpose()*KMyyjx;
     Hiyjy = gradX.transpose()*KMyxjy + gradY.transpose()*KMyyjy;
     
-    std::cout <<KMxxjx.cols()<< std::endl;
+   
 }

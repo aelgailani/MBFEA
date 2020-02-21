@@ -173,6 +173,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="callPythonPlot") {
         split >> trueFalse;
         callPythonPlot = trueFalse;
+        }else if (a=="calculateHessian") {
+        split >> trueFalse;
+        calculateHessian = trueFalse;
         }
     }
     
@@ -236,6 +239,7 @@ void Parameters::print_to_console(void) const {
             printit("segmentCellMethod",segmentCellMethod);
             printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
             printit("callPythonPlot",callPythonPlot);
+            printit("calculateHessian",callPythonPlot);
             std::cout << std::endl;
 }
 

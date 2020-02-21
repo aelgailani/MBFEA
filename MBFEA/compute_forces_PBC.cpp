@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
-#include <chrono>
+//#include <chrono>
 #include <valarray>
 #include "Parameters.hpp"
 #include "Configuration.hpp"
@@ -19,7 +19,7 @@
 
 void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC)
 {
-    auto start1 = std::chrono::high_resolution_clock::now();
+//    auto start1 = std::chrono::high_resolution_clock::now();
     
     //erase previous step data
     contactsEnergy=0;
@@ -140,24 +140,25 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 //    std::chrono::duration<double> elapsed13 = finish13 - finish12;
 //    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
-    
-   
+    if (pars.calculateHessian){
+        calculate_the_Hessian_H(pars);
+    }
 //    auto finish14 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> elapsed14 = finish14 - finish13;
 //    std::cout << "elapsed time in augmentedCurPos:  " << elapsed14.count() << std::endl;
 
-    auto finish15 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed15 = finish15 - start1;
-    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
+//    auto finish15 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed15 = finish15 - start1;
+//    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
     
+    //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
-        
         compute_surface_forces(baseData,pars);
     }
     
-    auto finish16 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed16 = finish16 - finish15;
-    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
+//    auto finish16 = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> elapsed16 = finish16 - finish15;
+//    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
     
     internalEnergy = internalEnergyPerEle.dot(refArea);
     totalEnergy= internalEnergy + contactsEnergy;
@@ -168,7 +169,57 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
-//
     
-    calculate_the_Hessian_H(pars);
+    
+
+    
+//    Prints for debugging purposes
+    
+//    std::cout << "gradX.transpose()  \n" <<gradX.transpose()<< std::endl;
+//    std::cout << "gradY.transpose()  \n" <<gradY.transpose()<< std::endl;
+//    std::cout << "Fxx \n " <<defGradXX<< std::endl;
+//    std::cout << "Fxy^\n " <<defGradXY<< std::endl;
+//    std::cout << "Fyx \n " <<defGradYX<< std::endl;
+//    std::cout << "Fyy \n " <<defGradYY<< std::endl;
+//    std::cout << "Fxx^-1 \n " <<invDefGradTransXX<< std::endl;
+//    std::cout << "Fxy^-1 \n " <<invDefGradTransXY<< std::endl;
+//    std::cout << "Fyx^-1 \n " <<invDefGradTransYX<< std::endl;
+//    std::cout << "Fyy^-1 \n " <<invDefGradTransYY<< std::endl;
+//    std::cout << "refAreas \n " <<refArea<< std::endl;
+//    std::cout << "J \n " <<areaRatio<< std::endl;
+
+    
+//    std::cout << "W''J^2 \n " <<WmPrimePrimeJSquared<< std::endl;
+//    std::cout << "W'J \n " <<swellingPressurePerEle.array()*areaRatio.array()<< std::endl;
+//    std::cout << "Kxxxx \n " <<Kxxxx<< std::endl;
+//    std::cout << "Kxxxy \n " <<Kxxxy<< std::endl;
+//    std::cout << "Kxxyx \n " <<Kxxyx<< std::endl;
+//    std::cout << "Kxxyy \n " <<Kxxyy<< std::endl;
+//    std::cout << "Kxyxy \n " <<Kxyxy<< std::endl;
+//    std::cout << "Kxyyx \n " <<Kxyyx<< std::endl;
+//    std::cout << "Kxyyy \n " <<Kxyyy<< std::endl;
+//    std::cout << "Kyxyx \n " <<Kyxyx<< std::endl;
+//    std::cout << "Kyxyy \n " <<Kyxyy<< std::endl;
+//    std::cout << "Kyyyy \n " <<Kyyyy<< std::endl;
+//
+//
+//    std::cout << "KMxxjx \n " <<KMxxjx<< std::endl;
+//    std::cout << "KMxxjy \n " <<KMxxjy<< std::endl;
+//    std::cout << "KMxyjx \n " <<KMxyjx<< std::endl;
+//    std::cout << "KMxyjy \n " <<KMxyjy<< std::endl;
+//    std::cout << "KMyxjx \n " <<KMyxjx<< std::endl;
+//    std::cout << "KMyxjy \n " <<KMyxjy<< std::endl;
+//    std::cout << "KMyyjx \n " <<KMyyjx<< std::endl;
+//    std::cout << "KMyyjy \n " <<KMyyjy<< std::endl;
+    
+//    std::cout << "Hixjx \n " <<Hixjx<< std::endl;
+//    std::cout << "Hixjy \n " <<Hixjy<< std::endl;
+//    std::cout << "Hiyjx \n " <<Hiyjx<< std::endl;
+//    std::cout << "Hiyjy \n " <<Hiyjy<< std::endl;
+    
+//    std::cout << "gradX.col(0) \n" <<gradX.col(0).cwiseProduct(Kxxxx) << std::endl;
+//    std::cout << "gradX.col(1) \n" <<gradX.col(1) << std::endl;
+//    std::cout << "Hixjx " <<Hixjx << std::endl;
+//    std::cout << "Hixjy " <<Hixjx << std::endl;
+
 }

@@ -64,6 +64,7 @@ public:
     int segmentCellMethod;
     std::vector<int> targetNodes;
     bool dumpPeriodicImagesXY;
+    bool calculateHessian;
     bool callPythonPlot;
     void print_to_console(void) const;
     

@@ -17,6 +17,7 @@
 Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars){
     
     if (pars.startingMode=="new") {
+        
         curPosX = baseData.refPosX * pars.initialStretch;
         curPosY = baseData.refPosY * pars.initialStretch;
         topPos = pars.initTopPos;
@@ -147,13 +148,23 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     }
     
     // These are for debugging mainly
-    consistencyFactorX.resize(baseData.numOriginalNodes);
-    consistencyFactorY.resize(baseData.numOriginalNodes);
-    consistencyErrorFactorY.resize(baseData.numOriginalNodes);
-    consistencyErrorFactorX.resize(baseData.numOriginalNodes);
+//    consistencyFactorX.resize(baseData.numOriginalNodes);
+//    consistencyFactorY.resize(baseData.numOriginalNodes);
+//    consistencyErrorFactorY.resize(baseData.numOriginalNodes);
+//    consistencyErrorFactorX.resize(baseData.numOriginalNodes);
+    //Hessian debugging
+//    FXref.resize(baseData.numOriginalNodes);
+//    FYref.resize(baseData.numOriginalNodes);
+//    DeltaForceXRatio.resize(baseData.numOriginalNodes);
+//    DeltaForceYRatio.resize(baseData.numOriginalNodes);
+//    refX.resize(baseData.numOriginalNodes);
+//    refY.resize(baseData.numOriginalNodes);
+//    HessianFX.resize(baseData.numOriginalNodes);
+//    HessianFY.resize(baseData.numOriginalNodes);
     
     // These variables are for the linearization of the second energy derivitive:
 //    Wm_primePrime.resize(baseData.numElements,1);
+     if (pars.calculateHessian){
     KMxxjx.resize(baseData.numElements,baseData.numOriginalNodes);
     KMxxjy.resize(baseData.numElements,baseData.numOriginalNodes);
     KMxyjx.resize(baseData.numElements,baseData.numOriginalNodes);
@@ -162,11 +173,12 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     KMyxjy.resize(baseData.numElements,baseData.numOriginalNodes);
     KMyyjx.resize(baseData.numElements,baseData.numOriginalNodes);
     KMyyjy.resize(baseData.numElements,baseData.numOriginalNodes);
-    Hixjx.resize(baseData.numElements,baseData.numOriginalNodes);
-    Hixjy.resize(baseData.numElements,baseData.numOriginalNodes);
-    Hiyjx.resize(baseData.numElements,baseData.numOriginalNodes);
-    Hiyjy.resize(baseData.numElements,baseData.numOriginalNodes);
-
+    Hixjx.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    Hixjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    Hiyjx.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    Hiyjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+     }
+    
     // If slover is FIRE, initiate zero velocity vectors
     if (pars.solver == "FIRE"){
         velocityX.resize(baseData.numOriginalNodes);

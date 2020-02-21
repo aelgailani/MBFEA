@@ -181,6 +181,7 @@ public:
     
     
     // Variables and functions needed for the Hessian
+    
     Eigen::VectorXd WmPrimePrimeJSquared; // Wm is mixing energy. PrimePrime is the second deriviative w/r/t areaRatio (aka J)
     Eigen::VectorXd prefactorA; // = (NkT + Wm" J^2)
     Eigen::VectorXd prefactorB;  // = (NkT - Wm'J)
@@ -207,8 +208,26 @@ public:
     Eigen::SparseMatrix<double> Hixjy;
     Eigen::SparseMatrix<double> Hiyjx;
     Eigen::SparseMatrix<double> Hiyjy;
+ 
+    
+//    Eigen::SparseMatrix<double> contactHixjx;
+//    Eigen::SparseMatrix<double> contactHixjy;
+//    Eigen::SparseMatrix<double> contactHiyjx;
+//    Eigen::SparseMatrix<double> contactHiyjy;
+    
+//    Eigen::VectorXd FXref;
+//    Eigen::VectorXd FYref;
+//    Eigen::VectorXd DeltaForceXRatio;
+//    Eigen::VectorXd DeltaForceYRatio;
+//    Eigen::VectorXd refX;
+//    Eigen::VectorXd refY;
+//    Eigen::VectorXd HessianFX;
+//    Eigen::VectorXd HessianFY;
+    
     void calculate_monolithic_stiffness_tensor_K(const Parameters& pars);
     void calculate_the_Hessian_H(const Parameters& pars);
+    void add_d1_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData);
+    void add_d2_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData);
 
     
 };
