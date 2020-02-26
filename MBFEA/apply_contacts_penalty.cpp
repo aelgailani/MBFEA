@@ -16,7 +16,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap)
+void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian)
 {
 
     for (int nodeID = 0; nodeID <baseData.numSurfaceNodes; nodeID++){
@@ -96,7 +96,7 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     }
                     
                     // add the Hessian part
-                    if (pars.calculateHessian) {
+                    if (Hessian) {
                         add_d1_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
                     }
                     
@@ -133,7 +133,7 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         
                     }
                      
-                    if (pars.calculateHessian) {
+                    if (Hessian) {
                     add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
                      }
 //
@@ -169,7 +169,7 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         
                     }
                     
-                    if (pars.calculateHessian){
+                    if (Hessian){
                     add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
                     }
                 }

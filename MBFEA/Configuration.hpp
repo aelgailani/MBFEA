@@ -165,11 +165,11 @@ public:
     void dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep);
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const int& timeStep);
-    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC);
-    void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars);
+    void compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
+    void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian);
     void detect_contacts_method_1(const BaseSysData& baseData, const Parameters& pars);
     void detect_contacts_method_2(const BaseSysData& baseData, const Parameters& pars);
-    void apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap);
+    void apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian);
 
     void NTS_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
@@ -208,7 +208,12 @@ public:
     Eigen::SparseMatrix<double> Hixjy;
     Eigen::SparseMatrix<double> Hiyjx;
     Eigen::SparseMatrix<double> Hiyjy;
- 
+    Eigen::SparseMatrix<double> InvHixjx;
+    Eigen::SparseMatrix<double> InvHixjy;
+    Eigen::SparseMatrix<double> InvHiyjx;
+    Eigen::SparseMatrix<double> InvHiyjy;
+    Eigen::VectorXd affineForceX;
+    Eigen::VectorXd affineForceY;
     
 //    Eigen::SparseMatrix<double> contactHixjx;
 //    Eigen::SparseMatrix<double> contactHixjy;

@@ -17,7 +17,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC)
+void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parameters& pars, const int& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian)
 {
 //    auto start1 = std::chrono::high_resolution_clock::now();
     
@@ -140,7 +140,7 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
 //    std::chrono::duration<double> elapsed13 = finish13 - finish12;
 //    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
-    if (pars.calculateHessian){
+    if (Hessian){
         calculate_the_Hessian_H(pars);
     }
 //    auto finish14 = std::chrono::high_resolution_clock::now();
@@ -153,7 +153,7 @@ void Configuration::compute_forces_PBC(const BaseSysData& baseData, const Parame
     
     //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
-        compute_surface_forces(baseData,pars);
+        compute_surface_forces(baseData,pars,Hessian);
     }
     
 //    auto finish16 = std::chrono::high_resolution_clock::now();

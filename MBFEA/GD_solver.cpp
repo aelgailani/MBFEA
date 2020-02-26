@@ -12,6 +12,7 @@
 #include <sstream>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
+#include<Eigen/IterativeLinearSolvers>
 #include <cmath>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -70,7 +71,67 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
 //
 //                exit(1);
 //            }
-            
+            if (timeStep>2){
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1, 1);
+                
+                // The following is ONLY for simple shear  case
+                mainSys.affineForceX = - mainSys.Hixjx * mainSys.curPosY;
+                mainSys.affineForceY = - mainSys.Hiyjx * mainSys.curPosY;
+                
+                
+                Eigen::SparseMatrix<double> b;
+                b.resize(2,2);
+                b.setIdentity();
+                // fill A and b
+                Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> cg;
+                
+                Eigen::SparseMatrix<double> A;
+                Eigen::SparseMatrix<double> x;
+                x.resize(2,2);
+                A.resize(2,2);
+                A.insert(0, 0) = 1;
+                A.insert(0, 1) = 2;
+                A.insert(1, 0) = 2;
+                A.insert(1, 1) = 1;
+                cg.compute(A);
+                x = cg.solve(b);
+                
+//                cg.compute(mainSys.Hixjy);
+//                mainSys.InvHixjy = cg.solve(b);
+//
+//                cg.compute(mainSys.Hiyjx);
+//                mainSys.InvHiyjx = cg.solve(b);
+//
+//                cg.compute(mainSys.Hiyjy);
+//                mainSys.InvHiyjy = cg.solve(b);
+//                std::cout << "#iterations:     " << cg.iterations() << std::endl;
+//                std::cout << "estimated error: " << cg.error()      << std::endl;
+                // update b, and solve again
+//                AAA = cg.solve(b);
+//                double mu  =(mainSys.Kxyxy.array()*mainSys.refArea.array()*mainSys.areaRatio.array()).mean() ;
+//                double mu  =((mainSys.Kxxxx.array()+mainSys.Kyyyy.array()-2*mainSys.Kxxyy.array())*mainSys.refArea.array()*mainSys.areaRatio.array()/4).mean() ;
+
+//                double mu = (mainSys.affineForceX.dot(mainSys.InvHixjx * mainSys.affineForceX));
+//                mu += (mainSys.affineForceX.dot(mainSys.InvHixjy * mainSys.affineForceY));
+//                mu += (mainSys.affineForceY.dot(mainSys.InvHiyjx * mainSys.affineForceX));
+//                mu += (mainSys.affineForceY.dot(mainSys.InvHiyjy * mainSys.affineForceY));
+                std::cout << "Mu = :     " << x << std::endl;
+                
+                
+                if (timeStep % pars.dumpEvery == 0) {
+                //                mainSys.check_force_energy_consistency(baseData, pars);
+                                mainSys.dump_per_node(baseData, pars, timeStep);
+                                mainSys.dump_per_ele(baseData, pars,timeStep);
+                                if (pars.dumpPeriodicImagesXY){
+                                    mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+                                }
+                                if (pars.callPythonPlot) {
+                                    plotWithPython(timeStep);
+                                }
+                            }
+                
+                exit(1);
+            }
 //            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
@@ -81,9 +142,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
 
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1, 0);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1, 0);
             }
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
@@ -168,9 +229,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1,0);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1,0);
             }
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
@@ -244,9 +305,9 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
             
             // Take an Euler step
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1,0);
             }else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 0, 1,0);
             }
             for(int nodeID: pars.targetNodes){
                 mainSys.forceX(nodeID) = 0;
@@ -322,7 +383,7 @@ void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep
 //                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
 //            }else
             if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1);
+                mainSys.compute_forces_PBC(baseData, pars, timeStep, 1, 1,0);
             }
             
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;

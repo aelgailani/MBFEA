@@ -15,7 +15,7 @@
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
-void Configuration::compute_surface_forces(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian)
 {
     maxInterference = 0;
     segmentIinteractions = 0;
@@ -73,9 +73,9 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
 //    std::chrono::duration<double> d2 = t3 - t2;
 //    std::cout << "elapsed time in looping over verlet cells:  " << d2.count() << std::endl;
     
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1);
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2);
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3);
+    apply_contacts_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1,Hessian);
+    apply_contacts_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2, Hessian);
+    apply_contacts_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3, Hessian);
     
 //    auto t4 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> d4 = t4 - t3;

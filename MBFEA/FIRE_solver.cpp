@@ -50,9 +50,9 @@ void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeSt
                 
                 // Calculate F
                 if (pars.boundaryType == "walls"){
-                    mainSys.compute_forces_PBC(baseData, pars, timeStep,1,1);
+                    mainSys.compute_forces_PBC(baseData, pars, timeStep,1,1,0);
                 }else if (pars.boundaryType == "periodic"){
-                    mainSys.compute_forces_PBC(baseData, pars, timeStep,1,1);
+                    mainSys.compute_forces_PBC(baseData, pars, timeStep,1,1,0);
                 }
                 
                 mainSys.velocityX += mainSys.forceX*FIRE_dt;

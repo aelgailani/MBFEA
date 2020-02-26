@@ -177,6 +177,13 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     Hixjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
     Hiyjx.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
     Hiyjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    InvHixjx.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    InvHixjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    InvHiyjx.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    InvHiyjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
+    affineForceX.resize(baseData.numOriginalNodes);
+    affineForceY.resize(baseData.numOriginalNodes);
+
      }
     
     // If slover is FIRE, initiate zero velocity vectors
@@ -295,8 +302,8 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << curPosY[i] << std::setw(20)
         << forceX[i] << std::setw(20)
         << forceY[i] << std::setw(20)
-        << surfaceForceX[i] << std::setw(20)
-        << surfaceForceY[i] << std::endl;
+        << affineForceX[i] << std::setw(20)
+        << affineForceY[i] << std::endl;
     }
     
     myfile.close();
@@ -622,19 +629,19 @@ void Configuration::check_force_energy_consistency(const BaseSysData& baseData, 
     for (int nodeID=0; nodeID < baseData.numOriginalNodes; nodeID++)
     {
         float d = 0.00001;
-        compute_forces_PBC(baseData, pars, 0,1,0);
+        compute_forces_PBC(baseData, pars, 0,1,0,0);
         double E1 = totalEnergy;
         curPosX(nodeID) += d;
-        compute_forces_PBC(baseData, pars, 0, 1,0);
+        compute_forces_PBC(baseData, pars, 0, 1,0,0);
         double E2 = totalEnergy;
         consistencyFactorX(nodeID) = (forceX(nodeID))*d/(E1-E2);
         consistencyErrorFactorX(nodeID) = (forceX(nodeID)*d-(E1-E2))/forceY(nodeID);
         curPosX(nodeID) -= d;
         
-        compute_forces_PBC(baseData, pars, 0, 1,0);
+        compute_forces_PBC(baseData, pars, 0, 1,0,0);
         E1 = totalEnergy;
         curPosY(nodeID) += d;
-        compute_forces_PBC(baseData, pars, 0, 1,0);
+        compute_forces_PBC(baseData, pars, 0, 1,0,0);
         E2 = totalEnergy;
         consistencyFactorY(nodeID) = (forceY(nodeID)*d)/(E1-E2);
         consistencyErrorFactorY(nodeID) = (forceY(nodeID)*d-(E1-E2))/forceY(nodeID);
