@@ -31,14 +31,14 @@ void Configuration::calculate_the_Hessian_H(const Parameters &pars){
         KMyyjy.col(colID) = gradX.col(colID).cwiseProduct(Kyxyy) + gradY.col(colID).cwiseProduct(Kyyyy);
         
         // multiply by the refArea of each element
-        KMxxjx.col(colID) = KMxxjx.col(colID).cwiseProduct(refArea*-1);
-        KMxxjy.col(colID) = KMxxjy.col(colID).cwiseProduct(refArea*-1);
-        KMxyjx.col(colID) = KMxyjx.col(colID).cwiseProduct(refArea*-1);
-        KMxyjy.col(colID) = KMxyjy.col(colID).cwiseProduct(refArea*-1);
-        KMyxjx.col(colID) = KMyxjx.col(colID).cwiseProduct(refArea*-1);
-        KMyxjy.col(colID) = KMyxjy.col(colID).cwiseProduct(refArea*-1);
-        KMyyjx.col(colID) = KMyyjx.col(colID).cwiseProduct(refArea*-1);
-        KMyyjy.col(colID) = KMyyjy.col(colID).cwiseProduct(refArea*-1);
+        KMxxjx.col(colID) = KMxxjx.col(colID).cwiseProduct(refArea);
+        KMxxjy.col(colID) = KMxxjy.col(colID).cwiseProduct(refArea);
+        KMxyjx.col(colID) = KMxyjx.col(colID).cwiseProduct(refArea);
+        KMxyjy.col(colID) = KMxyjy.col(colID).cwiseProduct(refArea);
+        KMyxjx.col(colID) = KMyxjx.col(colID).cwiseProduct(refArea);
+        KMyxjy.col(colID) = KMyxjy.col(colID).cwiseProduct(refArea);
+        KMyyjx.col(colID) = KMyyjx.col(colID).cwiseProduct(refArea);
+        KMyyjy.col(colID) = KMyyjy.col(colID).cwiseProduct(refArea);
     }
     
     

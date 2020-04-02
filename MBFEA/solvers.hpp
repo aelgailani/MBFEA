@@ -19,7 +19,7 @@
 #include "BaseSysData.hpp"
 #include "Configuration.hpp"
 
-void GD_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep, int stage, Configuration& mainSys);
-void FIRE_solver(const BaseSysData& baseData, const Parameters& pars, int timeStep, int stage, Configuration& mainSys);
+void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, int stage, Configuration& mainSys);
+void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, int stage, Configuration& mainSys);
 
 #endif /* solvers_hpp */

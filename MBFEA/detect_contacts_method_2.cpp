@@ -58,7 +58,7 @@ void Configuration::detect_contacts_method_2(const BaseSysData& baseData, const 
                               continue;
                           }
 
-                          NTS_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                          nts_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
                           
                           nextMSegment = segmentsLinkedList_2(masterSegment,column);
                           column = segmentsLinkedList_2(masterSegment,column+1);

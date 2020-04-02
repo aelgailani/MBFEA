@@ -22,9 +22,10 @@ int main(int argc, char* argv[])
    
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
-    std::string sartingMode = "none";
-    std::string runMode = "new";
+    std::string sartingMode = "new";
+    std::string runMode = "none";
     std::string restartStep = "none" ;  //restarting step
+    std::string inputRestartFolder = "none";  //default file name
     
     // This section is for passing parameters as arguments. NOT finishid yet so just use the parameters input file for now
     if (argc>1) {
@@ -33,8 +34,8 @@ int main(int argc, char* argv[])
                 inputFileName = std::string(argv[i+1]);
                 std::cout << "Input file read is "<<inputFileName<< std::endl;
             }
-        }
-    }
+        
+    
 //            else if (std::string(argv[i]) == "--compressrestartstep" || std::string(argv[i])== "-cr") {
 //                restartStep = std::string(argv[i+1]);
 //                std::cout << "restarting step is  "<<restartStep<< std::endl;
@@ -45,24 +46,27 @@ int main(int argc, char* argv[])
 //                std::cout << "restarting step is  "<<restartStep<< std::endl;
 //                sartingMode = "restart";
 //                runMode = "continuousShear";
-//            }else if (std::string(argv[i]) == "--stepshearrestartstep" || std::string(argv[i])== "-ssr") {
-//                restartStep = std::string(argv[i+1]);
-//                std::cout << "restarting step is  "<<restartStep<< std::endl;
-//                sartingMode = "restart";
-//                runMode = "stepShear";
-//            }else {
-//                std::cout << "unexpected argument buddy ! "<<std::string(argv[i])<< std::endl;;
-//                exit(1);}
-//        }
-//    }
+            else if (std::string(argv[i]) == "--stepshearrestartstep" || std::string(argv[i])== "-ssr") {
+                restartStep = std::string(argv[i+1]);
+                inputRestartFolder = std::string(argv[i+2]);
+                std::cout << "restarting step is  "<<restartStep<< std::endl;
+                sartingMode = "restart";
+                runMode = "stepShear";
+            }else if (std::string(argv[i]) == "--inputrestartfolder" || std::string(argv[i])== "-irf") {
+                inputRestartFolder = std::string(argv[i+1]);
 
+            }else {
+                std::cout << "unexpected argument buddy ! "<<std::string(argv[i])<< std::endl;;
+                exit(1);}
+        }
     
+    }
+    
+
     //Read parameters
-    const Parameters pars(inputFileName, runMode, restartStep);
+    const Parameters pars(inputFileName, inputRestartFolder, runMode, restartStep);
     pars.print_to_console();
-    
-    
-    //Open/create directory to dump the outputs
+        //Open/create directory to dump the outputs
     if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") )
     {    DIR* dir = opendir(pars.outputFolderName.c_str());
         if (dir)
@@ -77,7 +81,7 @@ int main(int argc, char* argv[])
         }
     }else if (pars.startingMode == "restart" && pars.runMode == "stepShear"){
         DIR* dir1 = opendir(pars.outputFolderName.c_str());
-        DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(pars.startingTimeStep)).c_str());
+        DIR* dir2 = opendir((pars.outputFolderName +"/phi-"+std::to_string(int(pars.startingTimeStep))).c_str());
         if (dir1)
         {
             closedir(dir1);
@@ -92,7 +96,7 @@ int main(int argc, char* argv[])
         if (dir2){
             closedir(dir2);
         } else if (ENOENT == errno){
-            const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(pars.startingTimeStep)).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err) {
                 printf("Error creating step directory!");
                 exit(1);
@@ -118,10 +122,6 @@ int main(int argc, char* argv[])
             
         }
         
-        
-        
-    
-
     //Fill in input data
     BaseSysData baseData(pars);
     baseData.dump_augmented_surface_meshes(pars);   // uncomment it for debugging purposes if you like to use it
@@ -130,17 +130,20 @@ int main(int argc, char* argv[])
     
    
     
-    int timeStep = pars.startingTimeStep;
+    long timeStep = pars.startingTimeStep;
+    if (pars.runMode != "compress") {
+        timeStep=0;
+    }
     int stage = 0; // a dummy varaiable to be used in shearing mode
-    mainSys.dump_global_data(pars, 'w', 'i');
+    mainSys.dump_global_data(pars, timeStep, "write", "running");
 
     
     ///////////////  Main loop
     
     if (pars.solver=="GD") {
-        GD_solver(baseData,pars,timeStep,stage, mainSys);
+        gd_solver(baseData,pars,timeStep,stage, mainSys);
     }else if (pars.solver=="FIRE"){
-        FIRE_solver(baseData,pars,timeStep,stage, mainSys);
+        fire_solver(baseData,pars,timeStep,stage, mainSys);
     }
     
     

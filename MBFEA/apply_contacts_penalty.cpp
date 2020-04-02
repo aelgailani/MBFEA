@@ -16,7 +16,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian)
+void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep)
 {
 
     for (int nodeID = 0; nodeID <baseData.numSurfaceNodes; nodeID++){
@@ -93,6 +93,21 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
                     contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
                     segmentIinteractions++ ;
+                        
+                    double Dd1Dxi=(y0 - y1)/pow(pow(-x0 + x1,2) + pow(-y0 + y1,2),0.5);
+
+                    double Dd1Dyi=(-x0 + x1)/pow(pow(-x0 + x1,2) + pow(-y0 + y1,2),0.5);
+
+                    double Dd1Dx0=(1.*(x0 - 1.*x1)*(x0 - 1.*xi)*(y0 - 1.*y1))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5) + (-y0 + y1)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5) + (y0 - yi)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5) - (1.*pow(x0 - 1.*x1,2)*(y0 - 1.*yi))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5);
+
+                    double Dd1Dy0=(x0 - x1)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5) + (-x0 + xi)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5) + (1.*(x0 - 1.*xi)*pow(y0 - 1.*y1,2))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5) - (1.*(x0 - 1.*x1)*(y0 - 1.*y1)*(y0 - 1.*yi))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5);
+
+                    double Dd1Dx1=(-1.*(x0 - 1.*x1)*(x0 - 1.*xi)*(y0 - 1.*y1))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5) + (1.*pow(x0 - 1.*x1,2)*(y0 - 1.*yi))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5) + (-y0 + yi)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5);
+
+                    double Dd1Dy1=(x0 - xi)/pow(pow(x0 - x1,2) + pow(y0 - y1,2),0.5) - (1.*(x0 - 1.*xi)*pow(y0 - 1.*y1,2))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5) + (1.*(x0 - 1.*x1)*(y0 - 1.*y1)*(y0 - 1.*yi))/pow(pow(x0 - x1,2) + pow(y0 - y1,2),1.5);
+
+                        KWoodXX += f*(Dd1Dxi*xi+Dd1Dx0*x0+Dd1Dx1*x1);
+                        KWoodYY += f*(Dd1Dyi*yi+Dd1Dy0*y0+Dd1Dy1*y1);
                     }
                     
                     // add the Hessian part
@@ -100,11 +115,20 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         add_d1_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
                     }
                     
+                    //add the facets elements if required
+                    if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
+                        int masterMesh = surNodes_mMesh[nodeID];
+                        int slaveMesh = baseData.nodeToSegments[node][2];
+                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node0);
+                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node1);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
+                    }
                     
                 }else if(whichPart==0){
                     
                     double x0 = augmentedCurPosX[node0];
                     double y0 = augmentedCurPosY[node0];
+                    double f = pars.penaltyStiffness * abs(gap);
                     double r0ix = xi-x0;
                     double r0iy = yi-y0;
                     double f0ix = -pars.penaltyStiffness  * r0ix;
@@ -131,11 +155,26 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
                         segmentIinteractions++ ;
                         
+                        double Dd2Dxi = (1.*(-x0 + xi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
+                        double Dd2Dyi = (1.*(-y0 + yi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
+                        double Dd2Dx0 = (-1.*(-x0 + xi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
+                        double Dd2Dy0 = (-1.*(-y0 + yi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
+                        
+                        KWoodXX += f*(Dd2Dxi*xi+Dd2Dx0*x0);
+                        KWoodYY += f*(Dd2Dyi*yi+Dd2Dy0*y0);
                     }
                      
                     if (Hessian) {
                     add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
                      }
+                    
+                    //add the facets elements if required
+                    if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
+                        int masterMesh = surNodes_mMesh[nodeID];
+                        int slaveMesh = baseData.nodeToSegments[node][2];
+                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node0);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
+                    }
 //
                 }else if(whichPart==1){
                     
@@ -143,7 +182,7 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     double y1 = augmentedCurPosY[node1];
                     double r1ix = xi-x1;
                     double r1iy = yi-y1;
-                    
+                    double f = pars.penaltyStiffness * abs(gap);
                     double f1ix = -pars.penaltyStiffness  * r1ix;
                     double f1iy = -pars.penaltyStiffness  * r1iy;
                     double f11x = -f1ix;
@@ -167,10 +206,26 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                         contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
                         segmentIinteractions++ ;
                         
+                        double Dd2Dxi = (1.*(-x1 + xi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
+                        double Dd2Dyi = (1.*(-y1 + yi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
+                        double Dd2Dx1 = (-1.*(-x1 + xi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
+                        double Dd2Dy1 = (-1.*(-y1 + yi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
+                        
+                        KWoodXX += f*(Dd2Dxi*xi+Dd2Dx1*x1);
+                        KWoodYY += f*(Dd2Dyi*yi+Dd2Dy1*y1);
                     }
                     
                     if (Hessian){
                     add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
+                    }
+                    
+                    
+                    //add the facets elements if required
+                    if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
+                        int masterMesh = surNodes_mMesh[nodeID];
+                        int slaveMesh = baseData.nodeToSegments[node][2];
+                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node1);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
                     }
                 }
             

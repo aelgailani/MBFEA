@@ -23,7 +23,7 @@ void Configuration::detect_contacts_method_1(const BaseSysData& baseData, const 
         for (int cellXid=0; cellXid<numXCells; cellXid++)
         {
             int cellFlatId = numXCells*cellYid + cellXid + baseData.numSurfaceNodes;
-            int slaveNodeId = nodesLinkedList[cellFlatId]; // Note that slaveNodeId is its local ordinal number not the golbal node name assigned in the mesh
+            int slaveNodeId = nodesLinkedList[cellFlatId]; // Note that slaveNodeId is its local ordinal number in surface nodes not the golbal node name assigned in the mesh
             
             
             while (slaveNodeId>=0)
@@ -53,7 +53,7 @@ void Configuration::detect_contacts_method_1(const BaseSysData& baseData, const 
                             continue;
                         }
                         
-                        NTS_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                        nts_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
                         
                         masterSegment = segmentsLinkedList_1[masterSegment];
                     }

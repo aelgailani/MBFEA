@@ -38,50 +38,40 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             std::cerr << "Error Openning Restart Nodes File" << std::endl;
             exit(1);
         }
-        //Read the number of nodes found in the first line of the input file
         std::string line,a;
         double b,c,d,x,y;
-        std::getline(inFile, line);
-        std::istringstream split1(line);
-        split1 >> a;
-        if (a=="numNodes") {
-            split1 >> b;
-            assert(b== baseData.numOriginalNodes);
-        }
+        long l;
+//        a="none";
+        while (a != "Nodes_data:"){
+            std::getline(inFile, line);
+            std::istringstream split(line);
+            split >> a;
+    
+            if (a=="numNodes") {
+                split >> l;
+                assert(l== baseData.numOriginalNodes);
+            }
         
-        std::getline(inFile, line);
-        std::istringstream split2(line);
-        split2 >> a;
-        std::cout << a << std::endl;
-        if (a=="kTOverOmega") {
-            split2 >> b;
-            assert(b==pars.kTOverOmega);
+            if (a=="kTOverOmega") {
+                split >> b;
+                assert(b==pars.kTOverOmega);
+            }
             
-        }
-        
-        std::getline(inFile, line); //this reads phi but skip it
-        std::getline(inFile, line);
-        std::istringstream split3(line);
-        split3 >> a;
-        if (a=="timeStep") {
-            split3 >> b;
-        }
-        std::getline(inFile, line);
-        std::istringstream split4(line);
-        split4 >> a;
-        std::cout << a << std::endl;
-        if (a=="wallsLRBT") {
-            split4 >> b >> c >> x >> y;
-            leftPos = b;
-            rightPos = c;
-            botPos = x;
-            topPos = y;
-        }
+            if (a=="timeStep") {
+                split >> l;
+            }
 
-        std::getline(inFile, line);
+            if (a=="wallsLRBT") {
+                split >> b >> c >> x >> y;
+                leftPos = b;
+                rightPos = c;
+                botPos = x;
+                topPos = y;
+            }
+
+        }
         std::getline(inFile, line);
         int id = 0;
-        
         curPosX.resize(baseData.numOriginalNodes);
         curPosY.resize(baseData.numOriginalNodes);
         while(std::getline(inFile, line))
@@ -183,6 +173,11 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     InvHiyjy.resize(baseData.numOriginalNodes,baseData.numOriginalNodes);
     affineForceX.resize(baseData.numOriginalNodes);
     affineForceY.resize(baseData.numOriginalNodes);
+    nonAffineVX.resize(baseData.numOriginalNodes);
+    nonAffineVY.resize(baseData.numOriginalNodes);
+    Hessian.resize(baseData.numOriginalNodes*2,baseData.numOriginalNodes*2);
+    augmentedNonAffineV.resize(baseData.numOriginalNodes*2);
+    augmentedAffineF.resize(baseData.numOriginalNodes*2);
 
      }
     
@@ -210,9 +205,12 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     Fh = 0.5*(-wallForceRight.sum()+wallForceLeft.sum());
     Fv = 0.5*(-wallForceTop.sum()+wallForceBottom.sum());
     P1 = 0.5*(Fv/lxNew+Fh/lyNew);
-    P2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
+//    P2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
+    P2 = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX).dot((refArea.array()*areaRatio.array()).matrix())+(KWoodYY+KWoodXX))/(2*LX*LY);
+    
     S1 = 0.5*(Fv/lxNew-Fh/lyNew);
-    S2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
+    S2 = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX).dot((refArea.array()*areaRatio.array()).matrix())+(KWoodYY-KWoodXX))/(2*LX*LY);
+//    S2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
     ex = log(lxNew/baseData.lxRef);
     ey = log(lyNew/baseData.lyRef);
     A = lxNew * lyNew;
@@ -227,64 +225,106 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
 }
 
-void Configuration::dump_global_data(const Parameters& pars, char mode, char purpose){
+void Configuration::dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose){
     std::string fname ;
-    if (purpose=='i'){
-        fname = "/data.txt";
-    }else if (purpose=='f'){
+    std::string first = std::to_string(timeStep/pars.splitDataEvery*pars.splitDataEvery);
+    std::string last =std::to_string(timeStep/pars.splitDataEvery*pars.splitDataEvery+pars.splitDataEvery-1);
+    
+    
+    if (purpose=="running"){
+        fname = "/data-steps-"+first+"-"+last+".txt";
+    }else if (purpose=="final"){
         fname = "/final_data.txt";
     }
-    if (mode=='w'){
+   
+    if (mode=="write" || first != lastStepFirst){
         std::ofstream dataFile;
-        dataFile.open (pars.outputFolderName+fname);
+        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname);
+        }else{
+            dataFile.open (pars.outputFolderName+fname);
+        }
         dataFile
-        <<  "TotalEnergy"  << std::setw(20)
+        <<  "step"  << std::setw(30)
+        <<  "totalEnergy"  << std::setw(20)
+        <<  "contactEnergy"  << std::setw(20)
         <<  "shearVirial"  << std::setw(20)
         <<  "pressureVirial"  << std::setw(20)
         <<  "maxResidualF"  << std::setw(20)
         <<  "pressure1"  << std::setw(20)
         <<  "pressure2"  << std::setw(20)
+        <<  "KWpressure2"  << std::setw(20)
         <<  "shearStress1"  << std::setw(20)
         <<  "shearStress2"  << std::setw(20)
+        <<  "KWshearStress2"  << std::setw(20)
         <<  "boxArea"  << std::setw(20)
         <<  "phi"  << std::setw(20)
         <<  "e0"  << std::setw(20)
-        <<  "e1" << std::endl;
+        <<  "e1" << std::setw(20)
+        <<  "dt" << std::setw(20)
+        <<  "defRate" << std::setw(20)
+        <<  "penalty" << std::endl;
         dataFile.close();
-    }else if (mode=='a'){
+        
+        
+    }else if (mode=="append"){
         std::ofstream dataFile;
-        dataFile.open (pars.outputFolderName+fname,  std::ios_base::app);
+        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname,  std::ios_base::app);
+        }else{
+            dataFile.open (pars.outputFolderName+fname,  std::ios_base::app);
+        }
         dataFile << std::setprecision(9)
+        <<  timeStep  << std::setw(30)
         <<  totalEnergy  << std::setw(20)
+        <<  contactsEnergy  << std::setw(20)
         <<  shearVirial  << std::setw(20)
         <<  pressureVirial  << std::setw(20)
         <<  maxR  << std::setw(20)
         <<  P1  << std::setw(20)
         <<  P2  << std::setw(20)
+        <<  (KWoodYY+KWoodXX)/(2*LX*LY)  << std::setw(20)
         <<  S1  << std::setw(20)
         <<  S2  << std::setw(20)
+        <<  (KWoodYY-KWoodXX)/(2*LX*LY)   << std::setw(20)
         <<  A  << std::setw(20)
         <<  phi  << std::setw(20)
         <<  e0  << std::setw(20)
-        <<  e1 << std::endl;
+        <<  e1 << std::setw(20)
+        <<  pars.dt  << std::setw(20)
+        <<  pars.deformationRate  << std::setw(20)
+        <<  pars.penaltyStiffness << std::endl;
         dataFile.close();
         
         
     }
+    
+   lastStepFirst = first;
 }
 
 
-void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters& pars, int& timeStep){
+void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    myfile.open (pars.outputFolderName+"/dataPerNode-"+step+".txt");
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerNode-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/dataPerNode-"+step+".txt");
+    }
+    
+    myfile << "Basic_data:" << std::endl;
     myfile << "numNodes" << "\t" << baseData.numOriginalNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "dt" << "\t" << pars.dt << std::endl;
+    myfile << "deformationRate" << "\t" << pars.deformationRate   << std::endl;
+    myfile << "penaltyStiffness" << "\t" << pars.penaltyStiffness << std::endl;
+    myfile << "verletCellCutoff" << "\t" << pars.verletCellCutoff << std::endl;
+    myfile << "penalty" << "\t" << pars.penaltyStiffness << std::endl;
     myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << std::endl;
-    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  std::endl;
-    
+    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  '\n' << std::endl;
+    myfile << "Nodes_data:" << std::endl;
     myfile
     << "id"  << std::setw(20)
     <<  "x"  << std::setw(20)
@@ -302,18 +342,23 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << curPosY[i] << std::setw(20)
         << forceX[i] << std::setw(20)
         << forceY[i] << std::setw(20)
-        << affineForceX[i] << std::setw(20)
-        << affineForceY[i] << std::endl;
+        << surfaceForceX[i] << std::setw(20)
+        << surfaceForceY[i] << std::endl;
     }
     
     myfile.close();
 
 }
 
-void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, int& timeStep){
+void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    myfile.open (pars.outputFolderName+"/dataPerNodePeriodicImages-"+step+".txt");
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerNodePeriodicImages-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/dataPerNodePeriodicImages-"+step+".txt");
+    }
+    myfile << "Basic_data:" << std::endl;
     myfile << "numNodes" << "\t" << baseData.numNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
@@ -325,8 +370,8 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     myfile << "effectiveBotPos" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
     myfile << "numCellsX" << "\t" << numXCells << std::endl;
     myfile << "numCellsY" << "\t" << numYCells << std::endl;
-    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  std::endl;
-    
+    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  "\n" <<std::endl;
+    myfile << "Nodes_data:" << std::endl;
     myfile
     << "id"  << std::setw(20)
     <<  "x"  << std::setw(20)
@@ -345,11 +390,16 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
 }
 
 
-void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& pars, int& timeStep){
+void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
     
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    myfile.open (pars.outputFolderName+"/dataPerEle-"+step+".txt");
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerEle-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/dataPerEle-"+step+".txt");
+    }
+    myfile << "Basic_data:" << std::endl;
     myfile << "numElements" << "\t" << baseData.numElements << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "internalEnergy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
@@ -358,8 +408,8 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     myfile << "totalEnergy" << "\t" <<  std::setprecision(9)<< totalEnergy << std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << std::endl;
-    
+    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos <<"\n"<<std::endl;
+    myfile << "Elements_data:" << std::endl;
     myfile
     <<"id" << std::setw(20)
     << "refArea" << std::setw(20)
@@ -407,6 +457,56 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     myfile.close();
 
 }
+
+
+
+void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
+    
+    
+    //    ifstream stream(file);
+    //    for(auto& kv : stored) {
+    //      stream << kv.second << '\n';
+    //      // Add '\n' character  ^^^^
+    //    }
+    //    stream.close();
+    
+    
+    std::string step = std::to_string(timeStep);
+    std::ofstream myfile;
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/facets-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
+    }
+    myfile << "Basic_data:" << std::endl;
+    myfile << "numElements" << "\t" << baseData.numElements << std::endl;
+    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
+    myfile << "internalEnergy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
+    myfile << "wallsEnergy" << "\t" <<  std::setprecision(9)<< wallsEnergy << std::endl;
+    myfile << "contactsEnergy" << "\t" <<  std::setprecision(9)<< contactsEnergy << std::endl;
+    myfile << "totalEnergy" << "\t" <<  std::setprecision(9)<< totalEnergy << std::endl;
+    myfile << "phi" << "\t" << phi << std::endl;
+    myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << "\n"<<std::endl;
+    myfile << "Facets_data:" << std::endl;
+    myfile
+    <<"mMesh" << std::setw(7)
+    << "sMesh" << std::setw(7)
+    << "mNodes" <<  std::endl;
+
+    for(auto& key : facets) {
+        myfile << std::to_string(key.first.first) << std::setw(7) << std::to_string(key.first.second) << std::setw(7);
+        
+        for (auto& node: key.second) {
+            myfile << std::to_string(node) << std::setw(7);
+        }
+        myfile << std::setw(-7)<< std::endl;
+    }
+    myfile << "EOF";
+    myfile.close();
+
+}
+
 
 
 void Configuration::compress(const BaseSysData& baseData, const Parameters& pars, double strain){
@@ -457,11 +557,11 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - xMid;
-    curPosX *= 1.0/lxCur*lxNew;
+    curPosX *= (1.0/lxCur)*lxNew;
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lyCur*lyNew;
+    curPosY *= (1.0/lyCur)*lyNew;
     curPosY = curPosY.array() + yMid;
     
     std::cout << "*** shearing ... *** " << std::endl;
@@ -629,19 +729,19 @@ void Configuration::check_force_energy_consistency(const BaseSysData& baseData, 
     for (int nodeID=0; nodeID < baseData.numOriginalNodes; nodeID++)
     {
         float d = 0.00001;
-        compute_forces_PBC(baseData, pars, 0,1,0,0);
+        compute_forces_pbc(baseData, pars, 0,1,0,0);
         double E1 = totalEnergy;
         curPosX(nodeID) += d;
-        compute_forces_PBC(baseData, pars, 0, 1,0,0);
+        compute_forces_pbc(baseData, pars, 0, 1,0,0);
         double E2 = totalEnergy;
         consistencyFactorX(nodeID) = (forceX(nodeID))*d/(E1-E2);
         consistencyErrorFactorX(nodeID) = (forceX(nodeID)*d-(E1-E2))/forceY(nodeID);
         curPosX(nodeID) -= d;
         
-        compute_forces_PBC(baseData, pars, 0, 1,0,0);
+        compute_forces_pbc(baseData, pars, 0, 1,0,0);
         E1 = totalEnergy;
         curPosY(nodeID) += d;
-        compute_forces_PBC(baseData, pars, 0, 1,0,0);
+        compute_forces_pbc(baseData, pars, 0, 1,0,0);
         E2 = totalEnergy;
         consistencyFactorY(nodeID) = (forceY(nodeID)*d)/(E1-E2);
         consistencyErrorFactorY(nodeID) = (forceY(nodeID)*d-(E1-E2))/forceY(nodeID);
@@ -651,4 +751,50 @@ void Configuration::check_force_energy_consistency(const BaseSysData& baseData, 
 //    std::cout<<consistencyFactorX<<std::endl;
 //    std::cout<<"Y"<<std::endl;
 //    std::cout<<consistencyErrorFactorX<<std::endl;
+    
+}
+
+void Configuration::fill_augmented_Hessian(){
+    
+    
+        
+        typedef Eigen::Triplet<double> T;
+        std::vector<T> tripletList;
+        tripletList.reserve(Hixjx.nonZeros()+Hixjy.nonZeros()+Hiyjx.nonZeros()+Hiyjy.nonZeros());
+       
+        
+        //First add the Hixjx values, the indices stay the same as in the augmented H later
+        for (int k=0; k<Hixjx.outerSize(); ++k){
+            for (Eigen::SparseMatrix<double>::InnerIterator it(Hixjx,k); it; ++it)
+            {
+                tripletList.push_back(T(int(it.row()),int(it.col()),it.value()));// inner index, here it is equal to it.row()
+            }
+        }
+        //Second add the Hixjy values to right of the fitst block of Hixjx, the row indices shift by #of_nodes
+        for (int k=0; k<Hixjy.outerSize(); ++k){
+           for (Eigen::SparseMatrix<double>::InnerIterator it(Hixjy,k); it; ++it)
+           {
+               tripletList.push_back(T(int(it.row()),int(it.col()+Hixjy.cols()),it.value()));// inner index, here it is equal to it.row()
+           }
+        }
+    
+        //Now Hiyjx with rows shift
+        for (int k=0; k<Hiyjx.outerSize(); ++k){
+            for (Eigen::SparseMatrix<double>::InnerIterator it(Hiyjx,k); it; ++it)
+            {
+                tripletList.push_back(T(int(it.row()+Hiyjx.rows()),int(it.col()),it.value()));// inner index, here it is equal to it.row()
+            }
+        }
+        
+    //Now Hiyjx with columns shift
+    for (int k=0; k<Hiyjy.outerSize(); ++k){
+        for (Eigen::SparseMatrix<double>::InnerIterator it(Hiyjy,k); it; ++it)
+        {
+            tripletList.push_back(T(int(it.row()+Hiyjy.cols()),int(it.col()+Hiyjy.cols()),it.value()));// inner index, here it is equal to it.row()
+        }
+    }
+        
+    Hessian.setFromTriplets(tripletList.begin(), tripletList.end());
+    
+    
 }

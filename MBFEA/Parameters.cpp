@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite, std::string& restartStepOverwrite) {
+Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runModeOverWrite, std::string& restartStepOverwrite) {
     std::ifstream inFile;
     inFile.open(inputFileName); //Make sure later that the file is open in "read" mode only
     //Check for errors
@@ -18,6 +18,7 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
     std::string a,b,f;
     double c;
     int d;
+    long l;
     bool trueFalse;
     while (std::getline(inFile, line)) {
         std::istringstream split(line);
@@ -38,11 +39,14 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
             split >> c;
             initialStretch = c;
         }else if (a=="dumpEvery") {
-            split >> d;
-            dumpEvery = d;
+            split >> l;
+            dumpEvery = l;
+        }else if (a=="splitDataEvery") {
+            split >> l;
+            splitDataEvery = l;
         }else if (a=="startingTimeStep") {
-            split >> d;
-            startingTimeStep = d;
+            split >> l;
+            startingTimeStep = l;
         }else if (a=="outputFolderName") {
             split >> f;
             outputFolderName = f;
@@ -151,8 +155,8 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
             split >> d;
             numStrainSteps = d;
         }else if (a=="startingStrainStep") {
-            split >> d;
-            startingStrainStep = d;
+            split >> l;
+            startingStrainStep = l;
         }else if (a=="targetNodes") {
             while(split >> d){
                 targetNodes.push_back(d);
@@ -176,27 +180,35 @@ Parameters::Parameters(std::string& inputFileName, std::string& runModeOverWrite
         }else if (a=="calculateHessian") {
         split >> trueFalse;
         calculateHessian = trueFalse;
+        }else if (a=="identifyAndDumbFacets") {
+        split >> trueFalse;
+        identifyAndDumbFacets = trueFalse;
         }
     }
-    
+//    identifyAndDumbFacets
     if (runModeOverWrite=="stepShear"){
         runMode = "stepShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = f+"/dataPerNode-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/dataPerNode-"+restartStepOverwrite+".txt";
         
     }
     if (runModeOverWrite=="contineousShear"){
         runMode = "contineousShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = f+"/dataPerNode-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/dataPerNode-"+restartStepOverwrite+".txt";
     }
     if (outputFolderName=="auto"){
         outputFolderName = runMode;
     }
-    
-
+    if (outputFolderName==inputFileName){
+        std::cout << "use different output directory name to avoid overwriting your data ! " << std::endl;;
+            exit(1);
+           }
+    if (boundaryType=="walls"){
+        imagesMargin = 0.0 ;
+    }
 }
 
 
@@ -208,6 +220,7 @@ void Parameters::print_to_console(void) const {
             printit("verletCellCutoff",verletCellCutoff);
             printit("initialStretch",initialStretch);
             printit("dumpEvery",dumpEvery);
+            printit("splitDataEvery",splitDataEvery);
             printit("startingTimeStep",startingTimeStep);
             printit("outputFolderName",outputFolderName);
             printit("surfaceNodesFileName",surfaceNodesFileName);
@@ -240,6 +253,8 @@ void Parameters::print_to_console(void) const {
             printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
             printit("callPythonPlot",callPythonPlot);
             printit("calculateHessian",callPythonPlot);
+            printit("identifyAndDumbFacets",identifyAndDumbFacets);
+    
             std::cout << std::endl;
 }
 

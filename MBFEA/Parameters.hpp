@@ -16,14 +16,15 @@ private:
 //    void print2(const std::string name,const T v, std::ofstream myfile) const;
     
 public:
-    Parameters(std::string& inputFileName, std::string& runMode, std::string& restartStepOverwrite);
+    Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runMode, std::string& restartStepOverwrite);
     double kTOverOmega;
     double NkT;
     double chi;
     double verletCellCutoff;
     double initialStretch;
-    int dumpEvery;
-    double startingTimeStep;
+    long dumpEvery;
+    long splitDataEvery;
+    long startingTimeStep;
     std::string outputFolderName;
     std::string trianglesFileName;
     std::string surfaceNodesFileName;
@@ -58,7 +59,7 @@ public:
     double FIRE_dt_start;
     double RTolerance;
     int numStrainSteps;
-    int startingStrainStep;
+    long startingStrainStep;
     double  gammaX;
     double  gammaY;
     int segmentCellMethod;
@@ -66,6 +67,7 @@ public:
     bool dumpPeriodicImagesXY;
     bool calculateHessian;
     bool callPythonPlot;
+    bool identifyAndDumbFacets;
     void print_to_console(void) const;
     
 

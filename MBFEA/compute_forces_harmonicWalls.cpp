@@ -17,7 +17,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian)
+void Configuration::compute_forces_harmonicWalls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian)
 {
 //    auto start1 = std::chrono::high_resolution_clock::now();
     
@@ -108,60 +108,37 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     interForceX = forceX;
     interForceY = forceY;
     
-//    auto finish12 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed12 = finish12 - finish11;
-//    std::cout << "elapsed time in internal forces:  " << elapsed12.count() << std::endl;
-    
-    // Create images x y
-    if (updatePBC) {
-        curPosXL = curPosX.array()-lxNew;
-        curPosXR = curPosX.array()+lxNew;
-        curPosXB = curPosX;
-        curPosXT = curPosX;
-        curPosXBL = curPosX.array()-lxNew;
-        curPosXBR = curPosX.array()+lxNew;
-        curPosXTL = curPosX.array()-lxNew;
-        curPosXTR = curPosX.array()+lxNew;
-        
-        curPosYL = curPosY;
-        curPosYR = curPosY;
-        curPosYB = curPosY.array()-lyNew;
-        curPosYT = curPosY.array()+lyNew;
-        curPosYBL = curPosY.array()-lyNew;
-        curPosYBR = curPosY.array()-lyNew;
-        curPosYTL = curPosY.array()+lyNew;
-        curPosYTR = curPosY.array()+lyNew;
 
-    }
-    
-    augmentedCurPosX.resize(baseData.numNodes);
-    augmentedCurPosY.resize(baseData.numNodes);
-    augmentedCurPosX << curPosX, curPosXL, curPosXR, curPosXB, curPosXT, curPosXBL, curPosXBR, curPosXTL, curPosXTR;
-    augmentedCurPosY << curPosY, curPosYL, curPosYR, curPosYB, curPosYT, curPosYBL, curPosYBR, curPosYTL, curPosYTR;
-//    auto finish13 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed13 = finish13 - finish12;
-//    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
-    
     if (Hessian){
         calculate_the_Hessian_H(pars);
     }
-//    auto finish14 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed14 = finish14 - finish13;
-//    std::cout << "elapsed time in augmentedCurPos:  " << elapsed14.count() << std::endl;
 
-//    auto finish15 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed15 = finish15 - start1;
-//    std::cout << "Total time elapsed in internal nodes:  " << elapsed15.count() << std::endl;
+    augmentedCurPosX = curPosX;
+    augmentedCurPosY = curPosY;
     
     //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
         compute_surface_forces(baseData,pars,Hessian, timeStep);
     }
     
-//    auto finish16 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed16 = finish16 - finish15;
-//    std::cout << "Total time elapsed in surface interactions:  " << elapsed16.count() << std::endl;
+    //apply hamonic repulsion to boudary nodes
+    wallForceTop = pars.penaltyStiffness*(0.5*((curPosY.array() - topPos).sign()+1))*(topPos-curPosY.array());
+    wallForceBottom = pars.penaltyStiffness*(0.5*(sign(botPos-curPosY.array())+1))*(botPos-curPosY.array());
+//
+    wallForceRight = pars.penaltyStiffness*(0.5*(sign(curPosX.array()-rightPos)+1))*(rightPos-curPosX.array());
+    wallForceLeft = pars.penaltyStiffness*(0.5*(sign(leftPos-curPosX.array())+1))*(leftPos-curPosX.array());
+
+    forceX = forceX + wallForceRight + wallForceLeft ;
+    forceY = forceY + wallForceTop + wallForceBottom ;
     
+    KWoodXX += 1/pars.penaltyStiffness*( wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
+    KWoodYY += 1/pars.penaltyStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum());
+//    std::cout << (curPosY.array() - topPos).sign() << std::endl;
+    
+    wallsEnergy = 0.5/pars.penaltyStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum() + wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
+    
+    
+    contactsEnergy += wallsEnergy;
     internalEnergy = internalEnergyPerEle.dot(refArea);
     totalEnergy= internalEnergy + contactsEnergy;
     
@@ -172,56 +149,5 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
     
-    
-
-    
-//    Prints for debugging purposes
-    
-//    std::cout << "gradX.transpose()  \n" <<gradX.transpose()<< std::endl;
-//    std::cout << "gradY.transpose()  \n" <<gradY.transpose()<< std::endl;
-//    std::cout << "Fxx \n " <<defGradXX<< std::endl;
-//    std::cout << "Fxy^\n " <<defGradXY<< std::endl;
-//    std::cout << "Fyx \n " <<defGradYX<< std::endl;
-//    std::cout << "Fyy \n " <<defGradYY<< std::endl;
-//    std::cout << "Fxx^-1 \n " <<invDefGradTransXX<< std::endl;
-//    std::cout << "Fxy^-1 \n " <<invDefGradTransXY<< std::endl;
-//    std::cout << "Fyx^-1 \n " <<invDefGradTransYX<< std::endl;
-//    std::cout << "Fyy^-1 \n " <<invDefGradTransYY<< std::endl;
-//    std::cout << "refAreas \n " <<refArea<< std::endl;
-//    std::cout << "J \n " <<areaRatio<< std::endl;
-
-    
-//    std::cout << "W''J^2 \n " <<WmPrimePrimeJSquared<< std::endl;
-//    std::cout << "W'J \n " <<swellingPressurePerEle.array()*areaRatio.array()<< std::endl;
-//    std::cout << "Kxxxx \n " <<Kxxxx<< std::endl;
-//    std::cout << "Kxxxy \n " <<Kxxxy<< std::endl;
-//    std::cout << "Kxxyx \n " <<Kxxyx<< std::endl;
-//    std::cout << "Kxxyy \n " <<Kxxyy<< std::endl;
-//    std::cout << "Kxyxy \n " <<Kxyxy<< std::endl;
-//    std::cout << "Kxyyx \n " <<Kxyyx<< std::endl;
-//    std::cout << "Kxyyy \n " <<Kxyyy<< std::endl;
-//    std::cout << "Kyxyx \n " <<Kyxyx<< std::endl;
-//    std::cout << "Kyxyy \n " <<Kyxyy<< std::endl;
-//    std::cout << "Kyyyy \n " <<Kyyyy<< std::endl;
-//
-//
-//    std::cout << "KMxxjx \n " <<KMxxjx<< std::endl;
-//    std::cout << "KMxxjy \n " <<KMxxjy<< std::endl;
-//    std::cout << "KMxyjx \n " <<KMxyjx<< std::endl;
-//    std::cout << "KMxyjy \n " <<KMxyjy<< std::endl;
-//    std::cout << "KMyxjx \n " <<KMyxjx<< std::endl;
-//    std::cout << "KMyxjy \n " <<KMyxjy<< std::endl;
-//    std::cout << "KMyyjx \n " <<KMyyjx<< std::endl;
-//    std::cout << "KMyyjy \n " <<KMyyjy<< std::endl;
-    
-//    std::cout << "Hixjx \n " <<Hixjx<< std::endl;
-//    std::cout << "Hixjy \n " <<Hixjy<< std::endl;
-//    std::cout << "Hiyjx \n " <<Hiyjx<< std::endl;
-//    std::cout << "Hiyjy \n " <<Hiyjy<< std::endl;
-    
-//    std::cout << "gradX.col(0) \n" <<gradX.col(0).cwiseProduct(Kxxxx) << std::endl;
-//    std::cout << "gradX.col(1) \n" <<gradX.col(1) << std::endl;
-//    std::cout << "Hixjx " <<Hixjx << std::endl;
-//    std::cout << "Hixjy " <<Hixjx << std::endl;
-
 }
+
