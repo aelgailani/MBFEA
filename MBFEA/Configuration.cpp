@@ -41,51 +41,120 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         std::string line,a;
         double b,c,d,x,y;
         long l;
-//        a="none";
-        while (a != "Nodes_data:"){
-            std::getline(inFile, line);
-            std::istringstream split(line);
-            split >> a;
-    
-            if (a=="numNodes") {
-                split >> l;
-                assert(l== baseData.numOriginalNodes);
-            }
+        std::getline(inFile, line);
+        std::istringstream split1(line);
+        split1 >> a;
         
-            if (a=="kTOverOmega") {
-                split >> b;
-                assert(b==pars.kTOverOmega);
+        if (a == "Basic_data:") {
+        
+            while (a != "Nodes_data:"){
+                std::getline(inFile, line);
+                std::istringstream split(line);
+                split >> a;
+        
+                if (a=="numNodes") {
+                    split >> l;
+                    assert(l== baseData.numOriginalNodes);
+                }
+            
+                if (a=="kTOverOmega") {
+                    split >> b;
+                    assert(b==pars.kTOverOmega);
+                }
+                
+                if (a=="timeStep") {
+                    split >> l;
+                }
+
+                if (a=="wallsLRBT") {
+                    split >> b >> c >> x >> y;
+                    leftPos = b;
+                    rightPos = c;
+                    botPos = x;
+                    topPos = y;
+                }
+
+            }
+            std::getline(inFile, line);
+            int id = 0;
+            curPosX.resize(baseData.numOriginalNodes);
+            curPosY.resize(baseData.numOriginalNodes);
+            while(std::getline(inFile, line))
+            {
+                std::istringstream split(line);
+                split >> b >> x >> y >> c >> d;
+                curPosX(id) = x;
+                curPosY(id) = y;
+                id++;
+            }
+            assert(baseData.numOriginalNodes==curPosX.size());
+            assert(baseData.numOriginalNodes==curPosY.size());
+            inFile.close();
+        
+        //if the restart file is in the old format, you can remove this later option later.
+        }else{
+                
+                if (a=="numNodes") {
+                    split1 >> b;
+                    assert(b== baseData.numOriginalNodes);
+                }
+                
+                std::getline(inFile, line);
+                std::istringstream split2(line);
+                split2 >> a;
+                std::cout << a << std::endl;
+                if (a=="kTOverOmega") {
+                    split2 >> b;
+                    assert(b==pars.kTOverOmega);
+                    
+                }
+                
+                std::getline(inFile, line); //this reads phi but skip it
+                std::getline(inFile, line);
+                std::istringstream split3(line);
+                split3 >> a;
+                if (a=="timeStep") {
+                    split3 >> b;
+                }
+                std::getline(inFile, line);
+                std::istringstream split4(line);
+                split4 >> a;
+                std::cout << a << std::endl;
+                if (a=="wallsLRBT") {
+                    split4 >> b >> c >> x >> y;
+                    leftPos = b;
+                    rightPos = c;
+                    botPos = x;
+                    topPos = y;
+                }
+
+                std::getline(inFile, line);
+                std::getline(inFile, line);
+                int id = 0;
+                
+                curPosX.resize(baseData.numOriginalNodes);
+                curPosY.resize(baseData.numOriginalNodes);
+                while(std::getline(inFile, line))
+                {
+                    std::istringstream split(line);
+                    split >> b >> x >> y >> c >> d;
+                    curPosX(id) = x;
+                    curPosY(id) = y;
+                    id++;
+                }
+                assert(baseData.numOriginalNodes==curPosX.size());
+                assert(baseData.numOriginalNodes==curPosY.size());
+                inFile.close();
             }
             
-            if (a=="timeStep") {
-                split >> l;
-            }
-
-            if (a=="wallsLRBT") {
-                split >> b >> c >> x >> y;
-                leftPos = b;
-                rightPos = c;
-                botPos = x;
-                topPos = y;
-            }
-
+            
+            
+            
         }
-        std::getline(inFile, line);
-        int id = 0;
-        curPosX.resize(baseData.numOriginalNodes);
-        curPosY.resize(baseData.numOriginalNodes);
-        while(std::getline(inFile, line))
-        {
-            std::istringstream split(line);
-            split >> b >> x >> y >> c >> d;
-            curPosX(id) = x;
-            curPosY(id) = y;
-            id++;
-        }
-        assert(baseData.numOriginalNodes==curPosX.size());
-        assert(baseData.numOriginalNodes==curPosY.size());
-        inFile.close();
-    }
+    
+    
+    
+    
     
     curPosXAtLastStep = curPosX;
     curPosYAtLastStep = curPosY;
@@ -307,23 +376,24 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerNode-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_node-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/dataPerNode-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data_per_node-"+step+".txt");
     }
     
     myfile << "Basic_data:" << std::endl;
-    myfile << "numNodes" << "\t" << baseData.numOriginalNodes << std::endl;
+    myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "number_of_nodes" << "\t" << baseData.numOriginalNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
-    myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "e0_strain" << "\t" << e0 << std::endl;
+    myfile << "e1_strain" << "\t" << e1 << std::endl;
     myfile << "dt" << "\t" << pars.dt << std::endl;
-    myfile << "deformationRate" << "\t" << pars.deformationRate   << std::endl;
-    myfile << "penaltyStiffness" << "\t" << pars.penaltyStiffness << std::endl;
-    myfile << "verletCellCutoff" << "\t" << pars.verletCellCutoff << std::endl;
-    myfile << "penalty" << "\t" << pars.penaltyStiffness << std::endl;
-    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << std::endl;
-    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  '\n' << std::endl;
+    myfile << "max_residual" << "\t" << maxR << std::endl;
+    myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
+    myfile << "penalty_stiffness" << "\t" << pars.penaltyStiffness << std::endl;
+    myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
+    myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< "\n"  << std::endl;
     myfile << "Nodes_data:" << std::endl;
     myfile
     << "id"  << std::setw(20)
@@ -354,37 +424,39 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerNodePeriodicImages-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_node_periodic-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/dataPerNodePeriodicImages-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data_per_node_periodic-"+step+".txt");
     }
     myfile << "Basic_data:" << std::endl;
-    myfile << "numNodes" << "\t" << baseData.numNodes << std::endl;
-    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
-    myfile << "phi" << "\t" << phi << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << std::endl;
-    myfile << "cellSizeX" << "\t" << verletCellSizeX << std::endl;
-    myfile << "cellSizeY" << "\t" << verletCellSizeY << std::endl;
-    myfile << "effectiveLeftPos" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
-    myfile << "effectiveBotPos" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
+    myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
+    myfile << "effective_simulation_box_left_boundary" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
+    myfile << "effective_simulation_box_bot_boundary" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
     myfile << "numCellsX" << "\t" << numXCells << std::endl;
-    myfile << "numCellsY" << "\t" << numYCells << std::endl;
-    myfile << "wallForceTop" << "\t" << wallForceTop.sum() << "\t" <<"wallForceBot" << "\t" << wallForceBottom.sum() << "\t" << "wallForceRight" << "\t" << wallForceRight.sum() << "\t" << "wallForceLeft" << "\t" << wallForceLeft.sum() <<  "\n" <<std::endl;
+    myfile << "numCellsY" << "\t" << numYCells <<"\n" << std::endl;
+   
     myfile << "Nodes_data:" << std::endl;
     myfile
     << "id"  << std::setw(20)
     <<  "x"  << std::setw(20)
-    <<  "y"  << std::endl;
+    <<  "y"  << std::setw(20)
+    <<  "fx"  << std::setw(20)
+    <<  "fy"  << std::setw(20)
+    <<  "contactFx"  << std::setw(20)
+    <<  "contactFy"  << std::endl;
     
     for (int i=0; i<augmentedCurPosX.size();i++ ) {
         myfile
         <<  std::setprecision(9)
         << i << std::setw(20)
         << augmentedCurPosX[i] << std::setw(20)
-        << augmentedCurPosY[i] << std::endl;
+        << augmentedCurPosY[i] << std::setw(20)
+        << forceX[i % baseData.numOriginalNodes] << std::setw(20)
+        << forceY[i % baseData.numOriginalNodes] << std::setw(20)
+        << surfaceForceX[i % baseData.numOriginalNodes] << std::setw(20)
+        << surfaceForceY[i % baseData.numOriginalNodes] << std::endl;
     }
-    
     myfile.close();
     
 }
@@ -392,23 +464,27 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
 
 void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
     
+    
+    // calculated strains
+    DVxDx = gradX * forceX;
+    DVxDy = gradY * forceX;
+    DVyDx = gradY * forceY;
+    DVyDy = gradY * forceY;
+    
+    
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/dataPerEle-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_ele-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/dataPerEle-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data_per_ele-"+step+".txt");
     }
     myfile << "Basic_data:" << std::endl;
-    myfile << "numElements" << "\t" << baseData.numElements << std::endl;
-    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
-    myfile << "internalEnergy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
-    myfile << "wallsEnergy" << "\t" <<  std::setprecision(9)<< wallsEnergy << std::endl;
-    myfile << "contactsEnergy" << "\t" <<  std::setprecision(9)<< contactsEnergy << std::endl;
-    myfile << "totalEnergy" << "\t" <<  std::setprecision(9)<< totalEnergy << std::endl;
-    myfile << "phi" << "\t" << phi << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos <<"\n"<<std::endl;
+    myfile << "number_of_elements" << "\t" << baseData.numElements << std::endl;
+    myfile << "internal_energy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
+    myfile << "contacts_energy" << "\t" <<  std::setprecision(9)<< contactsEnergy << std::endl;
+    myfile << "total_energy" << "\t" <<  std::setprecision(9)<< totalEnergy <<"\n"<< std::endl;
     myfile << "Elements_data:" << std::endl;
     myfile
     <<"id" << std::setw(20)
@@ -426,6 +502,10 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     << "CStressXY" << std::setw(20)
     << "CStressYX" << std::setw(20)
     << "CStressYY" << std::setw(20)
+    << "DVxDx" << std::setw(20)
+    << "DVxDy" << std::setw(20)
+    << "DVyDx" << std::setw(20)
+    << "DVyDy" << std::setw(20)
     << "swellingPressure" << std::setw(20)
     << "elasticEnergy" << std::setw(20)
     << "mixingEnergy" << std::setw(20)
@@ -448,6 +528,10 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
         << CstressXY[i] << std::setw(20)
         << CstressYX[i] << std::setw(20)
         << CstressYY[i] << std::setw(20)
+        << DVxDx[i] << std::setw(20)
+        << DVxDy[i] << std::setw(20)
+        << DVyDx[i] << std::setw(20)
+        << DVyDy[i] << std::setw(20)
         << swellingPressurePerEle[i] << std::setw(20)
         << elasticEnergyPerEle[i] << std::setw(20)
         << mixingEnergyPerEle[i] << std::setw(20)
@@ -479,20 +563,13 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
         myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
     }
     myfile << "Basic_data:" << std::endl;
-    myfile << "numElements" << "\t" << baseData.numElements << std::endl;
-    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
-    myfile << "internalEnergy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
-    myfile << "wallsEnergy" << "\t" <<  std::setprecision(9)<< wallsEnergy << std::endl;
-    myfile << "contactsEnergy" << "\t" <<  std::setprecision(9)<< contactsEnergy << std::endl;
-    myfile << "totalEnergy" << "\t" <<  std::setprecision(9)<< totalEnergy << std::endl;
-    myfile << "phi" << "\t" << phi << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "wallsLRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos << "\n"<<std::endl;
-    myfile << "Facets_data:" << std::endl;
+    myfile << "\n" << std::endl;
+    myfile << "Facets_data: (in the smNodes, the first entery is a slave node followed by its masters or master nodes or node, then the next slave node and so forth. Notice that slave nodes never duplicate in a row but master nodes can be shared and hence duplicated. Each slave node has two master nodes at max at one master mesh and a minimum of one.)" << std::endl;
     myfile
-    <<"mMesh" << std::setw(7)
-    << "sMesh" << std::setw(7)
-    << "mNodes" <<  std::endl;
+    <<"sMesh" << std::setw(7)
+    << "mMesh" << std::setw(7)
+    << "smNodes" <<  std::endl;
 
     for(auto& key : facets) {
         myfile << std::to_string(key.first.first) << std::setw(7) << std::to_string(key.first.second) << std::setw(7);
@@ -511,7 +588,7 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
 
 void Configuration::compress(const BaseSysData& baseData, const Parameters& pars, double strain){
     
-    std::cout << "compressing    rate " << pars.deformationRate << "   dt " << pars.dt << "   kWall " << pars.HWallStiffness << "   kSkin " << pars.penaltyStiffness << std::endl;
+    std::cout << "**** compressing ****   rate " << pars.deformationRate << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
     
     yMid=0.5*(topPos+ botPos);
     xMid=0.5*(rightPos+ leftPos);
@@ -540,7 +617,10 @@ void Configuration::compress(const BaseSysData& baseData, const Parameters& pars
 
 void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, double strain){
     
-
+    std::cout << "**** shearing ****   rate " << pars.deformationRate << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
+    
+    std::cout << "e1  " << e1 <<std::endl;
+    std::cout << "phi  " << phi <<std::endl;
     
     yMid=0.5*(topPos+ botPos);
     xMid=0.5*(rightPos+ leftPos);
@@ -564,9 +644,7 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     curPosY *= (1.0/lyCur)*lyNew;
     curPosY = curPosY.array() + yMid;
     
-    std::cout << "*** shearing ... *** " << std::endl;
-    std::cout << "e1  " << e1 <<std::endl;
-    std::cout << "phi  " << phi <<std::endl;
+    
 }
 
 void Configuration::special_localized_deformation(const BaseSysData& baseData, const Parameters& pars, const double& gammaX,const double& gammaY,const std::vector<int>& targetNodes){
@@ -598,7 +676,8 @@ void Configuration::special_localized_deformation(const BaseSysData& baseData, c
 void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
 {
     
-    std::cout << "*** holding ... ***" << std::endl;
+    std::cout << "**** holding **** " << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
+    
     std::cout << "e1  " << e1 <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
 

@@ -15,6 +15,7 @@
 #include <valarray>
 #include "Parameters.hpp"
 #include "BaseSysData.hpp"
+#include <set>
 
 class Configuration {
 
@@ -58,6 +59,10 @@ public:
     Eigen::VectorXd swellingPressurePerEle;
     Eigen::VectorXd elasticEnergyPerEle;
     Eigen::VectorXd mixingEnergyPerEle;
+    Eigen::VectorXd DVxDx;
+    Eigen::VectorXd DVxDy;
+    Eigen::VectorXd DVyDx;
+    Eigen::VectorXd DVyDy;
     
     
     Eigen::VectorXd internalEnergyPerEle;
@@ -138,8 +143,8 @@ public:
     std::valarray<int> segmentsLinkedList_1;
     Eigen::MatrixXd segmentsLinkedList_2;
     Eigen::MatrixXd cellsHeads;
-    std::map<std::pair<int,int>, std::vector<int>> facets; //this map gives you infromation about (master, slave) nodes with duplication allowed. notice that key (1,3) is different from (3,1), the former contains all nodes in mesh 1 while the latter the nodes of mesh 3.
-
+    std::map<std::pair<int,int>, std::vector<int>> facets;
+    Eigen::MatrixXd slaveMaster;//this map gives you infromation about (master, slave) nodes with duplication allowed. notice that key (1,3) is different from (3,1), the former contains all nodes in mesh 1 while the latter the nodes of mesh 3.
     std::valarray<int> surNodes_mMesh1;
     std::valarray<int> surNodes_mMesh2;
     std::valarray<int> surNodes_mMesh3;
@@ -155,7 +160,6 @@ public:
     
     
     
-    std::vector<int> masterSlave;
     std::pair<int,int> neighborBinDelta[9] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     
     Eigen::VectorXd displacementSinceLastStep;
@@ -172,9 +176,11 @@ public:
     void compute_forces_harmonicWalls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
-    void detect_contacts_method_1(const BaseSysData& baseData, const Parameters& pars);
-    void detect_contacts_method_2(const BaseSysData& baseData, const Parameters& pars);
-    void apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+    void detect_nts_contacts_method_1(const BaseSysData& baseData, const Parameters& pars);
+    void detect_nts_contacts_method_2(const BaseSysData& baseData, const Parameters& pars);
+    void apply_nts_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+    void apply_ntn_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
+
 
     void nts_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
@@ -243,8 +249,8 @@ public:
     void add_d1_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData);
     void add_d2_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData);
     void fill_augmented_Hessian();
-
     
+
 };
 
 #endif /* Configuration_hpp */

@@ -25,7 +25,6 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     contactsEnergy=0;
     KWoodYY=0;
     KWoodXX=0;
-    
     // initialize surface interaction forces on nodes to zero
     surfaceForceX.resize(baseData.numOriginalNodes);
     surfaceForceY.resize(baseData.numOriginalNodes);
@@ -37,9 +36,6 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     defGradXY = gradY * curPosX;
     defGradYY = gradY * curPosY;
     
-//    auto finish1 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed1 = finish1 - start1;
-//    std::cout << "elapsed time in defGrad:  " << elapsed1.count() << std::endl;
     
     //compute the determinant of defGrad
     areaRatio = defGradXX.array() * defGradYY.array() - defGradXY.array() * defGradYX.array();

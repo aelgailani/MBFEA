@@ -158,10 +158,43 @@ BaseSysData::BaseSysData(const Parameters& pars){
         triangles[eleID].push_back(n1);
         triangles[eleID].push_back(n2);
         triangles[eleID].push_back(n3);
+        
+        if (pars.boundaryType == "periodic"){
+            augTriangles[eleID].push_back(n1);
+            augTriangles[eleID].push_back(n2);
+            augTriangles[eleID].push_back(n3);
+            
+            augTriangles[eleID+numElements].push_back(n1+numOriginalNodes);
+            augTriangles[eleID+numElements].push_back(n2+numOriginalNodes);
+            augTriangles[eleID+numElements].push_back(n3+numOriginalNodes);
+            augTriangles[eleID+numElements*2].push_back(n1+numOriginalNodes*2);
+            augTriangles[eleID+numElements*2].push_back(n2+numOriginalNodes*2);
+            augTriangles[eleID+numElements*2].push_back(n3+numOriginalNodes*2);
+            augTriangles[eleID+numElements*3].push_back(n1+numOriginalNodes*3);
+            augTriangles[eleID+numElements*3].push_back(n2+numOriginalNodes*3);
+            augTriangles[eleID+numElements*3].push_back(n3+numOriginalNodes*3);
+            augTriangles[eleID+numElements*4].push_back(n1+numOriginalNodes*4);
+            augTriangles[eleID+numElements*4].push_back(n2+numOriginalNodes*4);
+            augTriangles[eleID+numElements*4].push_back(n3+numOriginalNodes*4);
+            augTriangles[eleID+numElements*5].push_back(n1+numOriginalNodes*5);
+            augTriangles[eleID+numElements*5].push_back(n2+numOriginalNodes*5);
+            augTriangles[eleID+numElements*5].push_back(n3+numOriginalNodes*5);
+            augTriangles[eleID+numElements*6].push_back(n1+numOriginalNodes*6);
+            augTriangles[eleID+numElements*6].push_back(n2+numOriginalNodes*6);
+            augTriangles[eleID+numElements*6].push_back(n3+numOriginalNodes*6);
+            augTriangles[eleID+numElements*7].push_back(n1+numOriginalNodes*7);
+            augTriangles[eleID+numElements*7].push_back(n2+numOriginalNodes*7);
+            augTriangles[eleID+numElements*7].push_back(n3+numOriginalNodes*7);
+            augTriangles[eleID+numElements*8].push_back(n1+numOriginalNodes*8);
+            augTriangles[eleID+numElements*8].push_back(n2+numOriginalNodes*8);
+            augTriangles[eleID+numElements*8].push_back(n3+numOriginalNodes*8);
+
+        }
+        
         eleID++;
     }
     inFile.close();
-
+    
 //**************  Dump triangels to the output folder ********************************************************************************************
     std::ofstream trifile;
     trifile.open (pars.outputFolderName+"/elements.txt");
@@ -169,8 +202,16 @@ BaseSysData::BaseSysData(const Parameters& pars){
         trifile << triangles[i][0] << std::setw(10)<< triangles[i][1] << std::setw(10)<< triangles[i][2] <<std::endl;
     }
     trifile.close();
-
     
+    if (pars.boundaryType=="periodic"){
+        std::ofstream augTrifile;
+           augTrifile.open (pars.outputFolderName+"/augElements.txt");
+           for (int i=0; i< augTriangles.size();i++ ) {
+               augTrifile << augTriangles[i][0] << std::setw(10)<< augTriangles[i][1] << std::setw(10)<< augTriangles[i][2] <<std::endl;
+           }
+           augTrifile.close();
+    }
+
 //******* fill in segments data ********************************************************************************************************************
    
     /* Create segments and there relations to the nodes ** specificly for the input forms in our project **

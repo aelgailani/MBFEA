@@ -11,9 +11,9 @@
 		682D8F2222939207001EB3C9 /* compute_forces_pbc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2122939207001EB3C9 /* compute_forces_pbc.cpp */; };
 		682D8F2422A1D427001EB3C9 /* compute_surface_forces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2322A1D427001EB3C9 /* compute_surface_forces.cpp */; };
 		682D8F2622A1E5F0001EB3C9 /* nts_interaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 682D8F2522A1E5F0001EB3C9 /* nts_interaction.cpp */; };
-		683CA5D423DB9DD100832DD6 /* apply_contacts_penalty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D323DB9DD100832DD6 /* apply_contacts_penalty.cpp */; };
-		683CA5D623DBA1BF00832DD6 /* detect_contacts_method_2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D523DBA1BF00832DD6 /* detect_contacts_method_2.cpp */; };
-		683CA5D823DBA39B00832DD6 /* detect_contacts_method_1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D723DBA39B00832DD6 /* detect_contacts_method_1.cpp */; };
+		683CA5D423DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D323DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp */; };
+		683CA5D623DBA1BF00832DD6 /* detect_nts_contacts_method_2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D523DBA1BF00832DD6 /* detect_nts_contacts_method_2.cpp */; };
+		683CA5D823DBA39B00832DD6 /* detect_nts_contacts_method_1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 683CA5D723DBA39B00832DD6 /* detect_nts_contacts_method_1.cpp */; };
 		684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853BD228F5FE500DBFE52 /* Configuration.cpp */; };
 		684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684853C0228F6FD600DBFE52 /* BaseSysData.cpp */; };
 		684F200A242EE200007CBE05 /* compute_forces_harmonicWalls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684F2009242EE200007CBE05 /* compute_forces_harmonicWalls.cpp */; };
@@ -44,9 +44,9 @@
 		682D8F2122939207001EB3C9 /* compute_forces_pbc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_forces_pbc.cpp; sourceTree = "<group>"; };
 		682D8F2322A1D427001EB3C9 /* compute_surface_forces.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_surface_forces.cpp; sourceTree = "<group>"; };
 		682D8F2522A1E5F0001EB3C9 /* nts_interaction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nts_interaction.cpp; sourceTree = "<group>"; };
-		683CA5D323DB9DD100832DD6 /* apply_contacts_penalty.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = apply_contacts_penalty.cpp; sourceTree = "<group>"; };
-		683CA5D523DBA1BF00832DD6 /* detect_contacts_method_2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = detect_contacts_method_2.cpp; sourceTree = "<group>"; };
-		683CA5D723DBA39B00832DD6 /* detect_contacts_method_1.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = detect_contacts_method_1.cpp; sourceTree = "<group>"; };
+		683CA5D323DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = apply_nts_contacts_penalty.cpp; sourceTree = "<group>"; };
+		683CA5D523DBA1BF00832DD6 /* detect_nts_contacts_method_2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = detect_nts_contacts_method_2.cpp; sourceTree = "<group>"; };
+		683CA5D723DBA39B00832DD6 /* detect_nts_contacts_method_1.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = detect_nts_contacts_method_1.cpp; sourceTree = "<group>"; };
 		684853BD228F5FE500DBFE52 /* Configuration.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Configuration.cpp; sourceTree = "<group>"; };
 		684853BE228F5FE500DBFE52 /* Configuration.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Configuration.hpp; sourceTree = "<group>"; };
 		684853C0228F6FD600DBFE52 /* BaseSysData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BaseSysData.cpp; sourceTree = "<group>"; };
@@ -108,7 +108,7 @@
 			children = (
 				68683D7A23FB1E1D002DD9E3 /* add_d1_contributions_to_Hessian.cpp */,
 				6897EBF123FB5365005358A4 /* add_d2_contributions_to_Hessian.cpp */,
-				683CA5D323DB9DD100832DD6 /* apply_contacts_penalty.cpp */,
+				683CA5D323DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp */,
 				684853C0228F6FD600DBFE52 /* BaseSysData.cpp */,
 				684853C1228F6FD600DBFE52 /* BaseSysData.hpp */,
 				680CCD0623F76BAA007327C1 /* calculate_stiffness_tensor_K.cpp */,
@@ -118,8 +118,8 @@
 				682D8F2322A1D427001EB3C9 /* compute_surface_forces.cpp */,
 				684853BD228F5FE500DBFE52 /* Configuration.cpp */,
 				684853BE228F5FE500DBFE52 /* Configuration.hpp */,
-				683CA5D723DBA39B00832DD6 /* detect_contacts_method_1.cpp */,
-				683CA5D523DBA1BF00832DD6 /* detect_contacts_method_2.cpp */,
+				683CA5D723DBA39B00832DD6 /* detect_nts_contacts_method_1.cpp */,
+				683CA5D523DBA1BF00832DD6 /* detect_nts_contacts_method_2.cpp */,
 				689D407B22D7ADED00EA4BBD /* fire_solver.cpp */,
 				689D407822D68B1000EA4BBD /* gd_solver.cpp */,
 				68A7B4E1226562DF00D1CB68 /* main.cpp */,
@@ -173,6 +173,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 68A7B4D5226562DF00D1CB68;
 			productRefGroup = 68A7B4DF226562DF00D1CB68 /* Products */;
@@ -190,15 +191,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				68A7B504227BD71700D1CB68 /* Parameters.cpp in Sources */,
-				683CA5D623DBA1BF00832DD6 /* detect_contacts_method_2.cpp in Sources */,
+				683CA5D623DBA1BF00832DD6 /* detect_nts_contacts_method_2.cpp in Sources */,
 				682D8F2422A1D427001EB3C9 /* compute_surface_forces.cpp in Sources */,
 				689D407D22D7ADED00EA4BBD /* fire_solver.cpp in Sources */,
 				684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */,
-				683CA5D823DBA39B00832DD6 /* detect_contacts_method_1.cpp in Sources */,
+				683CA5D823DBA39B00832DD6 /* detect_nts_contacts_method_1.cpp in Sources */,
 				68683D7923F8C0D8002DD9E3 /* calculate_the_Hessian_H.cpp in Sources */,
 				684853C2228F6FD600DBFE52 /* BaseSysData.cpp in Sources */,
 				682D8F2222939207001EB3C9 /* compute_forces_pbc.cpp in Sources */,
-				683CA5D423DB9DD100832DD6 /* apply_contacts_penalty.cpp in Sources */,
+				683CA5D423DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp in Sources */,
 				689D407A22D68B1000EA4BBD /* gd_solver.cpp in Sources */,
 				6897EBF223FB5365005358A4 /* add_d2_contributions_to_Hessian.cpp in Sources */,
 				684F200A242EE200007CBE05 /* compute_forces_harmonicWalls.cpp in Sources */,

@@ -11,10 +11,10 @@ class Parameters {
 private:
     template <typename T>
     void printit(const std::string name,const T v) const;
-    
-//    template <typename T>
-//    void print2(const std::string name,const T v, std::ofstream myfile) const;
-    
+
+    //    template <typename T>
+//    void print2(const std::string name,const T v, std::ofstream myfile) const
+
 public:
     Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runMode, std::string& restartStepOverwrite);
     double kTOverOmega;
@@ -68,10 +68,8 @@ public:
     bool calculateHessian;
     bool callPythonPlot;
     bool identifyAndDumbFacets;
+    bool reversibleMasterSlaveRole;
     void print_to_console(void) const;
-    
-
-    
     
 };
 

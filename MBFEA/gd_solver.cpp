@@ -179,31 +179,15 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
 //            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
             
-            if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
-            {
-                mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
-            }
 
-            // Take an Euler step
+            //
             if (pars.boundaryType == "walls"){
                 mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             } else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
-            
-            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
-                // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastStep = mainSys.curPosX;
-                mainSys.curPosYAtLastStep = mainSys.curPosY;
-            }
-
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
-            
-            
             //dump
             mainSys.dump_global_data(pars, timeStep, "append", "running");
             
@@ -219,21 +203,20 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 }
 
             }
-
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            std::chrono::duration<double> elapsed = t2 - t1;
-//            std::chrono::duration<double> elapsed0 = t2 - t0;
             
-            timeStep++;
+            // Take a step and then deform homogenuously
+            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+            
+            if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
+           {
+               mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
+           }
+           
+            std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
-            std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
-            std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
-//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
             
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50000.0){
@@ -244,70 +227,31 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 std::cout << "System blew up !" << std::endl;
                 break;
             }
+            
+            timeStep++;
         }
     }else if (pars.runMode=="stepShear"){  //  shearing ***********************************************************************************************
         mainSys.maxR = 9999;
+        
         while (1)
         {
 
-//            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
+            std::cout << "stage  " << stage << std::endl;
 
-
-
-            if (timeStep * pars.deformationRate * pars.dt < pars.maxShear) //Here maxShear is initial nonzerovalue for shear
-            {
-                mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
-
-            }else if (mainSys.maxR >= pars.maxForceTol)
-            {
-                mainSys.hold(baseData, pars);
-
-            }else if (stage==0){
-
-                mainSys.shear(baseData, pars, pars.maxShear); //here maxShear is the shear step to be taken to measure mu
-                stage++;
-
-            }else if (stage==1){
-                stage++;
-            }
-
-
-            // Take an Euler step
+            // calculate the state properties
             if (pars.boundaryType == "walls"){
                 mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             }else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
-
-            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
-            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
-                // updated curPos AtLastGridUpdate
-                mainSys.curPosXAtLastStep = mainSys.curPosX;
-                mainSys.curPosYAtLastStep = mainSys.curPosY;
-            }
-
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
-
-
+            
             // Dump data
             mainSys.dump_global_data(pars, timeStep, "append", "running");
 
-            if (stage==0){
-
-                mainSys.dump_global_data(pars, timeStep, "write", "final");
-                mainSys.dump_global_data(pars, timeStep, "append", "final");
-
-            }else if (stage==2){
-
-                mainSys.dump_global_data(pars, timeStep, "append", "final");
-
-            }
-
-
+            
             if (timeStep % pars.dumpEvery == 0) {
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);
@@ -318,31 +262,85 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                     mainSys.dump_facets(baseData, pars, timeStep);
                 }
             }
+            
+            
+            
+            if (timeStep * pars.deformationRate * pars.dt < pars.maxShear) //Here maxShear is initial nonzerovalue for shear
+            {
+                
+                //Take an Euler step then shear homogenuously
+                mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+                mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+                
+                mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
 
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            std::chrono::duration<double> elapsed = t2 - t1;
-//            std::chrono::duration<double> elapsed0 = t2 - t0;
-            timeStep++;
-            std::cout << "stage  " << stage << std::endl;
+            }else if (mainSys.maxR >= pars.maxForceTol)
+            {
+               
+                 //Take an Euler step and hold
+                mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+                mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+
+                mainSys.hold(baseData, pars);
+
+            }else if (stage==0){
+
+                mainSys.dump_global_data(pars, timeStep, "write", "final");
+                mainSys.dump_global_data(pars, timeStep, "append", "final");
+                mainSys.dump_per_node(baseData, pars, timeStep);
+                mainSys.dump_per_ele(baseData, pars,timeStep);
+                if (pars.dumpPeriodicImagesXY){
+                    mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+                }
+                if (pars.identifyAndDumbFacets) {
+                    mainSys.dump_facets(baseData, pars, timeStep);
+                }
+                
+                //Take an Euler step then shear homogenuously
+                mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+                mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+                               
+                mainSys.shear(baseData, pars, pars.maxShear); //here maxShear is the shear step to be taken to measure mu
+                stage++;
+
+            }else if (stage==1){
+                mainSys.dump_global_data(pars, timeStep, "append", "final");
+                mainSys.dump_per_node(baseData, pars, timeStep);
+                mainSys.dump_per_ele(baseData, pars,timeStep);
+                if (pars.dumpPeriodicImagesXY){
+                    mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+                }
+                if (pars.identifyAndDumbFacets) {
+                    mainSys.dump_facets(baseData, pars, timeStep);
+                }
+                
+                stage++;
+            }
+
+
+            
+            std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
-            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
-//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
-
-            if (stage==2){
-                std::cout << "Done !" << std::endl;
-                break;
-            }
+            
             if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50000.0){
-                std::cout << "Foce condition met !" << std::endl;
-                break;
-            }
-            if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
-                std::cout << "System blew up !" << std::endl;
-                break;
-            }
+                   std::cout << "Foce condition met !" << std::endl;
+                   break;
+               }
+               if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
+                   std::cout << "System blew up !" << std::endl;
+                   break;
+               }
+            
+            if (stage==2){
+               std::cout << "Done !" << std::endl;
+               break;
+           }
+            
+            timeStep++;
+
+            
         }
     }
 //    else if (pars.runMode=="special"){  //  compressing ***********************************************************************************************
@@ -418,11 +416,41 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
 //            auto t1 = std::chrono::high_resolution_clock::now();
             std::cout << timeStep << std::endl;
+            
 
 
+            if (pars.boundaryType == "walls"){
+                mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+            }else if (pars.boundaryType == "periodic"){
+                mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+            }
 
+            // Postporcesseing calculations
+           mainSys.update_post_processing_data(baseData, pars);
+
+
+           // Dump data
+           mainSys.dump_global_data(pars, timeStep, "append", "running");
+
+
+           if (timeStep % pars.dumpEvery == 0) {
+               mainSys.dump_per_node(baseData, pars, timeStep);
+               mainSys.dump_per_ele(baseData, pars,timeStep);
+               if (pars.dumpPeriodicImagesXY){
+                   mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+               }
+               if (pars.identifyAndDumbFacets) {
+                   mainSys.dump_facets(baseData, pars, timeStep);
+               }
+
+           }
+
+            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+            
             if (timeStep * pars.deformationRate * pars.dt < pars.maxShear )
             {
+               
                 mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
 
             }else if (timeStep * pars.deformationRate * pars.dt >= pars.maxShear )
@@ -432,14 +460,9 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
             }
 
             // Take an Euler step
-        if (pars.boundaryType == "walls"){
-            mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
-        }else if (pars.boundaryType == "periodic"){
-            mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
-        }
+        
 
-            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+           
             mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
             if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
                 // updated curPos AtLastGridUpdate
@@ -447,36 +470,11 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 mainSys.curPosYAtLastStep = mainSys.curPosY;
             }
 
-            // Postporcesseing calculations
-            mainSys.update_post_processing_data(baseData, pars);
-
-
-            // Dump data
-            mainSys.dump_global_data(pars, timeStep, "append", "running");
-
-
-            if (timeStep % pars.dumpEvery == 0) {
-                mainSys.dump_per_node(baseData, pars, timeStep);
-                mainSys.dump_per_ele(baseData, pars,timeStep);
-                if (pars.dumpPeriodicImagesXY){
-                    mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
-                }
-                if (pars.identifyAndDumbFacets) {
-                    mainSys.dump_facets(baseData, pars, timeStep);
-                }
-
-            }
-
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            std::chrono::duration<double> elapsed = t2 - t1;
-//            std::chrono::duration<double> elapsed0 = t2 - t0;
-            timeStep++;
-
+  
+            
+            std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
-//            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
-//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
             std::cout << "\n" << std::endl;
 
            if (timeStep * pars.deformationRate * pars.dt >= pars.maxShear )
@@ -492,6 +490,8 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 std::cout << "System blew up !" << std::endl;
                 break;
             }
+            
+            timeStep++;
         }
     }
 }

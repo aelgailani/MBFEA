@@ -183,9 +183,13 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="identifyAndDumbFacets") {
         split >> trueFalse;
         identifyAndDumbFacets = trueFalse;
+        }else if (a=="reversibleMasterSlaveRole") {
+        split >> trueFalse;
+        reversibleMasterSlaveRole = trueFalse;
         }
+        
     }
-//    identifyAndDumbFacets
+    //    identifyAndDumbFacets
     if (runModeOverWrite=="stepShear"){
         runMode = "stepShear";
         startingMode = "restart";
@@ -254,6 +258,7 @@ void Parameters::print_to_console(void) const {
             printit("callPythonPlot",callPythonPlot);
             printit("calculateHessian",callPythonPlot);
             printit("identifyAndDumbFacets",identifyAndDumbFacets);
+            printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
     
             std::cout << std::endl;
 }

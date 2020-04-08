@@ -16,7 +16,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep)
+void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep)
 {
 
     for (int nodeID = 0; nodeID <baseData.numSurfaceNodes; nodeID++){
@@ -119,9 +119,9 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
                         int masterMesh = surNodes_mMesh[nodeID];
                         int slaveMesh = baseData.nodeToSegments[node][2];
-                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node0);
-                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node1);
                         facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node0);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node1);
                     }
                     
                 }else if(whichPart==0){
@@ -172,8 +172,8 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
                         int masterMesh = surNodes_mMesh[nodeID];
                         int slaveMesh = baseData.nodeToSegments[node][2];
-                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node0);
                         facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node0);
                     }
 //
                 }else if(whichPart==1){
@@ -224,8 +224,8 @@ void Configuration::apply_contacts_penalty(const BaseSysData& baseData, const Pa
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
                         int masterMesh = surNodes_mMesh[nodeID];
                         int slaveMesh = baseData.nodeToSegments[node][2];
-                        facets[std::make_pair(masterMesh,slaveMesh)].push_back(node1);
                         facets[std::make_pair(slaveMesh,masterMesh)].push_back(node);
+                        facets[std::make_pair(slaveMesh,masterMesh)].push_back(node1);
                     }
                 }
             

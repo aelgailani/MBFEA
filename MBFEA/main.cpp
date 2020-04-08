@@ -12,7 +12,7 @@
 #include <iomanip>
 //#include <chrono>
 #include "Parameters.hpp"
-#include "visualization.hpp"
+//#include "visualization.hpp"
 #include "BaseSysData.hpp"
 #include "Configuration.hpp"
 #include "solvers.hpp"
@@ -46,13 +46,13 @@ int main(int argc, char* argv[])
 //                std::cout << "restarting step is  "<<restartStep<< std::endl;
 //                sartingMode = "restart";
 //                runMode = "continuousShear";
-            else if (std::string(argv[i]) == "--stepshearrestartstep" || std::string(argv[i])== "-ssr") {
+            else if (std::string(argv[i]) == "--stepshearrestartstep" || std::string(argv[i])== "-ss") {
                 restartStep = std::string(argv[i+1]);
                 inputRestartFolder = std::string(argv[i+2]);
                 std::cout << "restarting step is  "<<restartStep<< std::endl;
                 sartingMode = "restart";
                 runMode = "stepShear";
-            }else if (std::string(argv[i]) == "--inputrestartfolder" || std::string(argv[i])== "-irf") {
+            }else if (std::string(argv[i]) == "--inputdirectory" || std::string(argv[i])== "-id") {
                 inputRestartFolder = std::string(argv[i+1]);
 
             }else {
@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
     
     }
     
-
     //Read parameters
     const Parameters pars(inputFileName, inputRestartFolder, runMode, restartStep);
     pars.print_to_console();
@@ -81,7 +80,7 @@ int main(int argc, char* argv[])
         }
     }else if (pars.startingMode == "restart" && pars.runMode == "stepShear"){
         DIR* dir1 = opendir(pars.outputFolderName.c_str());
-        DIR* dir2 = opendir((pars.outputFolderName +"/phi-"+std::to_string(int(pars.startingTimeStep))).c_str());
+        DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str());
         if (dir1)
         {
             closedir(dir1);

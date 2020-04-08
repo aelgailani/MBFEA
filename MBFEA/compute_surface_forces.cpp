@@ -27,6 +27,7 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
     verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXCells;
     verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYCells;
     
+
     nodesLinkedList.resize(numXCells*numYCells+baseData.numSurfaceNodes,-1);
     
     surNodes_mMesh1.resize(baseData.numSurfaceNodes,-1);
@@ -50,18 +51,27 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
 //    auto t1 = std::chrono::high_resolution_clock::now();
     if (pars.segmentCellMethod ==1){
         
+        if (not pars.reversibleMasterSlaveRole){
+            slaveMaster.resize(baseData.numMeshes,baseData.numMeshes);
+            slaveMaster.fill(-1);
+        }
+        
         segmentsLinkedList_1.resize(numXCells*numYCells+baseData.numSurfaceNodes,-1);
         update_cells_1(baseData, pars);
-        detect_contacts_method_1(baseData,pars);
+        detect_nts_contacts_method_1(baseData,pars);
         
     }else if (pars.segmentCellMethod ==2){
         
+        if (not pars.reversibleMasterSlaveRole){
+            slaveMaster.resize(baseData.numMeshes,baseData.numMeshes);
+            slaveMaster.fill(-1);
+        }
         segmentsLinkedList_2.resize(baseData.numSurfaceNodes, 5);
         segmentsLinkedList_2.fill(-2);
         cellsHeads.resize(numXCells*numYCells, 2);
         cellsHeads.fill(-1);
         update_cells_2(baseData, pars);
-        detect_contacts_method_2(baseData,pars);
+        detect_nts_contacts_method_2(baseData,pars);
         
     }else{
         std::cout << "Please specify segmentCellMethod. Either 1 or 2. " << std::endl;;
@@ -78,9 +88,9 @@ void Configuration::compute_surface_forces(const BaseSysData& baseData, const Pa
 //    std::chrono::duration<double> d2 = t3 - t2;
 //    std::cout << "elapsed time in looping over verlet cells:  " << d2.count() << std::endl;
     
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1,Hessian, timeStep);
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2, Hessian, timeStep);
-    apply_contacts_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3, Hessian, timeStep);
+    apply_nts_contacts_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1,Hessian, timeStep);
+    apply_nts_contacts_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2, Hessian, timeStep);
+    apply_nts_contacts_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3, Hessian, timeStep);
     
 //    auto t4 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> d4 = t4 - t3;

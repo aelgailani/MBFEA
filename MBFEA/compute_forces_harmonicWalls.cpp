@@ -31,6 +31,7 @@ void Configuration::compute_forces_harmonicWalls(const BaseSysData& baseData, co
     surfaceForceY.resize(baseData.numOriginalNodes);
     surfaceForceX.fill(0);
     surfaceForceY.fill(0);
+    
     //compute the deformation gradient
     defGradXX = gradX * curPosX;
     defGradYX = gradX * curPosY;
@@ -122,20 +123,20 @@ void Configuration::compute_forces_harmonicWalls(const BaseSysData& baseData, co
     }
     
     //apply hamonic repulsion to boudary nodes
-    wallForceTop = pars.penaltyStiffness*(0.5*((curPosY.array() - topPos).sign()+1))*(topPos-curPosY.array());
-    wallForceBottom = pars.penaltyStiffness*(0.5*(sign(botPos-curPosY.array())+1))*(botPos-curPosY.array());
+    wallForceTop = pars.HWallStiffness*(0.5*((curPosY.array() - topPos).sign()+1))*(topPos-curPosY.array());
+    wallForceBottom = pars.HWallStiffness*(0.5*(sign(botPos-curPosY.array())+1))*(botPos-curPosY.array());
 //
-    wallForceRight = pars.penaltyStiffness*(0.5*(sign(curPosX.array()-rightPos)+1))*(rightPos-curPosX.array());
-    wallForceLeft = pars.penaltyStiffness*(0.5*(sign(leftPos-curPosX.array())+1))*(leftPos-curPosX.array());
+    wallForceRight = pars.HWallStiffness*(0.5*(sign(curPosX.array()-rightPos)+1))*(rightPos-curPosX.array());
+    wallForceLeft = pars.HWallStiffness*(0.5*(sign(leftPos-curPosX.array())+1))*(leftPos-curPosX.array());
 
     forceX = forceX + wallForceRight + wallForceLeft ;
     forceY = forceY + wallForceTop + wallForceBottom ;
     
-    KWoodXX += 1/pars.penaltyStiffness*( wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
-    KWoodYY += 1/pars.penaltyStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum());
+    KWoodXX += 1/pars.HWallStiffness*( wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
+    KWoodYY += 1/pars.HWallStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum());
 //    std::cout << (curPosY.array() - topPos).sign() << std::endl;
     
-    wallsEnergy = 0.5/pars.penaltyStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum() + wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
+    wallsEnergy = 0.5/pars.HWallStiffness*( wallForceTop.array().pow(2).sum() + wallForceBottom.array().pow(2).sum() + wallForceRight.array().pow(2).sum() + wallForceLeft.array().pow(2).sum());
     
     
     contactsEnergy += wallsEnergy;

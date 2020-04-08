@@ -15,7 +15,7 @@
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
-void Configuration::detect_contacts_method_2(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::detect_nts_contacts_method_2(const BaseSysData& baseData, const Parameters& pars)
 {
     for (int cellYid=0; cellYid<numYCells; cellYid++)
       {
@@ -58,6 +58,24 @@ void Configuration::detect_contacts_method_2(const BaseSysData& baseData, const 
                               continue;
                           }
 
+                           if (not pars.reversibleMasterSlaveRole)
+                             {
+                                 // slaveMaster is 1 if the slaveMesh is enslaved to the masterMesh, -2 if it is actually the master, and -1 if no claim is etablished yet
+                                 if (slaveMaster(slaveMesh,masterMesh)!=1){
+                                     
+                                     if (slaveMaster(slaveMesh,masterMesh)==-2){
+                                             nextMSegment = segmentsLinkedList_2(masterSegment,column);
+                                             column = segmentsLinkedList_2(masterSegment,column+1);
+                                             masterSegment = nextMSegment;
+                                             continue;
+                                         }else if (slaveMaster(slaveMesh,masterMesh)==-1){
+                                             slaveMaster(slaveMesh,masterMesh)=1;
+                                             slaveMaster(masterMesh,slaveMesh)=-2;
+                                         }
+                                 }
+
+                             }
+                          
                           nts_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
                           
                           nextMSegment = segmentsLinkedList_2(masterSegment,column);

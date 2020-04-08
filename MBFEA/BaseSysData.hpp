@@ -36,6 +36,7 @@ public:
     std::map<int,std::vector<int>> imageMeshesTR;
     
     std::map<int,std::vector<int>>  triangles;
+    std::map<int,std::vector<int>>  augTriangles;
     int numNodes;
     int numOriginalNodes;
     int numSurfaceNodes;
