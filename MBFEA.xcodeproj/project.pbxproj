@@ -22,10 +22,9 @@
 		68862975243E9CF700468BBD /* apply_ntn_repulsions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68862974243E9CF700468BBD /* apply_ntn_repulsions.cpp */; };
 		6897EBF223FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6897EBF123FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp */; };
 		689D407A22D68B1000EA4BBD /* gd_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407822D68B1000EA4BBD /* gd_solver.cpp */; };
-		689D407D22D7ADED00EA4BBD /* fire_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407B22D7ADED00EA4BBD /* fire_solver.cpp */; };
+		689D407D22D7ADED00EA4BBD /* fire_solver_old.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407B22D7ADED00EA4BBD /* fire_solver_old.cpp */; };
 		68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B4E1226562DF00D1CB68 /* main.cpp */; };
 		68A7B504227BD71700D1CB68 /* Parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B502227BD71700D1CB68 /* Parameters.cpp */; };
-		68A7B50D2280F77300D1CB68 /* visualization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68A7B50B2280F77300D1CB68 /* visualization.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -60,13 +59,11 @@
 		6897EBF123FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = add_d2_contributions_to_the_hessian.cpp; sourceTree = "<group>"; };
 		689D407822D68B1000EA4BBD /* gd_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gd_solver.cpp; sourceTree = "<group>"; };
 		689D407922D68B1000EA4BBD /* solvers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solvers.hpp; sourceTree = "<group>"; };
-		689D407B22D7ADED00EA4BBD /* fire_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fire_solver.cpp; sourceTree = "<group>"; };
+		689D407B22D7ADED00EA4BBD /* fire_solver_old.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fire_solver_old.cpp; sourceTree = "<group>"; };
 		68A7B4DE226562DF00D1CB68 /* MBFEA */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MBFEA; sourceTree = BUILT_PRODUCTS_DIR; };
 		68A7B4E1226562DF00D1CB68 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		68A7B502227BD71700D1CB68 /* Parameters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parameters.cpp; sourceTree = "<group>"; };
 		68A7B503227BD71700D1CB68 /* Parameters.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Parameters.hpp; sourceTree = "<group>"; };
-		68A7B50B2280F77300D1CB68 /* visualization.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = visualization.cpp; sourceTree = "<group>"; };
-		68A7B50C2280F77300D1CB68 /* visualization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = visualization.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,7 +119,7 @@
 				684853BE228F5FE500DBFE52 /* Configuration.hpp */,
 				683CA5D723DBA39B00832DD6 /* detect_nts_contacts_single_point_method.cpp */,
 				683CA5D523DBA1BF00832DD6 /* detect_nts_contacts_two_points_method.cpp */,
-				689D407B22D7ADED00EA4BBD /* fire_solver.cpp */,
+				689D407B22D7ADED00EA4BBD /* fire_solver_old.cpp */,
 				689D407822D68B1000EA4BBD /* gd_solver.cpp */,
 				68A7B4E1226562DF00D1CB68 /* main.cpp */,
 				68862974243E9CF700468BBD /* apply_ntn_repulsions.cpp */,
@@ -130,8 +127,6 @@
 				68A7B502227BD71700D1CB68 /* Parameters.cpp */,
 				68A7B503227BD71700D1CB68 /* Parameters.hpp */,
 				689D407922D68B1000EA4BBD /* solvers.hpp */,
-				68A7B50B2280F77300D1CB68 /* visualization.cpp */,
-				68A7B50C2280F77300D1CB68 /* visualization.hpp */,
 			);
 			path = MBFEA;
 			sourceTree = "<group>";
@@ -196,7 +191,7 @@
 				68A7B504227BD71700D1CB68 /* Parameters.cpp in Sources */,
 				683CA5D623DBA1BF00832DD6 /* detect_nts_contacts_two_points_method.cpp in Sources */,
 				682D8F2422A1D427001EB3C9 /* compute_surface_forces.cpp in Sources */,
-				689D407D22D7ADED00EA4BBD /* fire_solver.cpp in Sources */,
+				689D407D22D7ADED00EA4BBD /* fire_solver_old.cpp in Sources */,
 				684853BF228F5FE500DBFE52 /* Configuration.cpp in Sources */,
 				683CA5D823DBA39B00832DD6 /* detect_nts_contacts_single_point_method.cpp in Sources */,
 				68683D7923F8C0D8002DD9E3 /* calculate_the_hessian.cpp in Sources */,
@@ -206,7 +201,6 @@
 				689D407A22D68B1000EA4BBD /* gd_solver.cpp in Sources */,
 				6897EBF223FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp in Sources */,
 				684F200A242EE200007CBE05 /* compute_forces_harmonic_walls.cpp in Sources */,
-				68A7B50D2280F77300D1CB68 /* visualization.cpp in Sources */,
 				68683D7C23FB1E1D002DD9E3 /* add_d1_contributions_to_the_hessian.cpp in Sources */,
 				68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */,
 				680CCD0723F76BAA007327C1 /* calculate_monolithic_stiffness_tensor.cpp in Sources */,
