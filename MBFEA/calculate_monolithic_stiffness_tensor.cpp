@@ -15,7 +15,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::calculate_monolithic_stiffness_tensor_K(const Parameters& pars){
+void Configuration::calculate_monolithic_stiffness_tensor(const Parameters& pars){
     
     WmPrimePrimeJSquared = pars.kTOverOmega * (  ( 2*pars.chi*(1-areaRatio.array()) + areaRatio.array() ) / areaRatio.array() / (areaRatio.array() - 1) );
     

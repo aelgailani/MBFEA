@@ -36,7 +36,7 @@ public:
     double initRightPos;
     double initLeftPos;
     double deformationRate;
-    double maxCompression;
+    double targetPhi;
     double dt;
     std::string wallStyle;
     std::string solver;
@@ -48,7 +48,7 @@ public:
     std::string runMode;
     std::string startingMode;
     std::string restartFile;
-    double maxShear;
+    double targetShear;
     double maxForceTol;
     double FIRE_dtmax;
     double FIRE_Nmin;
@@ -69,6 +69,9 @@ public:
     bool callPythonPlot;
     bool identifyAndDumbFacets;
     bool reversibleMasterSlaveRole;
+    std::string contactMethod;
+    double repulseEnergy;
+    double ljScale;
     void print_to_console(void) const;
     
 };

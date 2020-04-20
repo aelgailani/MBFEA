@@ -47,6 +47,7 @@ public:
     int numNodesPerMesh;
     std::vector< std::vector<int> > surfaceSegments;
     std::vector< std::vector<int> > nodeToSegments;
+    std::vector<int> nodeToMesh;
     void dump_augmented_surface_meshes(const Parameters& pars);
     
 };

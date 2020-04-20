@@ -80,9 +80,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="deformationRate") {
             split >> c;
             deformationRate = c;
-        }else if (a=="maxCompression") {
+        }else if (a=="targetPhi") {
             split >> c;
-            maxCompression = c;
+            targetPhi = c;
         }else if (a=="dt") {
             split >> c;
             dt = c;
@@ -113,9 +113,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="restartFile") {
             split >> b;
             restartFile = b;
-        }else if (a=="maxShear") {
+        }else if (a=="targetShear") {
             split >> c;
-            maxShear = c;
+            targetShear = c;
         }else if (a=="maxForceTol") {
             split >> c;
             maxForceTol = c;
@@ -186,7 +186,17 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="reversibleMasterSlaveRole") {
         split >> trueFalse;
         reversibleMasterSlaveRole = trueFalse;
+        }else if (a=="contactMethod") {
+        split >> f;
+        contactMethod = f;
+        }else if (a=="repulseEnergy") {
+        split >> c;
+        repulseEnergy = c;
+        }else if (a=="ljScale") {
+        split >> c;
+        ljScale = c;
         }
+        
         
     }
     //    identifyAndDumbFacets
@@ -194,14 +204,14 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         runMode = "stepShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = inputRestartFolder+"/dataPerNode-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/data_per_node-"+restartStepOverwrite+".txt";
         
     }
     if (runModeOverWrite=="contineousShear"){
         runMode = "contineousShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = inputRestartFolder+"/dataPerNode-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/data_per_node-"+restartStepOverwrite+".txt";
     }
     if (outputFolderName=="auto"){
         outputFolderName = runMode;
@@ -218,48 +228,52 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
 
 
 void Parameters::print_to_console(void) const {
-            printit("kTOverOmega", kTOverOmega);
-            printit("NkT",NkT);
-            printit("chi",chi);
-            printit("verletCellCutoff",verletCellCutoff);
-            printit("initialStretch",initialStretch);
-            printit("dumpEvery",dumpEvery);
-            printit("splitDataEvery",splitDataEvery);
-            printit("startingTimeStep",startingTimeStep);
-            printit("outputFolderName",outputFolderName);
-            printit("surfaceNodesFileName",surfaceNodesFileName);
-            printit("trianglesFileName",trianglesFileName);
-            printit("initialNodesFileName",initialNodesFileName);
-            printit("boundaryType",boundaryType);
-            printit("imagesMargin",imagesMargin);
-            printit("initTopPos",initTopPos);
-            printit("initBotPos",initBotPos);
-            printit("initRightPos",initRightPos);
-            printit("initLeftPos",initLeftPos);
-            printit("deformationRate",deformationRate);
-            printit("maxCompression",maxCompression);
-            printit("dt",dt);
-            printit("wallStyle",wallStyle);
-            printit("HWallStiffness",HWallStiffness);
-            printit("PLWallEnergyScale",PLWallEnergyScale);
-            printit("PLWallLJScale",PLWallLJScale);
-            printit("penaltyStiffness",penaltyStiffness);
-            printit("Ap",Ap);
-            printit("runMode",runMode);
-            printit("startingMode",startingMode);
-            printit("restartFile",restartFile);
-            printit("maxShear",maxShear);
-            printit("maxForceTol",maxForceTol);
-            printit("solver",solver);
-            printit("numStrainSteps",numStrainSteps);
-            printit("startingStrainStep",startingStrainStep);
-            printit("segmentCellMethod",segmentCellMethod);
-            printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
-            printit("callPythonPlot",callPythonPlot);
-            printit("calculateHessian",callPythonPlot);
-            printit("identifyAndDumbFacets",identifyAndDumbFacets);
-            printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
-    
+    printit("kTOverOmega", kTOverOmega);
+    printit("NkT",NkT);
+    printit("chi",chi);
+    printit("verletCellCutoff",verletCellCutoff);
+    printit("initialStretch",initialStretch);
+    printit("dumpEvery",dumpEvery);
+    printit("splitDataEvery",splitDataEvery);
+    printit("startingTimeStep",startingTimeStep);
+    printit("outputFolderName",outputFolderName);
+    printit("surfaceNodesFileName",surfaceNodesFileName);
+    printit("trianglesFileName",trianglesFileName);
+    printit("initialNodesFileName",initialNodesFileName);
+    printit("boundaryType",boundaryType);
+    printit("imagesMargin",imagesMargin);
+    printit("initTopPos",initTopPos);
+    printit("initBotPos",initBotPos);
+    printit("initRightPos",initRightPos);
+    printit("initLeftPos",initLeftPos);
+    printit("deformationRate",deformationRate);
+    printit("targetPhi",targetPhi);
+    printit("dt",dt);
+    printit("wallStyle",wallStyle);
+    printit("HWallStiffness",HWallStiffness);
+    printit("PLWallEnergyScale",PLWallEnergyScale);
+    printit("PLWallLJScale",PLWallLJScale);
+    printit("penaltyStiffness",penaltyStiffness);
+    printit("Ap",Ap);
+    printit("runMode",runMode);
+    printit("startingMode",startingMode);
+    printit("restartFile",restartFile);
+    printit("targetShear",targetShear);
+    printit("maxForceTol",maxForceTol);
+    printit("solver",solver);
+    printit("numStrainSteps",numStrainSteps);
+    printit("startingStrainStep",startingStrainStep);
+    printit("segmentCellMethod",segmentCellMethod);
+    printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
+    printit("callPythonPlot",callPythonPlot);
+    printit("calculateHessian",callPythonPlot);
+    printit("identifyAndDumbFacets",identifyAndDumbFacets);
+    printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
+    printit("contactMethod", contactMethod);
+    printit("repulseEnergy", repulseEnergy);
+    printit("ljScale", ljScale);
+
+
             std::cout << std::endl;
 }
 

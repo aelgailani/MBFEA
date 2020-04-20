@@ -111,7 +111,7 @@ void Configuration::compute_forces_harmonic_walls(const BaseSysData& baseData, c
     
 
     if (Hessian){
-        calculate_the_Hessian_H(pars);
+        calculate_the_hessian(pars);
     }
 
     augmentedCurPosX = curPosX;

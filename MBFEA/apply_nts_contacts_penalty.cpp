@@ -112,7 +112,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     
                     // add the Hessian part
                     if (Hessian) {
-                        add_d1_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
+                        add_d1_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
                     }
                     
                     //add the facets elements if required
@@ -153,7 +153,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     
                     if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
                         contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-                        segmentIinteractions++ ;
+                        nodeIinteractions++ ;
                         
                         double Dd2Dxi = (1.*(-x0 + xi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
                         double Dd2Dyi = (1.*(-y0 + yi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
@@ -165,7 +165,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                      
                     if (Hessian) {
-                    add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
+                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
                      }
                     
                     //add the facets elements if required
@@ -204,7 +204,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                     if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
                         contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
-                        segmentIinteractions++ ;
+                        nodeIinteractions++ ;
                         
                         double Dd2Dxi = (1.*(-x1 + xi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
                         double Dd2Dyi = (1.*(-y1 + yi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
@@ -216,7 +216,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                     
                     if (Hessian){
-                    add_d2_contributions_to_Hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
+                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
                     }
                     
                     

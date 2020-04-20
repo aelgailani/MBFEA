@@ -12,7 +12,7 @@
 #include "BaseSysData.hpp"
 #include <stdio.h>
 
-void Configuration::add_d1_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData){
+void Configuration::add_d1_contributions_to_the_hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData){
 
 double L = pow((pow((x1 - x0),2) + pow((y1 - y0),2)),0.5);
 double d1 = (xs - x0)*(y0 - y1)/L + (ys - y0)*(x1 - x0)/L;  // this is the equation used in te derivations. Its the negative of the signedGap equation in NTS function

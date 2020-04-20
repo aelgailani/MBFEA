@@ -107,7 +107,10 @@ BaseSysData::BaseSysData(const Parameters& pars){
             for(int& d : surfaceMeshes[meshID] ){
 
                 flatSurfaceNodes.push_back(d);
+                nodeToMesh.push_back(meshID);
             }
+            
+            
         }
         
         
@@ -125,6 +128,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
             for(int& d : surfaceMeshes[meshID] ){
                 
                 flatSurfaceNodes.push_back(d);
+                nodeToMesh.push_back(meshID);
             }
         }
     }else{
@@ -218,36 +222,37 @@ BaseSysData::BaseSysData(const Parameters& pars){
      surfaceSegments[segmentID] = {firstNodeID, secondNodeID, meshID, prevSegid, nextSegID}
      nodeToSegments[nodeID] = {firstNodeID, secondNodeID, meshID, prevSegid, nextSegID}
      */
-    
-    surfaceSegments.resize(numSurfaceNodes,std::vector<int>(5));
-    nodeToSegments.resize(numNodes,std::vector<int>(3,999999999));
-    int segmentID = 0;
-    int surfaceNodeID = 0;
-    for (int meshID = 0; meshID < numMeshes; meshID++)
-    {
-        surfaceNodeID = 0;
-        for (surfaceNodeID = 0; surfaceNodeID < (numNodesPerMesh-1) ; surfaceNodeID++)
+    if (pars.contactMethod=="nts"){
+        surfaceSegments.resize(numSurfaceNodes,std::vector<int>(5));
+        nodeToSegments.resize(numNodes,std::vector<int>(3,999999999));
+        int segmentID = 0;
+        int surfaceNodeID = 0;
+        for (int meshID = 0; meshID < numMeshes; meshID++)
         {
+            surfaceNodeID = 0;
+            for (surfaceNodeID = 0; surfaceNodeID < (numNodesPerMesh-1) ; surfaceNodeID++)
+            {
+                surfaceSegments[segmentID][0] = surfaceMeshes[meshID][surfaceNodeID];
+                surfaceSegments[segmentID][1] = surfaceMeshes[meshID][surfaceNodeID + 1];
+                surfaceSegments[segmentID][2] = meshID;
+                surfaceSegments[segmentID][3] = segmentID-1;
+                surfaceSegments[segmentID][4] = segmentID+1;
+                nodeToSegments[surfaceMeshes[meshID][surfaceNodeID+1]][0] = segmentID;
+                nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][1] = segmentID;
+                nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][2] = meshID;
+                segmentID++;
+            }
             surfaceSegments[segmentID][0] = surfaceMeshes[meshID][surfaceNodeID];
-            surfaceSegments[segmentID][1] = surfaceMeshes[meshID][surfaceNodeID + 1];
+            surfaceSegments[segmentID][1] = surfaceMeshes[meshID][0];
             surfaceSegments[segmentID][2] = meshID;
             surfaceSegments[segmentID][3] = segmentID-1;
-            surfaceSegments[segmentID][4] = segmentID+1;
-            nodeToSegments[surfaceMeshes[meshID][surfaceNodeID+1]][0] = segmentID;
+            surfaceSegments[segmentID][4] = segmentID-numNodesPerMesh+1;
+            surfaceSegments[segmentID-numNodesPerMesh+1][3] = segmentID;
             nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][1] = segmentID;
+            nodeToSegments[surfaceMeshes[meshID][0]][0] = segmentID;
             nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][2] = meshID;
             segmentID++;
         }
-        surfaceSegments[segmentID][0] = surfaceMeshes[meshID][surfaceNodeID];
-        surfaceSegments[segmentID][1] = surfaceMeshes[meshID][0];
-        surfaceSegments[segmentID][2] = meshID;
-        surfaceSegments[segmentID][3] = segmentID-1;
-        surfaceSegments[segmentID][4] = segmentID-numNodesPerMesh+1;
-        surfaceSegments[segmentID-numNodesPerMesh+1][3] = segmentID;
-        nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][1] = segmentID;
-        nodeToSegments[surfaceMeshes[meshID][0]][0] = segmentID;
-        nodeToSegments[surfaceMeshes[meshID][surfaceNodeID]][2] = meshID;
-        segmentID++;
     }
 
 

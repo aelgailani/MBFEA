@@ -112,8 +112,10 @@ public:
     double lyNew;
     double lxNew;
     double A;
-    double e0;
-    double e1;
+    double e0=0;
+    double prev_e0=0;
+    double e1=0;
+    double prev_e1=0;
     double phi;
     double maxR;
     double avgR;
@@ -123,8 +125,10 @@ public:
     double Fv;
     double P1;
     double P2;
+    double prev_P2=0;
     double S1;
     double S2;
+    double prev_S2=0;
     double S3;
     double S4;
     double ex;
@@ -134,6 +138,8 @@ public:
     double verletCellSizeY;
     double maxWallinterference;
     double maxInterference;
+    double DPOverDe0;
+    double DSOverDe1;
 //    abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny
 //    std::map<std::pair<int,int>, std::vector<double>> gaps;
 //    std::valarray<double> surNodes_gap;
@@ -173,13 +179,13 @@ public:
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     
-    void compute_forces_harmonicWalls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
+    void compute_forces_harmonic_walls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
-    void detect_nts_contacts_method_1(const BaseSysData& baseData, const Parameters& pars);
-    void detect_nts_contacts_method_2(const BaseSysData& baseData, const Parameters& pars);
+    void detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars);
+    void detect_nts_contacts_two_points_method(const BaseSysData& baseData, const Parameters& pars);
     void apply_nts_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
-    void apply_ntn_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
+    void apply_ntn_repulsions(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
 
 
     void nts_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
@@ -244,10 +250,10 @@ public:
 //    Eigen::VectorXd HessianFX;
 //    Eigen::VectorXd HessianFY;
     
-    void calculate_monolithic_stiffness_tensor_K(const Parameters& pars);
-    void calculate_the_Hessian_H(const Parameters& pars);
-    void add_d1_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData);
-    void add_d2_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData);
+    void calculate_monolithic_stiffness_tensor(const Parameters& pars);
+    void calculate_the_hessian(const Parameters& pars);
+    void add_d1_contributions_to_the_hessian(double penaltyStifness, double xs,double ys,double x0,double y0,double x1,double y1, int snode, int node0, int node1, const BaseSysData& baseData);
+    void add_d2_contributions_to_the_hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData);
     void fill_augmented_Hessian();
     
 

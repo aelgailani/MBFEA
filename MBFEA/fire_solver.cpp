@@ -40,7 +40,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
 //            auto t1 = std::chrono::high_resolution_clock::now();
             
             
-            mainSys.compress(baseData, pars, pars.maxCompression * float(strainStep)/float(pars.numStrainSteps));
+            mainSys.compress(baseData, pars, pars.targetPhi * float(strainStep)/float(pars.numStrainSteps));
 
             while (1)
             {

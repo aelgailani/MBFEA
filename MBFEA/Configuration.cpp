@@ -25,7 +25,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         rightPos = pars.initRightPos;
         leftPos = pars.initLeftPos;
         lyCur = baseData.lyRef;
-        lyCur =  baseData.lxRef;
+        lxCur =  baseData.lxRef;
         lyNew = lyCur;
         lxNew = lxCur;
 
@@ -66,7 +66,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                     split >> l;
                 }
 
-                if (a=="wallsLRBT") {
+                if (a=="original_box_LRBT") {
                     split >> b >> c >> x >> y;
                     leftPos = b;
                     rightPos = c;
@@ -75,6 +75,11 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                 }
 
             }
+            
+            lxCur = rightPos - leftPos;
+            lyCur = topPos - botPos;
+            lyNew = lyCur;
+            lxNew = lxCur;
             std::getline(inFile, line);
             int id = 0;
             curPosX.resize(baseData.numOriginalNodes);
@@ -127,7 +132,12 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                     botPos = x;
                     topPos = y;
                 }
-
+                
+                lxCur = rightPos - leftPos;
+                lyCur = topPos - botPos;
+                lyNew = lyCur;
+                lxNew = lxCur;
+            
                 std::getline(inFile, line);
                 std::getline(inFile, line);
                 int id = 0;
@@ -151,10 +161,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             
             
         }
-    
-    
-    
-    
+
     
     curPosXAtLastStep = curPosX;
     curPosYAtLastStep = curPosY;
@@ -269,8 +276,10 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     
     maxR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).maxCoeff());
     avgR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).mean());
-    LX = (curPosX.maxCoeff()-curPosX.minCoeff());
-    LY = (curPosY.maxCoeff()-curPosY.minCoeff());
+//    LX = (curPosX.maxCoeff()-curPosX.minCoeff());
+//    LY = (curPosY.maxCoeff()-curPosY.minCoeff());
+    LX = (rightPos-leftPos);
+    LY = (topPos-botPos);
     Fh = 0.5*(-wallForceRight.sum()+wallForceLeft.sum());
     Fv = 0.5*(-wallForceTop.sum()+wallForceBottom.sum());
     P1 = 0.5*(Fv/lxNew+Fh/lyNew);
@@ -292,6 +301,13 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     
     shearVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
+    
+    DPOverDe0 = (prev_P2-P2)/(prev_e0-e0);
+    DSOverDe1 = (prev_S2-S2)/(prev_e1-e1);
+    prev_e0 = e0;
+    prev_e1 =e1;
+    prev_P2 = P2;
+    prev_S2 = S2;
 }
 
 void Configuration::dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose){
@@ -330,6 +346,8 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  "phi"  << std::setw(20)
         <<  "e0"  << std::setw(20)
         <<  "e1" << std::setw(20)
+        <<  "DPOverDe0" << std::setw(20)
+        <<  "DSOverDe1qq" << std::setw(20)
         <<  "dt" << std::setw(20)
         <<  "defRate" << std::setw(20)
         <<  "penalty" << std::endl;
@@ -360,6 +378,8 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  phi  << std::setw(20)
         <<  e0  << std::setw(20)
         <<  e1 << std::setw(20)
+        <<  DPOverDe0 << std::setw(20)
+        <<  DSOverDe1 << std::setw(20)
         <<  pars.dt  << std::setw(20)
         <<  pars.deformationRate  << std::setw(20)
         <<  pars.penaltyStiffness << std::endl;
@@ -430,11 +450,14 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     }
     myfile << "Basic_data:" << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "number_of_augmented_nodes" << "\t" << baseData.numNodes << std::endl;
     myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
     myfile << "effective_simulation_box_left_boundary" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
     myfile << "effective_simulation_box_bot_boundary" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
     myfile << "numCellsX" << "\t" << numXCells << std::endl;
-    myfile << "numCellsY" << "\t" << numYCells <<"\n" << std::endl;
+    myfile << "numCellsY" << "\t" << numYCells << std::endl;
+    myfile << "cellSizeX" << "\t" << verletCellSizeX << std::endl;
+    myfile << "cellSizeY" << "\t" << verletCellSizeY <<"\n" << std::endl;
    
     myfile << "Nodes_data:" << std::endl;
     myfile
@@ -588,7 +611,7 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
 
 void Configuration::compress(const BaseSysData& baseData, const Parameters& pars, double strain){
     
-    std::cout << "**** compressing ****   rate " << pars.deformationRate << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
+    std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
     yMid=0.5*(topPos+ botPos);
     xMid=0.5*(rightPos+ leftPos);
@@ -617,7 +640,7 @@ void Configuration::compress(const BaseSysData& baseData, const Parameters& pars
 
 void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, double strain){
     
-    std::cout << "**** shearing ****   rate " << pars.deformationRate << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
+    std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
     std::cout << "e1  " << e1 <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
@@ -676,7 +699,7 @@ void Configuration::special_localized_deformation(const BaseSysData& baseData, c
 void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
 {
     
-    std::cout << "**** holding **** " << "   dt " << pars.dt << "\t" << pars.wallStyle << "   penaltyStiffness " << pars.penaltyStiffness << std::endl;
+    std::cout << "**** holding **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
     std::cout << "e1  " << e1 <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
@@ -719,21 +742,24 @@ void Configuration::update_cells_1(const BaseSysData& baseData, const Parameters
         xCell = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
         yCell = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
 
-        if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
-        {
+    if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
+    {
             continue;
-        }
-        
-        segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
+    }
         
         cellId = numXCells*yCell+xCell+baseData.numSurfaceNodes;
-
-        
+             
         nodesLinkedList[nodeID] = nodesLinkedList[cellId]; // Note that nodeID is its local ordinal number not the golbal node name assigned in the mesh
         nodesLinkedList[cellId] = nodeID;
         
-        segmentsLinkedList_1[segment0] = segmentsLinkedList_1[cellId];
-        segmentsLinkedList_1[cellId] = segment0;
+        if (pars.contactMethod=="nts"){
+            segment0 = baseData.nodeToSegments[baseData.flatSurfaceNodes[nodeID]][0];
+            
+ 
+            
+            segmentsLinkedList_1[segment0] = segmentsLinkedList_1[cellId];
+            segmentsLinkedList_1[cellId] = segment0;
+        }
         
     }
     

@@ -139,7 +139,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
 //    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
     if (Hessian){
-        calculate_the_Hessian_H(pars);
+        calculate_the_hessian(pars);
     }
 //    auto finish14 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> elapsed14 = finish14 - finish13;

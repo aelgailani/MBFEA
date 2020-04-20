@@ -13,10 +13,10 @@
 #include <stdio.h>
 
 
-void Configuration::calculate_the_Hessian_H(const Parameters &pars){
+void Configuration::calculate_the_hessian(const Parameters &pars){
     
     // First construct the stiffness matrix
-    calculate_monolithic_stiffness_tensor_K(pars);
+    calculate_monolithic_stiffness_tensor(pars);
     
     // Now so the first tensor multiplication
     for (int colID=0; colID<gradX.cols(); colID++) {

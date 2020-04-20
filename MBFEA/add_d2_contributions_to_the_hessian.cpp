@@ -12,7 +12,7 @@
 #include "BaseSysData.hpp"
 #include <stdio.h>
 
-void Configuration::add_d2_contributions_to_Hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData){
+void Configuration::add_d2_contributions_to_the_hessian(double penaltyStifness, double xs,double ys,double xm,double ym, int snode, int mnode, const BaseSysData& baseData){
     
     double d2 = pow((pow((xs - xm),2) + pow((ys - ym),2)),0.5);
     double Dd2Dxs = (1.*(-xm + xs))/pow(pow(xm - xs,2) + pow(ym - ys,2),0.5);

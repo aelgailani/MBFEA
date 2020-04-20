@@ -15,7 +15,7 @@
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
-void Configuration::detect_nts_contacts_method_1(const BaseSysData& baseData, const Parameters& pars)
+void Configuration::detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars)
 {
     for (int cellYid=0; cellYid<numYCells; cellYid++)
     {

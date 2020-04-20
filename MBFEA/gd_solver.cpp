@@ -182,7 +182,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
             //
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             } else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
@@ -208,7 +208,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
             
-            if (timeStep * pars.deformationRate * pars.dt <= pars.maxCompression)
+            if (mainSys.phi <= pars.targetPhi)
            {
                mainSys.compress(baseData, pars, pars.deformationRate * pars.dt);
            }
@@ -241,7 +241,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
             // calculate the state properties
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             }else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
@@ -265,7 +265,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
             
             
             
-            if (timeStep * pars.deformationRate * pars.dt < pars.maxShear) //Here maxShear is initial nonzerovalue for shear
+            if (mainSys.e1 < pars.targetShear) //Here tergetShear is initial nonzerovalue for shear
             {
                 
                 //Take an Euler step then shear homogenuously
@@ -300,7 +300,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
                 mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
                                
-                mainSys.shear(baseData, pars, pars.maxShear); //here maxShear is the shear step to be taken to measure mu
+                mainSys.shear(baseData, pars, pars.targetShear); //here tergetShear is the shear step to be taken to measure mu
                 stage++;
 
             }else if (stage==1){
@@ -420,7 +420,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
 
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_harmonicWalls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             }else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
@@ -448,12 +448,12 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
             mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
             mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
             
-            if (timeStep * pars.deformationRate * pars.dt < pars.maxShear )
+            if (timeStep * pars.deformationRate * pars.dt < pars.targetShear )
             {
                
                 mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
 
-            }else if (timeStep * pars.deformationRate * pars.dt >= pars.maxShear )
+            }else if (mainSys.e1 >= pars.targetShear )
             {
                 mainSys.hold(baseData, pars);
 
@@ -477,7 +477,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "\n" << std::endl;
 
-           if (timeStep * pars.deformationRate * pars.dt >= pars.maxShear )
+            if (mainSys.e1 >= pars.targetShear )
            {
                std::cout << "Done successfully!" << std::endl;
                exit(1);
