@@ -292,7 +292,7 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     ex = log(lxNew/baseData.lxRef);
     ey = log(lyNew/baseData.lyRef);
     A = lxNew * lyNew;
-    e0 = 0.5*(ex+ey);
+    e0 = - 0.5*(ex+ey); // my conviension is positive for compression
     e1 = (ex-ey);
     phi = pars.Ap / A;
     deltaTotEnergy = totalEnergy - prevTotEnergy;

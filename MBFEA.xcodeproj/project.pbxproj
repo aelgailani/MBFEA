@@ -19,6 +19,7 @@
 		684F200A242EE200007CBE05 /* compute_forces_harmonic_walls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 684F2009242EE200007CBE05 /* compute_forces_harmonic_walls.cpp */; };
 		68683D7923F8C0D8002DD9E3 /* calculate_the_hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68683D7823F8C0D8002DD9E3 /* calculate_the_hessian.cpp */; };
 		68683D7C23FB1E1D002DD9E3 /* add_d1_contributions_to_the_hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68683D7A23FB1E1D002DD9E3 /* add_d1_contributions_to_the_hessian.cpp */; };
+		687BC7AA244D6E8A00B65C69 /* fire_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 687BC7A9244D6E8A00B65C69 /* fire_solver.cpp */; };
 		68862975243E9CF700468BBD /* apply_ntn_repulsions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 68862974243E9CF700468BBD /* apply_ntn_repulsions.cpp */; };
 		6897EBF223FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6897EBF123FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp */; };
 		689D407A22D68B1000EA4BBD /* gd_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 689D407822D68B1000EA4BBD /* gd_solver.cpp */; };
@@ -55,6 +56,7 @@
 		684F2009242EE200007CBE05 /* compute_forces_harmonic_walls.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = compute_forces_harmonic_walls.cpp; sourceTree = "<group>"; };
 		68683D7823F8C0D8002DD9E3 /* calculate_the_hessian.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = calculate_the_hessian.cpp; sourceTree = "<group>"; };
 		68683D7A23FB1E1D002DD9E3 /* add_d1_contributions_to_the_hessian.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = add_d1_contributions_to_the_hessian.cpp; sourceTree = "<group>"; };
+		687BC7A9244D6E8A00B65C69 /* fire_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fire_solver.cpp; sourceTree = "<group>"; };
 		68862974243E9CF700468BBD /* apply_ntn_repulsions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = apply_ntn_repulsions.cpp; sourceTree = "<group>"; };
 		6897EBF123FB5365005358A4 /* add_d2_contributions_to_the_hessian.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = add_d2_contributions_to_the_hessian.cpp; sourceTree = "<group>"; };
 		689D407822D68B1000EA4BBD /* gd_solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gd_solver.cpp; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				683CA5D323DB9DD100832DD6 /* apply_nts_contacts_penalty.cpp */,
 				684853C0228F6FD600DBFE52 /* BaseSysData.cpp */,
 				684853C1228F6FD600DBFE52 /* BaseSysData.hpp */,
+				687BC7A9244D6E8A00B65C69 /* fire_solver.cpp */,
 				680CCD0623F76BAA007327C1 /* calculate_monolithic_stiffness_tensor.cpp */,
 				68683D7823F8C0D8002DD9E3 /* calculate_the_hessian.cpp */,
 				684F2009242EE200007CBE05 /* compute_forces_harmonic_walls.cpp */,
@@ -204,6 +207,7 @@
 				68683D7C23FB1E1D002DD9E3 /* add_d1_contributions_to_the_hessian.cpp in Sources */,
 				68A7B4E2226562DF00D1CB68 /* main.cpp in Sources */,
 				680CCD0723F76BAA007327C1 /* calculate_monolithic_stiffness_tensor.cpp in Sources */,
+				687BC7AA244D6E8A00B65C69 /* fire_solver.cpp in Sources */,
 				682D8F2622A1E5F0001EB3C9 /* nts_interaction.cpp in Sources */,
 				68862975243E9CF700468BBD /* apply_ntn_repulsions.cpp in Sources */,
 			);
