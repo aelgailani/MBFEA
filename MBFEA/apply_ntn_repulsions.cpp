@@ -61,7 +61,7 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                            double dyij = augmentedCurPosY[jNode] - augmentedCurPosY[iNode];
                            double drijSq = pow(dxij,2)+ pow(dyij,2);
                            double drij = sqrt(drijSq);
-                           double forceij=0.5*pars.repulseEnergy/pars.ljScale*12*pow((pars.ljScale/drij),13);
+                           double forceij=0.5*pars.ntnRepulseEnergy/pars.ntnLjScale*12*pow((pars.ntnLjScale/drij),13);
                            
                            double forceXij = forceij*dxij/drij;
                            double forceYij = forceij*dyij/drij;
@@ -81,7 +81,7 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                                
                     
                            nodeIinteractions++ ;
-                           contactsEnergy+=0.5*pars.repulseEnergy*pow((pars.ljScale/drij),12);
+                           contactsEnergy+=0.5*pars.ntnRepulseEnergy*pow((pars.ntnLjScale/drij),12);
                            
                            jNodeId = nodesLinkedList[jNodeId];
 

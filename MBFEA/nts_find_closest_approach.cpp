@@ -14,7 +14,7 @@
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
 
-void Configuration::nts_interaction(const int& slaveNodeId, const int& segment,const int& masterMesh,  const BaseSysData& baseData, const Parameters& pars)
+void Configuration::nts_find_closest_approach(const int& slaveNodeId, const int& segment,const int& masterMesh,  const BaseSysData& baseData, const Parameters& pars)
 {
 
     int node = baseData.flatSurfaceNodes[slaveNodeId];

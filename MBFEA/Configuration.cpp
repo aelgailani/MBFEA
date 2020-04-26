@@ -29,6 +29,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lyNew = lyCur;
         lxNew = lxCur;
 
+
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
         inFile.open(pars.restartFile); //Make sure later that the file is open in "read" mode only
@@ -156,12 +157,14 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                 assert(baseData.numOriginalNodes==curPosY.size());
                 inFile.close();
             }
-            
-            
-            
-            
         }
 
+    ex = log(lxNew/baseData.lxRef);
+    ey = log(lyNew/baseData.lyRef);
+    A = lxNew * lyNew;
+    e0 = - 0.5*(ex+ey); // my conviension is positive for compression
+    e1 = (ex-ey);
+    phi = pars.Ap / A;
     
     curPosXAtLastStep = curPosX;
     curPosYAtLastStep = curPosY;
@@ -258,15 +261,12 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
      }
     
     // If slover is FIRE, initiate zero velocity vectors
-    if (pars.solver == "FIRE"){
+    if (pars.solver == "FIRE" || pars.solver == "FIRE2"){
         velocityX.resize(baseData.numOriginalNodes);
         velocityY.resize(baseData.numOriginalNodes);
         prevVelocityX.resize(baseData.numOriginalNodes);
         prevVelocityY.resize(baseData.numOriginalNodes);
-        velocityX.fill(0);
-        velocityY.fill(0);
-        prevVelocityX.fill(0);
-        prevVelocityY.fill(0);
+        
     }
 }
 
@@ -382,7 +382,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  DSOverDe1 << std::setw(20)
         <<  pars.dt  << std::setw(20)
         <<  pars.deformationRate  << std::setw(20)
-        <<  pars.penaltyStiffness << std::endl;
+        <<  pars.ntsHarmonicPenaltyStiffness << std::endl;
         dataFile.close();
         
         
@@ -411,7 +411,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "dt" << "\t" << pars.dt << std::endl;
     myfile << "max_residual" << "\t" << maxR << std::endl;
     myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
-    myfile << "penalty_stiffness" << "\t" << pars.penaltyStiffness << std::endl;
+    myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
     myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
     myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< "\n"  << std::endl;
     myfile << "Nodes_data:" << std::endl;
@@ -618,8 +618,8 @@ void Configuration::compress(const BaseSysData& baseData, const Parameters& pars
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
     
-    lxNew=lxCur * (1 - strain);
-    lyNew=lyCur * (1 - strain);
+    lxNew=lxCur * exp(-strain); // remember the is a a negative sign in the passed strain for cosmetics only so strain = log(Lcur/Lnew) where conventionaly it is log(Lnew/Lcur)
+    lyNew=lyCur * exp(-strain);
 
     leftPos= xMid-0.5 * lxNew;
     rightPos= xMid+0.5 * lxNew;
@@ -650,8 +650,8 @@ void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, d
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
     
-    lxNew=lxCur / (1 - strain);
-    lyNew=lyCur * (1 - strain);
+    lxNew=lxCur * exp(strain);
+    lyNew=lyCur * exp(-strain);
     
     leftPos= xMid-0.5 * lxNew;
     rightPos= xMid+0.5 * lxNew;

@@ -98,9 +98,6 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="PLWallLJScale") {
             split >> c;
             PLWallLJScale = c;
-        }else if (a=="penaltyStiffness") {
-            split >> c;
-            penaltyStiffness = c;
         }else if (a=="Ap") {
             split >> c;
             Ap = c;
@@ -128,9 +125,15 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
             split >> c;
             FIRE_dtmax = c;
         }
-        else if (a=="FIRE_Nmin") {
+        else if (a=="FIRE_N_positive_min") {
             split >> c;
-            FIRE_Nmin = c;
+            FIRE_N_positive_min = c;
+        }else if (a=="FIRE_N_negative_max") {
+            split >> c;
+            FIRE_N_negative_max = c;
+        }else if (a=="FIRE_Nmax") {
+            split >> l;
+            FIRE_Nmax = l;
         }
         else if (a=="FIRE_finc") {
             split >> c;
@@ -148,6 +151,12 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="FIRE_dt_start") {
             split >> c;
             FIRE_dt_start = c;
+        }else if (a=="FIRE_dtmin") {
+            split >> c;
+            FIRE_dtmin = c;
+        }else if (a=="FIRE_intialdelay") {
+        split >> trueFalse;
+        FIRE_intialdelay = trueFalse;
         }else if (a=="RTolerance") {
             split >> c;
             RTolerance = c;
@@ -189,12 +198,24 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="contactMethod") {
         split >> f;
         contactMethod = f;
-        }else if (a=="repulseEnergy") {
+        }else if (a=="ntsPenaltyMethod") {
+        split >> f;
+        ntsPenaltyMethod = f;
+        }else if (a=="ntsHarmonicPenaltyStiffness") {
+            split >> c;
+            ntsHarmonicPenaltyStiffness = c;
+        }else if (a=="ntsPowerlawRepulseEnergy") {
         split >> c;
-        repulseEnergy = c;
-        }else if (a=="ljScale") {
+        ntsPowerlawRepulseEnergy = c;
+        }else if (a=="ntnRepulseEnergy") {
         split >> c;
-        ljScale = c;
+        ntnRepulseEnergy = c;
+        }else if (a=="ntsPowerlawLjScale") {
+            split >> c;
+            ntsPowerlawLjScale = c;
+        }else if (a=="ntnLjScale") {
+        split >> c;
+        ntnLjScale = c;
         }
         
         
@@ -253,7 +274,7 @@ void Parameters::print_to_console(void) const {
     printit("HWallStiffness",HWallStiffness);
     printit("PLWallEnergyScale",PLWallEnergyScale);
     printit("PLWallLJScale",PLWallLJScale);
-    printit("penaltyStiffness",penaltyStiffness);
+    printit("penaltyStiffness",ntsHarmonicPenaltyStiffness);
     printit("Ap",Ap);
     printit("runMode",runMode);
     printit("startingMode",startingMode);
@@ -270,8 +291,8 @@ void Parameters::print_to_console(void) const {
     printit("identifyAndDumbFacets",identifyAndDumbFacets);
     printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
     printit("contactMethod", contactMethod);
-    printit("repulseEnergy", repulseEnergy);
-    printit("ljScale", ljScale);
+    printit("repulseEnergy", ntnRepulseEnergy);
+    printit("ljScale", ntnLjScale);
 
 
             std::cout << std::endl;

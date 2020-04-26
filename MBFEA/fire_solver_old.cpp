@@ -93,7 +93,7 @@ void fire_solver_old(const BaseSysData& baseData, const Parameters& pars, long t
                     FIRE_alpha = pars.FIRE_alpha_start;
                     FIRE_N = timeStep;
                 } else {
-                    if ((timeStep - FIRE_N) > pars.FIRE_Nmin){
+                    if ((timeStep - FIRE_N) > pars.FIRE_N_positive_min){
                         FIRE_prevDt = FIRE_dt;
                         FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
                         FIRE_alpha *= pars.FIRE_falpha;

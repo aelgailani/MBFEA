@@ -16,7 +16,7 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep)
+void Configuration::apply_nts_powerlaw_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep)
 {
 
     for (int nodeID = 0; nodeID <baseData.numSurfaceNodes; nodeID++){
@@ -28,14 +28,14 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                 int whichPart =  surNodes_mPart[nodeID];
                 double gap = surNodes_gap[nodeID];
                 // first check if there is interference
-                if (gap>= 0)
-                {
-                    continue;
-                }
-                if (abs(gap) > maxInterference)
-                {
-                    maxInterference = abs(gap);
-                }
+//                if (gap>= 0)
+//                {
+//                    continue;
+//                }
+//                if (abs(gap) > maxInterference)
+//                {
+//                    maxInterference = abs(gap);
+//                }
             
                 //now the rest comes
             
@@ -60,7 +60,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     double nx = dy/L;
                     double ny = - dx/L;
                     double s = (xi-x0)*dx/std::pow(L,2)+(yi-y0)*dy/std::pow(L,2);
-                    double f = pars.penaltyStiffness * abs(gap);
+                    double f = 0.5*pars.ntsPowerlawRepulseEnergy/pars.ntsPowerlawLjScale*12*pow((pars.ntsPowerlawLjScale/gap),13);
                     double fx = f * (nx);
                     double fy = f * (ny);
                     double f0x = -fx * (1-s);
@@ -91,7 +91,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                     
                     if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
-                    contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                    contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/gap),12);
                     segmentIinteractions++ ;
                         
                     double Dd1Dxi=(y0 - y1)/pow(pow(-x0 + x1,2) + pow(-y0 + y1,2),0.5);
@@ -111,9 +111,9 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                     
                     // add the Hessian part
-                    if (Hessian) {
-                        add_d1_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
-                    }
+//                    if (Hessian) {
+//                        add_d1_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0,x1,y1, node, node0, node1, baseData);
+//                    }
                     
                     //add the facets elements if required
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
@@ -128,13 +128,13 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     
                     double x0 = augmentedCurPosX[node0];
                     double y0 = augmentedCurPosY[node0];
-                    double f = pars.penaltyStiffness * abs(gap);
+                    double f = 0.5*pars.ntsPowerlawRepulseEnergy/pars.ntsPowerlawLjScale*12*pow((pars.ntsPowerlawLjScale/gap),13);
                     double r0ix = xi-x0;
                     double r0iy = yi-y0;
-                    double f0ix = -pars.penaltyStiffness  * r0ix;
-                    double f0iy = -pars.penaltyStiffness  * r0iy;
-                    double f00x = -f0ix;
-                    double f00y = -f0iy;
+                    double f0ix = f * r0ix/abs(gap);
+                    double f0iy = f  * r0iy/abs(gap);
+                    double f00x = - f0ix;
+                    double f00y = - f0iy;
                     
                     if (node < baseData.numOriginalNodes)
                     {
@@ -152,7 +152,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     }
                     
                     if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
-                        contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                        contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/gap),12);
                         nodeIinteractions++ ;
                         
                         double Dd2Dxi = (1.*(-x0 + xi))/pow(pow(x0 - xi,2) + pow(y0 - yi,2),0.5);
@@ -164,9 +164,9 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                         KWoodYY += f*(Dd2Dyi*yi+Dd2Dy0*y0);
                     }
                      
-                    if (Hessian) {
-                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
-                     }
+//                    if (Hessian) {
+//                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x0,y0, node, node0, baseData);
+//                     }
                     
                     //add the facets elements if required
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
@@ -182,9 +182,9 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                     double y1 = augmentedCurPosY[node1];
                     double r1ix = xi-x1;
                     double r1iy = yi-y1;
-                    double f = pars.penaltyStiffness * abs(gap);
-                    double f1ix = -pars.penaltyStiffness  * r1ix;
-                    double f1iy = -pars.penaltyStiffness  * r1iy;
+                    double f = 0.5*pars.ntsPowerlawRepulseEnergy/pars.ntsPowerlawLjScale*12*pow((pars.ntsPowerlawLjScale/gap),13);
+                    double f1ix = f*r1ix/abs(gap);
+                    double f1iy = f*r1iy/abs(gap);
                     double f11x = -f1ix;
                     double f11y = -f1iy;
                     
@@ -203,7 +203,7 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                         surfaceForceY(node1) = surfaceForceY(node1) + f11y;
                     }
                     if ( node < baseData.numOriginalNodes || node1 < baseData.numOriginalNodes){
-                        contactsEnergy += pars.penaltyStiffness/2 *(gap*gap);
+                        contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/gap),12);
                         nodeIinteractions++ ;
                         
                         double Dd2Dxi = (1.*(-x1 + xi))/pow(pow(x1 - xi,2) + pow(y1 - yi,2),0.5);
@@ -215,10 +215,10 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
                         KWoodYY += f*(Dd2Dyi*yi+Dd2Dy1*y1);
                     }
                     
-                    if (Hessian){
-                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
-                    }
-                    
+//                    if (Hessian){
+//                    add_d2_contributions_to_the_hessian(pars.penaltyStiffness, xi,yi,x1,y1, node, node1, baseData);
+//                    }
+//                    
                     
                     //add the facets elements if required
                     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
@@ -231,3 +231,4 @@ void Configuration::apply_nts_contacts_penalty(const BaseSysData& baseData, cons
             
         }
 }
+

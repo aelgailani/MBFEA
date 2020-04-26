@@ -69,7 +69,7 @@ void Configuration::detect_nts_contacts_single_point_method(const BaseSysData& b
 
                         }
                         
-                        nts_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                        nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
                         
                         masterSegment = segmentsLinkedList_1[masterSegment];
                     }

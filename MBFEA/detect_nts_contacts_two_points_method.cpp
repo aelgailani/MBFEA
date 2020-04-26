@@ -76,7 +76,7 @@ void Configuration::detect_nts_contacts_two_points_method(const BaseSysData& bas
 
                              }
                           
-                          nts_interaction(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                          nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
                           
                           nextMSegment = segmentsLinkedList_2(masterSegment,column);
                           column = segmentsLinkedList_2(masterSegment,column+1);

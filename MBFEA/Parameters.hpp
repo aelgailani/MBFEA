@@ -43,7 +43,7 @@ public:
     double HWallStiffness;
     double PLWallEnergyScale;
     double PLWallLJScale;
-    double penaltyStiffness;
+    double ntsHarmonicPenaltyStiffness;
     double Ap;
     std::string runMode;
     std::string startingMode;
@@ -51,13 +51,17 @@ public:
     double targetShear;
     double maxForceTol;
     double FIRE_dtmax;
-    double FIRE_Nmin;
+    double FIRE_N_positive_min;
     double FIRE_finc;
     double FIRE_fdec;
     double FIRE_alpha_start;
     double FIRE_falpha;
     double FIRE_dt_start;
     double RTolerance;
+    double FIRE_N_negative_max;
+    double FIRE_dtmin;
+    bool FIRE_intialdelay;
+    long FIRE_Nmax;
     int numStrainSteps;
     long startingStrainStep;
     double  gammaX;
@@ -70,8 +74,11 @@ public:
     bool identifyAndDumbFacets;
     bool reversibleMasterSlaveRole;
     std::string contactMethod;
-    double repulseEnergy;
-    double ljScale;
+    std::string ntsPenaltyMethod;
+    double ntnRepulseEnergy;
+    double ntsPowerlawRepulseEnergy;
+    double ntsPowerlawLjScale;
+    double ntnLjScale;
     void print_to_console(void) const;
     
 };

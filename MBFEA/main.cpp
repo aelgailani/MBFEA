@@ -143,6 +143,8 @@ int main(int argc, char* argv[])
         gd_solver(baseData,pars,timeStep,stage, mainSys);
     }else if (pars.solver=="FIRE"){
         fire_solver(baseData,pars,timeStep, mainSys);
+    }else if (pars.solver=="FIRE2"){
+        fire2_solver(baseData,pars,timeStep, mainSys);
     }
     
     

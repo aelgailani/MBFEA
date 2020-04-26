@@ -22,5 +22,6 @@
 void gd_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, int stage, Configuration& mainSys);
 void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, Configuration& mainSys);
 void fire_solver_old(const BaseSysData& baseData, const Parameters& pars, long timeStep, int stage, Configuration& mainSys);
+void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, Configuration& mainSys);
 
 #endif /* solvers_hpp */

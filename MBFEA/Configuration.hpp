@@ -184,11 +184,14 @@ public:
     void compute_surface_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
     void detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars);
     void detect_nts_contacts_two_points_method(const BaseSysData& baseData, const Parameters& pars);
-    void apply_nts_contacts_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+    void apply_nts_harmonic_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+    void apply_nts_powerlaw_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+
     void apply_ntn_repulsions(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
 
 
-    void nts_interaction(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
+    void nts_find_closest_approach(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
+
     void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
     void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);
     void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
