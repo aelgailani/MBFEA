@@ -67,6 +67,25 @@ void Configuration::apply_nts_powerlaw_penalty(const BaseSysData& baseData, cons
                     double f0y = -fy * (1-s);
                     double f1x = -fx * (s);
                     double f1y = -fy * (s);
+                    
+                    // test phase, to be checked thourghouly
+//                    double r0ix = xi-x0;
+//                    double r0iy = yi-y0;
+//                    double dri0Sq = pow(r0ix,2)+ pow(r0iy,2);
+//                    double dri0 = sqrt(dri0Sq);
+//                    double f0ix = f * r0ix/dri0;
+//                    double f0iy = f  * r0iy/dri0;
+//                    double f00x = - f0ix;
+//                    double f00y = - f0iy;
+//
+//                    double r1ix = xi-x1;
+//                    double r1iy = yi-y1;
+//                    double dri1Sq = pow(r1ix,2)+ pow(r1iy,2);
+//                    double dri1 = sqrt(dri1Sq);
+//                    double f1ix = f * r0ix/dri1;
+//                    double f1iy = f  * r0iy/dri1;
+//                    double f11x = - f1ix;
+//                    double f11y = - f1iy;
 
                     if (node < baseData.numOriginalNodes)
                     {
@@ -75,12 +94,28 @@ void Configuration::apply_nts_powerlaw_penalty(const BaseSysData& baseData, cons
                         surfaceForceX(node) = surfaceForceX(node) + fx; // the surfaceForces vectors are just for debugging purposes here
                         surfaceForceY(node) = surfaceForceY(node) + fy;
                         
+//                        // new
+//                        forceX(node) = forceX(node) + f0ix ;
+//                        forceY(node) = forceY(node) + f0iy ;
+//                        surfaceForceX(node) = surfaceForceX(node) + f0ix;
+//                        surfaceForceY(node) = surfaceForceY(node) + f0iy;
+//
+//                        forceX(node) = forceX(node) + f1ix ;
+//                        forceY(node) = forceY(node) + f1iy ;
+//                        surfaceForceX(node) = surfaceForceX(node) + f1ix;
+//                        surfaceForceY(node) = surfaceForceY(node) + f1iy;
                     }
                     if ( node0 < baseData.numOriginalNodes){
                         forceX(node0) = forceX(node0) + f0x ;
                         forceY(node0) = forceY(node0) + f0y ;
                         surfaceForceX(node0) = surfaceForceX(node0) + f0x;
                         surfaceForceY(node0) = surfaceForceY(node0) + f0y;
+                        
+//                        //new
+//                        forceX(node0) = forceX(node0) + f00x ;
+//                        forceY(node0) = forceY(node0) + f00y ;
+//                        surfaceForceX(node0) = surfaceForceX(node0) + f00x;
+//                        surfaceForceY(node0) = surfaceForceY(node0) + f00y;
                     }
                     if ( node1 < baseData.numOriginalNodes){
                         forceX(node1) = forceX(node1) + f1x ;
@@ -88,12 +123,24 @@ void Configuration::apply_nts_powerlaw_penalty(const BaseSysData& baseData, cons
                         surfaceForceX(node1) = surfaceForceX(node1) + f1x;
                         surfaceForceY(node1) = surfaceForceY(node1) + f1y;
                         
+//                        //new
+//                        forceX(node1) = forceX(node1) + f11x ;
+//                        forceY(node1) = forceY(node1) + f11y ;
+//                        surfaceForceX(node1) = surfaceForceX(node1) + f11x;
+//                        surfaceForceY(node1) = surfaceForceY(node1) + f11y;
+                        
                     }
                     
                     if ( node < baseData.numOriginalNodes || node0 < baseData.numOriginalNodes){
                     contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/gap),12);
                     segmentIinteractions++ ;
                         
+//                    contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/dri0),12);
+//                    nodeIinteractions++ ;
+//
+//                    contactsEnergy += 0.5*pars.ntsPowerlawRepulseEnergy*pow((pars.ntsPowerlawLjScale/dri1),12);
+//                    nodeIinteractions++ ;
+                    
                     double Dd1Dxi=(y0 - y1)/pow(pow(-x0 + x1,2) + pow(-y0 + y1,2),0.5);
 
                     double Dd1Dyi=(-x0 + x1)/pow(pow(-x0 + x1,2) + pow(-y0 + y1,2),0.5);

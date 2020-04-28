@@ -292,6 +292,7 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     ex = log(lxNew/baseData.lxRef);
     ey = log(lyNew/baseData.lyRef);
     A = lxNew * lyNew;
+    A_material = refArea.dot(areaRatio);
     e0 = - 0.5*(ex+ey); // my conviension is positive for compression
     e1 = (ex-ey);
     phi = pars.Ap / A;
@@ -319,7 +320,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
     if (purpose=="running"){
         fname = "/data-steps-"+first+"-"+last+".txt";
     }else if (purpose=="final"){
-        fname = "/final_data.txt";
+        fname = "/final-data.txt";
     }
    
     if (mode=="write" || first != lastStepFirst){
@@ -343,6 +344,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  "shearStress2"  << std::setw(20)
         <<  "KWshearStress2"  << std::setw(20)
         <<  "boxArea"  << std::setw(20)
+        <<  "materialArea"  << std::setw(20)
         <<  "phi"  << std::setw(20)
         <<  "e0"  << std::setw(20)
         <<  "e1" << std::setw(20)
@@ -375,6 +377,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  S2  << std::setw(20)
         <<  (KWoodYY-KWoodXX)/(2*LX*LY)   << std::setw(20)
         <<  A  << std::setw(20)
+        <<  A_material  << std::setw(20)
         <<  phi  << std::setw(20)
         <<  e0  << std::setw(20)
         <<  e1 << std::setw(20)
@@ -396,9 +399,9 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_node-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/data_per_node-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data-per-node-"+step+".txt");
     }
     
     myfile << "Basic_data:" << std::endl;
@@ -444,9 +447,9 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_node_periodic-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-periodic-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/data_per_node_periodic-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data-per-node-periodic-"+step+".txt");
     }
     myfile << "Basic_data:" << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
@@ -498,9 +501,9 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data_per_ele-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-ele-"+step+".txt").c_str());
     }else{
-        myfile.open (pars.outputFolderName+"/data_per_ele-"+step+".txt");
+        myfile.open (pars.outputFolderName+"/data-per-ele-"+step+".txt");
     }
     myfile << "Basic_data:" << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;

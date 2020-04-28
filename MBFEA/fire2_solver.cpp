@@ -21,11 +21,8 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long time
     double FIRE_N_positive = 0; //steps since positve power
     double FIRE_N_negative = 0;//steps since negative power
     double FIRE_dt = pars.FIRE_dt_start;
-//    double FIRE_prevDt = pars.FIRE_dt_start;
     mainSys.velocityX.fill(0);
     mainSys.velocityY.fill(0);
-    mainSys.prevVelocityX.fill(0);
-    mainSys.prevVelocityY.fill(0);
     double FdotF;
     double VdotV;
     double scale1;
@@ -147,93 +144,129 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long time
             FIRE_dt = pars.FIRE_dt_start;
             mainSys.velocityX.fill(0);
             mainSys.velocityY.fill(0);
-            mainSys.prevVelocityX.fill(0);
-            mainSys.prevVelocityY.fill(0);
+
         }
     }
-//    else if (pars.runMode=="stepShear"){
-//
-//        long stage=0;
-//        mainSys.dump_global_data(pars, timeStep, "write", "final"); //open file and write cols names
-//        while(stage<2){
-//
-//            mainSys.shear(baseData, pars, pars.targetShear);
-//
-//            double FIRE_alpha =  pars.FIRE_alpha_start;
-//            double FIRE_N = 0;
-//            double FIRE_dt = pars.FIRE_dt_start;
-//            double FIRE_prevDt = pars.FIRE_dt_start;
-//
-//            while (1)
-//            {
-//
-//                if (pars.boundaryType == "walls"){
-//                    mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
-//                }else if (pars.boundaryType == "periodic"){
-//                    mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
-//                }
-//                mainSys.update_post_processing_data(baseData, pars);
-//
-//                std::cout << "timeStep  " << timeStep << std::endl;
-//                std::cout << "stage  " << stage << std::endl;
-//                std::cout << "e1  " << mainSys.e1 << std::endl;
-//                std::cout << "phi  " << mainSys.phi <<std::endl;
-//                std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
-//                std::cout << "maxForce  " << mainSys.maxR << std::endl;
-//                std::cout << "avgForce  " << mainSys.avgR << std::endl;
-//
-//                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.RTolerance){
-//                   std::cout << "Foce condition met !" << std::endl;
-//                   break;
-//                }
-//
-//                double power = mainSys.forceX.dot(mainSys.velocityX)+ mainSys.forceY.dot(mainSys.velocityY);
-//
-//                if (power <=0) {
-//                    FIRE_dt *= pars.FIRE_fdec;
-//                    mainSys.velocityX.fill(0);
-//                    mainSys.velocityY.fill(0);
-//                    FIRE_alpha = pars.FIRE_alpha_start;
-//                    FIRE_N = timeStep;
-//                } else {
-//                    if ((timeStep - FIRE_N) > pars.FIRE_Nmin){
-//                        FIRE_prevDt = FIRE_dt;
-//                        FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
-//                        FIRE_alpha *= pars.FIRE_falpha;
-//                    }
-//                    Eigen::VectorXd force_magnitude = (mainSys.forceX.array().pow(2)+mainSys.forceY.array().pow(2)).pow(0.5);
-//                    Eigen::VectorXd velocity_magnitude = (mainSys.velocityX.array().pow(2)+mainSys.velocityY.array().pow(2)).pow(0.5);
-//                    mainSys.velocityX = (1 - FIRE_alpha)*mainSys.velocityX.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceX.array()/force_magnitude.array();
-//                    mainSys.velocityY = (1 - FIRE_alpha)*mainSys.velocityY.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceY.array()/force_magnitude.array();
-//                }
-//
-//
-//
-//                mainSys.curPosX += mainSys.velocityX*FIRE_dt;
-//                mainSys.curPosY += mainSys.velocityY*FIRE_dt;
-//                mainSys.velocityX += mainSys.forceX*FIRE_dt;
-//                mainSys.velocityY += mainSys.forceY*FIRE_dt;
-//
-//                std::cout << "power   " << power <<std::endl;
-//                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
-//                std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
-//                std::cout << "\n" << std::endl;
-//
-//                timeStep++;
-//            }
-//            FIRE_alpha = pars.FIRE_alpha_start;
-//            FIRE_N = timeStep;
-//            mainSys.dump_global_data(pars, timeStep, "append", "final");
-//            mainSys.dump_per_node(baseData, pars, stage);
-//            mainSys.dump_per_ele(baseData, pars,stage);
-//            if (pars.dumpPeriodicImagesXY){
-//                mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
-//            }
-//
-//            stage+=1;
-//
-//        }
-//
-//    }
+    else if (pars.runMode=="stepShear"){
+
+        long stage=0;
+        mainSys.dump_global_data(pars, timeStep, "write", "final"); //open file and write cols names
+        while(stage<2){
+
+            mainSys.shear(baseData, pars, pars.targetShear);
+
+
+            for (long i=1; i<= pars.FIRE_Nmax; i++) {
+               
+
+                if (pars.boundaryType == "walls"){
+                    mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                }else if (pars.boundaryType == "periodic"){
+                    mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+                }
+               
+                
+                mainSys.update_post_processing_data(baseData, pars);
+                
+                std::cout << "timeStep  " << timeStep << std::endl;
+                std::cout << "stage  " << stage <<std::endl;
+                std::cout << "e1  " << mainSys.e1 << ", target is  " << pars.targetShear*2 <<std::endl;
+                std::cout << "phi  " << mainSys.phi <<std::endl;
+                std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
+                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+                std::cout << "avgForce  " << mainSys.avgR << std::endl;
+                
+                if (mainSys.maxR <= pars.RTolerance){
+                    std::cout << " Done !" << std::endl;
+                    break;
+                }
+                
+                double power = mainSys.forceX.dot(mainSys.velocityX) + mainSys.forceY.dot(mainSys.velocityY);
+
+                if (power >0) {
+                    FIRE_N_positive +=1;
+                    FIRE_N_negative =0;
+                    if (FIRE_N_positive > pars.FIRE_N_positive_min){
+                        FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
+                        FIRE_alpha *= pars.FIRE_falpha;
+                    }
+                    scale1=(1-FIRE_alpha);
+                    FdotF = mainSys.forceX.dot(mainSys.forceX)+mainSys.forceY.dot(mainSys.forceY);
+                    VdotV = mainSys.velocityX.dot(mainSys.velocityX)+mainSys.velocityY.dot(mainSys.velocityY);
+                    if (FdotF <= 1e-20) scale2 = 0.0;
+                    else scale2 = FIRE_alpha * sqrt(VdotV/FdotF);
+                    
+                } else {
+                    
+                    FIRE_N_positive =0;
+                    FIRE_N_negative +=1;
+                    
+                    if (FIRE_N_negative > pars.FIRE_N_negative_max){
+                        std::cout << " Failed to converge !" << std::endl;
+                        break;
+                    }
+                    if (!(pars.FIRE_intialdelay && i < pars.FIRE_N_positive_min)){
+                        if ( FIRE_dt*pars.FIRE_fdec >= pars.FIRE_dtmin){
+                            FIRE_dt*=pars.FIRE_fdec;
+                        }
+                        FIRE_alpha = pars.FIRE_alpha_start;
+                    }
+                    
+                    mainSys.curPosX -= 0.5* mainSys.velocityX*FIRE_dt;
+                    mainSys.curPosY -= 0.5* mainSys.velocityY*FIRE_dt;
+                    mainSys.velocityX.fill(0);
+                    mainSys.velocityY.fill(0);
+                    
+                }
+                
+                // Semi-implicit Euler OR Leap Frog integration
+                mainSys.velocityX += mainSys.forceX*FIRE_dt;
+                mainSys.velocityY += mainSys.forceY*FIRE_dt;
+                
+                if (power>0.0){
+                    mainSys.velocityX = scale1 * mainSys.velocityX+ scale2 * mainSys.forceX;
+                    mainSys.velocityY = scale1 * mainSys.velocityY+ scale2 * mainSys.forceY;
+                }
+                mainSys.curPosX += mainSys.velocityX*FIRE_dt;
+                mainSys.curPosY += mainSys.velocityY*FIRE_dt;
+                
+                
+                std::cout << "power   " << power <<std::endl;
+                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+                std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
+                std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
+                std::cout << "FIRE_Np-   " << FIRE_N_negative  <<std::endl;
+                std::cout << "\n" << std::endl;
+                timeStep++;
+                
+                
+
+            }
+            
+           if (mainSys.maxR > pars.RTolerance){
+                 std::cout << " Failed to coverge !" << std::endl;
+
+             }else{
+                 mainSys.dump_global_data(pars, timeStep, "append", "final");
+                 mainSys.dump_per_node(baseData, pars, stage);
+                 mainSys.dump_per_ele(baseData, pars,stage);
+                 if (pars.dumpPeriodicImagesXY){
+                     mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
+                 }
+             }
+             
+            
+             FIRE_alpha = pars.FIRE_alpha_start;
+             FIRE_N_positive=0;
+             FIRE_N_negative=0;
+             FIRE_dt = pars.FIRE_dt_start;
+             mainSys.velocityX.fill(0);
+             mainSys.velocityY.fill(0);
+
+            stage+=1;
+
+        }
+
+    }
         
 }
