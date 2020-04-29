@@ -79,6 +79,7 @@ public:
     double ntsPowerlawRepulseEnergy;
     double ntsPowerlawLjScale;
     double ntnLjScale;
+    int integrator;
     void print_to_console(void) const;
     
 };

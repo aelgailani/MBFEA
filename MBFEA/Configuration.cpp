@@ -612,7 +612,7 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
 
 
 
-void Configuration::compress(const BaseSysData& baseData, const Parameters& pars, double strain){
+void Configuration::affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain){
     
     std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
@@ -641,7 +641,7 @@ void Configuration::compress(const BaseSysData& baseData, const Parameters& pars
 }
 
 
-void Configuration::shear(const BaseSysData& baseData, const Parameters& pars, double strain){
+void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain){
     
     std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     

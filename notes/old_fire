@@ -36,7 +36,7 @@ void fire_solver_old(const BaseSysData& baseData, const Parameters& pars, long t
         
         for (long strainStep = pars.startingStrainStep ; strainStep<= pars.numStrainSteps ; strainStep++) {
             
-            mainSys.compress(baseData, pars, pars.targetPhi * float(strainStep)/float(pars.numStrainSteps));
+            mainSys.affine_compression(baseData, pars, pars.targetPhi * float(strainStep)/float(pars.numStrainSteps));
 
             while (1)
             {
@@ -257,4 +257,5 @@ void fire_solver_old(const BaseSysData& baseData, const Parameters& pars, long t
 //        }
 //    }
 }
+
 

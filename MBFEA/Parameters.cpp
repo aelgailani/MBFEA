@@ -216,6 +216,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="ntnLjScale") {
         split >> c;
         ntnLjScale = c;
+        }else if (a=="integrator") {
+        split >> d;
+        integrator = d;
         }
         
         
@@ -293,6 +296,7 @@ void Parameters::print_to_console(void) const {
     printit("contactMethod", contactMethod);
     printit("repulseEnergy", ntnRepulseEnergy);
     printit("ljScale", ntnLjScale);
+    printit("integrator", integrator);
 
 
             std::cout << std::endl;

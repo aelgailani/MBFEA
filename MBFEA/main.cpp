@@ -12,7 +12,7 @@
 #include <iomanip>
 //#include <chrono>
 #include "Parameters.hpp"
-//#include "visualization.hpp"
+#include "standard_runs.hpp"
 #include "BaseSysData.hpp"
 #include "Configuration.hpp"
 #include "solvers.hpp"
@@ -133,20 +133,17 @@ int main(int argc, char* argv[])
     if (pars.runMode != "compress") {
         timeStep=0;
     }
-    int stage = 0; // a dummy varaiable to be used in shearing mode
+   
     mainSys.dump_global_data(pars, timeStep, "write", "running");
 
     
     ///////////////  Main loop
     
-    if (pars.solver=="GD") {
-        gd_solver(baseData,pars,timeStep,stage, mainSys);
-    }else if (pars.solver=="FIRE"){
-        fire_solver(baseData,pars,timeStep, mainSys);
-    }else if (pars.solver=="FIRE2"){
-        fire2_solver(baseData,pars,timeStep, mainSys);
+    if (pars.runMode=="compress") {
+        compress(baseData, pars, timeStep , mainSys);
+    }else if (pars.runMode=="stepShear"){
+        stepshear(baseData, pars, timeStep , mainSys);
     }
-    
     
     return 0;
     

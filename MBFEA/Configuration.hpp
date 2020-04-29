@@ -193,9 +193,9 @@ public:
 
     void nts_find_closest_approach(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
 
-    void shear(const BaseSysData& baseData, const Parameters& pars, double strain);
+    void affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain);
     void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);
-    void compress(const BaseSysData& baseData, const Parameters& pars, double strain);
+    void affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);
     void dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose);  //mode: "w" for writing or "a" for appending. purpose: "i" for inspection or "f" for final results
     

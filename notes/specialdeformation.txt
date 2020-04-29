@@ -1,0 +1,66 @@
+//    else if (pars.runMode=="special"){  //  compressing ***********************************************************************************************
+//        while (1)
+//        {
+//
+//            std::cout << timeStep << std::endl;
+//
+//            if (timeStep==0){
+//                mainSys.special_localized_deformation(baseData, pars, pars.gammaX, pars.gammaY, pars.targetNodes);
+//            }
+//
+//
+//            // Take an Euler step
+//            if (pars.boundaryType == "walls"){
+//                mainSys.compute_forces_pbc(baseData, pars, timeStep, 0, 1,0);
+//            }else if (pars.boundaryType == "periodic"){
+//                mainSys.compute_forces_pbc(baseData, pars, timeStep, 0, 1,0);
+//            }
+//            for(int nodeID: pars.targetNodes){
+//                mainSys.forceX(nodeID) = 0;
+//                mainSys.forceY(nodeID) = 0;
+//            }
+//            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
+//            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
+////            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() -               mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-                 mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
+////            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
+////                // updated curPos AtLastGridUpdate
+////                mainSys.curPosXAtLastStep = mainSys.curPosX;
+////                mainSys.curPosYAtLastStep = mainSys.curPosY;
+////            }
+////
+//
+//
+//            // Postporcesseing calculations
+//            mainSys.update_post_processing_data(baseData, pars);
+//
+//
+//            //dump
+//            mainSys.dump_global_data(pars, 'a', 'i');
+////            if (timeStep % pars.dumpEvery == 0) {
+////                mainSys.check_force_energy_consistency(baseData, pars);
+////                mainSys.dump_per_node(baseData, pars, timeStep);
+////                mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+////                mainSys.dump_per_ele(baseData, pars,timeStep);
+////                plotWithPython(timeStep);
+////            }
+//
+//
+//            timeStep++;
+////            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+////            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
+////            std::cout << "phi  " << mainSys.phi << std::endl;
+////            std::cout << "deltaEnergy  " << mainSys.deltaTotEnergy << std::endl;
+////            std::cout << "deltaEnergy/dt  " << mainSys.deltaTotEnergy/pars.dt << std::endl;
+////            std::cout << "L2NormResidual  " << mainSys.L2NormResidual << std::endl;
+//
+//            std::cout << "\n" << std::endl;
+//
+//            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50000.0){
+//                std::cout << "Foce condition met !" << std::endl;
+//                break;
+//            }
+//            if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
+//                std::cout << "System blew up !" << std::endl;
+//                break;
+//            }
+//        }
