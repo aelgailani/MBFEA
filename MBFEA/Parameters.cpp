@@ -126,11 +126,11 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
             FIRE_dtmax = c;
         }
         else if (a=="FIRE_N_positive_min") {
-            split >> c;
-            FIRE_N_positive_min = c;
+            split >> l;
+            FIRE_N_positive_min = l;
         }else if (a=="FIRE_N_negative_max") {
-            split >> c;
-            FIRE_N_negative_max = c;
+            split >> l;
+            FIRE_N_negative_max = l;
         }else if (a=="FIRE_Nmax") {
             split >> l;
             FIRE_Nmax = l;
@@ -157,15 +157,15 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="FIRE_intialdelay") {
         split >> trueFalse;
         FIRE_intialdelay = trueFalse;
-        }else if (a=="RTolerance") {
+        }else if (a=="FIRE_RTolerance") {
             split >> c;
-            RTolerance = c;
-        }else if (a=="numStrainSteps") {
+            FIRE_RTolerance = c;
+        }else if (a=="FIRE_numStrainSteps") {
             split >> d;
-            numStrainSteps = d;
-        }else if (a=="startingStrainStep") {
+            FIRE_numStrainSteps = d;
+        }else if (a=="FIRE_startingStrainStep") {
             split >> l;
-            startingStrainStep = l;
+            FIRE_startingStrainStep = l;
         }else if (a=="targetNodes") {
             while(split >> d){
                 targetNodes.push_back(d);
@@ -216,14 +216,20 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="ntnLjScale") {
         split >> c;
         ntnLjScale = c;
+        }else if (a=="ntnRcutoff") {
+        split >> c;
+        ntnRcutoff = c;
         }else if (a=="integrator") {
         split >> d;
         integrator = d;
+        }else if (a=="gntn_NGhostNodes") {
+        split >> d;
+        gntn_NGhostNodes = d;
         }
         
         
     }
-    //    identifyAndDumbFacets
+    //    ioverwtire are parameter recieved as console argumentsa
     if (runModeOverWrite=="stepShear"){
         runMode = "stepShear";
         startingMode = "restart";
@@ -252,11 +258,12 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
 
 
 void Parameters::print_to_console(void) const {
+    
     printit("kTOverOmega", kTOverOmega);
     printit("NkT",NkT);
     printit("chi",chi);
-    printit("verletCellCutoff",verletCellCutoff);
-    printit("initialStretch",initialStretch);
+    printit("Ap",Ap);
+    
     printit("dumpEvery",dumpEvery);
     printit("splitDataEvery",splitDataEvery);
     printit("startingTimeStep",startingTimeStep);
@@ -264,40 +271,85 @@ void Parameters::print_to_console(void) const {
     printit("surfaceNodesFileName",surfaceNodesFileName);
     printit("trianglesFileName",trianglesFileName);
     printit("initialNodesFileName",initialNodesFileName);
-    printit("boundaryType",boundaryType);
-    printit("imagesMargin",imagesMargin);
+    
     printit("initTopPos",initTopPos);
     printit("initBotPos",initBotPos);
     printit("initRightPos",initRightPos);
     printit("initLeftPos",initLeftPos);
-    printit("deformationRate",deformationRate);
-    printit("targetPhi",targetPhi);
-    printit("dt",dt);
-    printit("wallStyle",wallStyle);
-    printit("HWallStiffness",HWallStiffness);
-    printit("PLWallEnergyScale",PLWallEnergyScale);
-    printit("PLWallLJScale",PLWallLJScale);
-    printit("penaltyStiffness",ntsHarmonicPenaltyStiffness);
-    printit("Ap",Ap);
-    printit("runMode",runMode);
-    printit("startingMode",startingMode);
-    printit("restartFile",restartFile);
-    printit("targetShear",targetShear);
-    printit("maxForceTol",maxForceTol);
+    
+    
+    
+    
     printit("solver",solver);
-    printit("numStrainSteps",numStrainSteps);
-    printit("startingStrainStep",startingStrainStep);
-    printit("segmentCellMethod",segmentCellMethod);
-    printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
-    printit("callPythonPlot",callPythonPlot);
-    printit("calculateHessian",callPythonPlot);
-    printit("identifyAndDumbFacets",identifyAndDumbFacets);
-    printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
-    printit("contactMethod", contactMethod);
-    printit("repulseEnergy", ntnRepulseEnergy);
-    printit("ljScale", ntnLjScale);
+    if (solver=="GD"){
+        printit("deformationRate",deformationRate);
+        printit("dt",dt);
+        printit("maxForceTol",maxForceTol);
+    }else if (solver=="FIRE2" || solver=="FIRE"){
+        printit("FIRE_dtmax",FIRE_dtmax);
+        printit("FIRE_Nmax",FIRE_Nmax);
+        printit("FIRE_finc",FIRE_finc);
+        printit("FIRE_fdec",FIRE_fdec);
+        printit("FIRE_alpha_start",FIRE_alpha_start);
+        printit("FIRE_falpha",FIRE_falpha);
+        printit("FIRE_dt_start",FIRE_dt_start);
+        printit("FIRE_RTolerance",FIRE_RTolerance);
+        
+        if (solver=="FIRE2"){
+            printit("FIRE_dtmin",FIRE_dtmin);
+            printit("FIRE_N_negative_max",FIRE_N_negative_max);
+            printit("FIRE_intialdelay",FIRE_intialdelay);
+        }
+    }
+    
     printit("integrator", integrator);
+    
+    printit("runMode",runMode);
+    if (runMode=="compress"){
+        printit("targetPhi",targetPhi);
+        if (startingMode=="new") printit("initialStretch",initialStretch);
+        if (solver=="FIRE2" || solver=="FIRE"){
+            printit("FIRE_numStrainSteps",FIRE_numStrainSteps);
+            printit("FIRE_startingStrainStep",FIRE_startingStrainStep);
+        }
+    }else if (runMode=="stepShear" || runMode=="continuousShear"){
+        printit("targetShear",targetShear);
+    }
+    
+    printit("startingMode",startingMode);
+    if (startingMode=="restart"){
+        printit("restartFile",restartFile);
+    }
+    
+    printit("boundaryType",boundaryType);
+    if (boundaryType=="walls"){
+        printit("wallStyle",wallStyle);
+        printit("HWallStiffness",HWallStiffness);
+        printit("PLWallEnergyScale",PLWallEnergyScale);
+        printit("PLWallLJScale",PLWallLJScale);
+    }else if (boundaryType=="periodic"){
+        printit("imagesMargin",imagesMargin);
+        printit("dumpPeriodicImagesXY",dumpPeriodicImagesXY);
+        
+    }
+    
+    printit("contactMethod", contactMethod);
+    if (contactMethod=="nts"){
+        printit("ntsHarmonicPenaltyStiffness",ntsHarmonicPenaltyStiffness);
+        printit("segmentCellMethod",segmentCellMethod);
+        printit("identifyAndDumbFacets",identifyAndDumbFacets);
+        printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
+        
 
+    }else if (contactMethod=="ntn" || contactMethod=="gntn"){
+        if (contactMethod=="gntn") printit("gntn_NGhostNodes", gntn_NGhostNodes);
+        printit("ntnRepulseEnergy", ntnRepulseEnergy);
+        printit("ntnLjScale", ntnLjScale);
+        printit("ntnRcutoff", ntnRcutoff);
+    }
+    printit("verletCellCutoff",verletCellCutoff);
+    
+    printit("calculateHessian",callPythonPlot);
 
             std::cout << std::endl;
 }
@@ -306,4 +358,8 @@ void Parameters::print_to_console(void) const {
     template <typename T>
 void Parameters::printit(const std::string name,const T v) const {
         std::cout << name+" = " << v << std::endl;
+        std::ofstream logfile;
+        logfile.open (runMode+"-parameters.log", std::ios_base::app);
+        logfile << name+" = " << v << std::endl;
+        logfile.close();
 }

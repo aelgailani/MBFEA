@@ -51,19 +51,19 @@ public:
     double targetShear;
     double maxForceTol;
     double FIRE_dtmax;
-    double FIRE_N_positive_min;
+    long FIRE_N_positive_min;
     double FIRE_finc;
     double FIRE_fdec;
     double FIRE_alpha_start;
     double FIRE_falpha;
     double FIRE_dt_start;
-    double RTolerance;
-    double FIRE_N_negative_max;
+    double FIRE_RTolerance;
+    long FIRE_N_negative_max;
     double FIRE_dtmin;
     bool FIRE_intialdelay;
     long FIRE_Nmax;
-    int numStrainSteps;
-    long startingStrainStep;
+    int FIRE_numStrainSteps;
+    long FIRE_startingStrainStep;
     double  gammaX;
     double  gammaY;
     int segmentCellMethod;
@@ -79,7 +79,9 @@ public:
     double ntsPowerlawRepulseEnergy;
     double ntsPowerlawLjScale;
     double ntnLjScale;
+    double ntnRcutoff;
     int integrator;
+    int gntn_NGhostNodes;
     void print_to_console(void) const;
     
 };

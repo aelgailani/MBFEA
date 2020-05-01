@@ -151,7 +151,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
     //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
-        compute_surface_forces(baseData,pars,Hessian, timeStep);
+        contact_forces(baseData,pars,Hessian, timeStep);
     }
     
 //    auto finish16 = std::chrono::high_resolution_clock::now();
@@ -163,7 +163,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
 //    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
 //    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
-    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
+   
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;

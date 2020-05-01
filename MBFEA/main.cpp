@@ -10,12 +10,12 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <iomanip>
-//#include <chrono>
 #include "Parameters.hpp"
 #include "standard_runs.hpp"
 #include "BaseSysData.hpp"
 #include "Configuration.hpp"
 #include "solvers.hpp"
+#include <time.h>
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +64,24 @@ int main(int argc, char* argv[])
     
     //Read parameters
     const Parameters pars(inputFileName, inputRestartFolder, runMode, restartStep);
+    
+    // print time to log file
+    std::ofstream logfile;
+    logfile.open (pars.runMode+"-parameters.log", std::ios_base::app);
+    std::time_t t = std::time(0);   // get time now
+    tm* localtm = std::localtime(&t);
+    if (pars.runMode=="stepShear"){
+        if (restartStep=="none") restartStep=pars.restartFile;
+        logfile << std::endl << std::endl << "step  " << restartStep << "------ " << asctime(localtm) << std::endl;
+    }else{
+       logfile << std::endl << std::endl << "------ " << asctime(localtm) << std::endl;
+    }
+    
+   
+    logfile.close();
     pars.print_to_console();
+    
+    
         //Open/create directory to dump the outputs
     if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") )
     {    DIR* dir = opendir(pars.outputFolderName.c_str());

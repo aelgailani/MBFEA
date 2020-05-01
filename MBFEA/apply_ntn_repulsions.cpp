@@ -61,6 +61,12 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                            double dyij = augmentedCurPosY[jNode] - augmentedCurPosY[iNode];
                            double drijSq = pow(dxij,2)+ pow(dyij,2);
                            double drij = sqrt(drijSq);
+                           
+                           if (drij > pars.ntnRcutoff){
+                               jNodeId = nodesLinkedList[jNodeId];
+                               continue;
+                           } 
+                           
                            double forceij=0.5*pars.ntnRepulseEnergy/pars.ntnLjScale*12*pow((pars.ntnLjScale/drij),13);
                            
                            double forceXij = forceij*dxij/drij;

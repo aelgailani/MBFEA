@@ -115,7 +115,8 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
         cellsHeads.resize(numXCells*numYCells, 2);
         cellsHeads.fill(-1);
         update_cells_2(baseData, pars);
-        apply_ghost_nodes_to_node_repulsions( baseData, pars, Hessian, timeStep);
+        
+        apply_ghost_nodes_to_node_repulsions_v2( baseData, pars, Hessian, timeStep);
 
         
     }else{

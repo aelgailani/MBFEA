@@ -222,7 +222,7 @@ BaseSysData::BaseSysData(const Parameters& pars){
      surfaceSegments[segmentID] = {firstNodeID, secondNodeID, meshID, prevSegid, nextSegID}
      nodeToSegments[nodeID] = {firstNodeID, secondNodeID, meshID, prevSegid, nextSegID}
      */
-    if (pars.contactMethod=="nts"){
+    if (pars.contactMethod=="nts" || pars.contactMethod=="gntn" || pars.contactMethod=="gntn2"  ){
         surfaceSegments.resize(numSurfaceNodes,std::vector<int>(5));
         nodeToSegments.resize(numNodes,std::vector<int>(3,999999999));
         int segmentID = 0;

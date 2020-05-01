@@ -51,9 +51,9 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
-            std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "e0  " << mainSys.e0 << std::endl;
-            std::cout << "e1  " << mainSys.e1 << std::endl;
+//            std::cout << "phi  " << mainSys.phi << std::endl;
+//            std::cout << "e0  " << mainSys.e0 << std::endl;
+//            std::cout << "e1  " << mainSys.e1 << std::endl;
             std::cout << "\n" << std::endl;
     
             if ( mainSys.maxR<=pars.maxForceTol){
@@ -74,9 +74,10 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             }
             
             // Take explicit Euler step
-            explicit_Euler(mainSys, pars.dt, 0, 0, 0, 0);
+        mainSys.curPosX += mainSys.forceX * pars.dt;
+        mainSys.curPosY += mainSys.forceY *  pars.dt;
         
-            timeStep++;
+        timeStep++;
 }
 
 

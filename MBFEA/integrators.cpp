@@ -48,7 +48,7 @@ void explicit_Euler(Configuration& mainSys, double dt, bool FIRE=false, double p
     }else{
 
         mainSys.curPosX += mainSys.forceX* dt;
-        mainSys.curPosX += mainSys.forceY* dt;
+        mainSys.curPosY += mainSys.forceY* dt;
     }
    
     

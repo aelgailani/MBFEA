@@ -28,22 +28,22 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
     
     if (pars.solver=="FIRE2"){
         
-        assert(pars.startingStrainStep <= pars.numStrainSteps);
+        assert(pars.FIRE_startingStrainStep <= pars.FIRE_numStrainSteps);
         
-        for (long strainStep = pars.startingStrainStep ; strainStep<= pars.numStrainSteps ; strainStep++) {
+        for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
-            double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.numStrainSteps); // the required phi of this step as a fraction of the required target phi
+            double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
             double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
             
             std::cout << timeStep << std::endl;
-            std::cout << "phi  <<" << mainSys.phi << "  target is" << pars.targetPhi << std::endl;
-            std::cout << "e0  <<" << mainSys.phi << "  target is" << target_e0 << std::endl;
+            std::cout << "phi  " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+            std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
             
             mainSys.affine_compression(baseData, pars, relativeStrain);
             
-            fire2_solver(baseData, pars, timeStep , mainSys);
+            fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
             
-            if (mainSys.maxR > pars.RTolerance){
+            if (mainSys.maxR > pars.FIRE_RTolerance){
                  std::cout << " Failed to coverge !" << std::endl;
 
              }else{
@@ -62,8 +62,8 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
         while(1){
             
             std::cout << timeStep << std::endl;
-            std::cout << "phi  <<" << mainSys.phi << "  target is" << pars.targetPhi << std::endl;
-            std::cout << "e0  <<" << mainSys.phi << "  target is" << target_e0 << std::endl;
+            std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+            std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
 
             gd_solver(baseData,pars,timeStep, mainSys);
           
@@ -89,9 +89,9 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            
            mainSys.affine_axial_shearing(baseData, pars, pars.targetShear);
             
-           fire2_solver(baseData, pars, timeStep , mainSys);
+           fire2_solver(baseData, pars, timeStep , mainSys, stage);
             
-            if (mainSys.maxR > pars.RTolerance){
+            if (mainSys.maxR > pars.FIRE_RTolerance){
                  std::cout << " Failed to coverge !" << std::endl;
                  exit(1);
              }else{

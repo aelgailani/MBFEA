@@ -119,7 +119,7 @@ void Configuration::compute_forces_harmonic_walls(const BaseSysData& baseData, c
     
     //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
-        compute_surface_forces(baseData,pars,Hessian, timeStep);
+        contact_forces(baseData,pars,Hessian, timeStep);
     }
     
     //apply hamonic repulsion to boudary nodes

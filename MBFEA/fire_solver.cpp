@@ -26,13 +26,13 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
     double scale1;
     double scale2;
     if (pars.runMode=="compress"){
-        assert(pars.startingStrainStep <= pars.numStrainSteps);
+        assert(pars.FIRE_startingStrainStep <= pars.FIRE_numStrainSteps);
         double refPhi = pars.Ap/(baseData.lxRef*baseData.lyRef);
         double target_e0 = - log(sqrt(pars.Ap/(pars.targetPhi*baseData.lxRef*baseData.lyRef))); // my conviension is positive e0 for compression
 
-        for (long strainStep = pars.startingStrainStep ; strainStep<= pars.numStrainSteps ; strainStep++) {
+        for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
-            double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.numStrainSteps); // the required phi of this step as a fraction of the required target phi
+            double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
             double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
             mainSys.affine_compression(baseData, pars, relativeStrain);
 
@@ -50,14 +50,14 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                 mainSys.update_post_processing_data(baseData, pars);
                 
                 std::cout << "timeStep  " << timeStep << std::endl;
-                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.numStrainSteps <<std::endl;
+                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.FIRE_numStrainSteps <<std::endl;
                 std::cout << "e0  " << mainSys.e0 << ", target is  " << target_e0 <<std::endl;
                 std::cout << "phi  " << mainSys.phi << ", target is  " << pars.targetPhi <<std::endl;
                 std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;
                 std::cout << "avgForce  " << mainSys.avgR << std::endl;
                 
-                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.RTolerance){
+                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.FIRE_RTolerance){
                     std::cout << "Foce condition met !" << std::endl;
                     break;
                 }
@@ -147,7 +147,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;
                 std::cout << "avgForce  " << mainSys.avgR << std::endl;
                 
-                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.RTolerance){
+                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.FIRE_RTolerance){
                    std::cout << "Foce condition met !" << std::endl;
                    break;
                 }

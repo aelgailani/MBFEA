@@ -17,7 +17,7 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep , Configuration& mainSys){
+void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep , Configuration& mainSys, long step){
     
     // simple parameters validation
     if (pars.FIRE_dtmax < pars.FIRE_dtmin) {
@@ -36,13 +36,14 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
     
     // initialize some varialbles
     double FIRE_alpha = pars.FIRE_alpha_start;
-    double FIRE_N_positive=0;
-    double FIRE_N_negative=0;
+    long FIRE_N_positive=0;
+    long FIRE_N_negative=0;
     double FIRE_dt = pars.FIRE_dt_start;
     double FdotF;
     double VdotV;
     double scale1=0;
     double scale2=0;
+    double vmax=0;
     
     // initialize the system
     if (pars.boundaryType == "walls"){
@@ -63,7 +64,9 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
 
 
     for (long i=1; i<= pars.FIRE_Nmax; i++) {
-       
+        
+        std::cout << "step  " << step << "\n" << std::endl;
+        std::cout << "timeStep  " << timeStep << std::endl;
 
         if (pars.boundaryType == "walls"){
             mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
@@ -74,15 +77,9 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         mainSys.update_post_processing_data(baseData, pars);
         
-        std::cout << "timeStep  " << timeStep << std::endl;
-        std::cout << "e0  " << mainSys.e0 << std::endl;
-        std::cout << "e1  " << mainSys.e1 << std::endl;
-        std::cout << "phi  " << mainSys.phi << std::endl;
-        std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
-        std::cout << "maxForce  " << mainSys.maxR << std::endl;
-        std::cout << "avgForce  " << mainSys.avgR << std::endl;
         
-        if (mainSys.maxR <= pars.RTolerance){
+        
+        if (mainSys.maxR <= pars.FIRE_RTolerance){
             std::cout << " Done !" << std::endl;
             break;
         }else if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff())){
@@ -92,6 +89,21 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         double power = mainSys.forceX.dot(mainSys.velocityX) + mainSys.forceY.dot(mainSys.velocityY);
 
+        std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
+        std::cout << "power   " << power <<std::endl;
+        std::cout << "e0  " << mainSys.e0 << std::endl;
+        std::cout << "e1  " << mainSys.e1 << std::endl;
+        std::cout << "phi  " << mainSys.phi << std::endl;
+        std::cout << "maxForce  " << mainSys.maxR << std::endl;
+        std::cout << "avgForce  " << mainSys.avgR << std::endl;
+        std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+        std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+        std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
+        std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
+        std::cout << "FIRE_Np-   " << FIRE_N_negative  <<std::endl;
+        std::cout << "\n" << std::endl;
+        
+        
         if (power >0) {
             FIRE_N_positive +=1;
             FIRE_N_negative =0;
@@ -114,6 +126,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
                 std::cout << " Failed to converge !" << std::endl;
                 break;
             }
+            
             if (!(pars.FIRE_intialdelay && i < pars.FIRE_N_positive_min)){
                 if ( FIRE_dt*pars.FIRE_fdec >= pars.FIRE_dtmin){
                     FIRE_dt*=pars.FIRE_fdec;
@@ -127,20 +140,17 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
             mainSys.velocityY.fill(0);
             
         }
+        vmax= sqrt((mainSys.velocityX.array()*mainSys.velocityX.array()+mainSys.velocityY.array()*mainSys.velocityY.array()).maxCoeff());
         
+        if (vmax*FIRE_dt>pars.verletCellCutoff*0.5){
+            FIRE_dt = pars.verletCellCutoff*0.5/vmax;
+        }
         //MD integration
         if (pars.integrator==0) semi_implicit_Euler(mainSys, FIRE_dt, 1, power, scale1, scale2);
         else if (pars.integrator==1) leapfrog(mainSys, FIRE_dt, 1, power, scale1, scale2);
         else if (pars.integrator==2) explicit_Euler(mainSys, FIRE_dt, 1, power, scale1, scale2);
         else if (pars.integrator==3) velocity_Verlet(mainSys, FIRE_dt, 1, power, scale1, scale2);
         
-        
-        std::cout << "power   " << power <<std::endl;
-        std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
-        std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
-        std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
-        std::cout << "FIRE_Np-   " << FIRE_N_negative  <<std::endl;
-        std::cout << "\n" << std::endl;
         
         timeStep++;
         
