@@ -41,7 +41,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                 
 
                 if (pars.boundaryType == "walls"){
-                    mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                    mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
                 }else if (pars.boundaryType == "periodic"){
                     mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
                 }
@@ -133,7 +133,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
             {
                 
                 if (pars.boundaryType == "walls"){
-                    mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                    mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
                 }else if (pars.boundaryType == "periodic"){
                     mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
                 }

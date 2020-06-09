@@ -75,15 +75,20 @@ public:
     bool reversibleMasterSlaveRole;
     std::string contactMethod;
     std::string ntsPenaltyMethod;
-    double ntnRepulseEnergy;
+    double ntnPLEnergy;
     double ntsPowerlawRepulseEnergy;
     double ntsPowerlawLjScale;
-    double ntnLjScale;
-    double ntnRcutoff;
+    double ntnRadius;
+    double ntnPLRcutoff;
+    std::string ntnRepulsionMethod;
+    double ntnHStiffness;
+    
     int integrator;
     int gntn_NGhostNodes;
     void print_to_console(void) const;
     
+    double targetPressure;
+    double shearTo;
 };
 
 #endif /* Parameters_hpp */

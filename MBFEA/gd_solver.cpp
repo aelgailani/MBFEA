@@ -24,11 +24,11 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, Configuration& mainSys){
+void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, Configuration& mainSys, bool dumpStateData){
 
             // calculate forces and energy of the current configuration of the system
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
             } else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
@@ -37,7 +37,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             //dump
             mainSys.dump_global_data(pars, timeStep, "append", "running");
             
-            if (timeStep % pars.dumpEvery == 0) {
+            if (dumpStateData==true && timeStep % pars.dumpEvery == 0) {
                 mainSys.dump_per_node(baseData, pars, timeStep);
                 mainSys.dump_per_ele(baseData, pars,timeStep);
                 if (pars.dumpPeriodicImagesXY){

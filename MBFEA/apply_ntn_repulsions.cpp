@@ -62,32 +62,69 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                            double drijSq = pow(dxij,2)+ pow(dyij,2);
                            double drij = sqrt(drijSq);
                            
-                           if (drij > pars.ntnRcutoff){
-                               jNodeId = nodesLinkedList[jNodeId];
-                               continue;
-                           } 
-                           
-                           double forceij=0.5*pars.ntnRepulseEnergy/pars.ntnLjScale*12*pow((pars.ntnLjScale/drij),13);
-                           
-                           double forceXij = forceij*dxij/drij;
-                           double forceYij = forceij*dyij/drij;
-        
-                           if (iNode<=baseData.numOriginalNodes){
-                               forceX(iNode) = forceX(iNode)-forceXij;
-                               forceY(iNode) = forceY(iNode)-forceYij;
-                               surfaceForceX(iNode) = surfaceForceX(iNode)-forceXij;
-                               surfaceForceY(iNode) = surfaceForceY(iNode)-forceYij;
-                           }
-                           if (jNode<=baseData.numOriginalNodes){
-                               forceX(jNode) = forceX(jNode)+forceXij;
-                               forceY(jNode) = forceY(jNode)+forceYij;
-                               surfaceForceX(jNode) = surfaceForceX(jNode)+forceXij;
-                               surfaceForceY(jNode) = surfaceForceY(jNode)+forceYij;
-                           }
+                           if (pars.ntnRepulsionMethod=="powerlaw"){
                                
-                    
-                           nodeIinteractions++ ;
-                           contactsEnergy+=0.5*pars.ntnRepulseEnergy*pow((pars.ntnLjScale/drij),12);
+                               if (drij > pars.ntnPLRcutoff){
+                                   jNodeId = nodesLinkedList[jNodeId];
+                                   continue;
+                               }
+                               
+                               double forceij=0.5*pars.ntnPLEnergy/pars.ntnRadius*12*pow((pars.ntnRadius/drij),13);
+                               double forceXij = forceij*dxij/drij;
+                               double forceYij = forceij*dyij/drij;
+                               
+                               if (iNode<=baseData.numOriginalNodes){
+                                          forceX(iNode) = forceX(iNode)-forceXij;
+                                          forceY(iNode) = forceY(iNode)-forceYij;
+                                          surfaceForceX(iNode) = surfaceForceX(iNode)-forceXij;
+                                          surfaceForceY(iNode) = surfaceForceY(iNode)-forceYij;
+                                      }
+                                      if (jNode<=baseData.numOriginalNodes){
+                                          forceX(jNode) = forceX(jNode)+forceXij;
+                                          forceY(jNode) = forceY(jNode)+forceYij;
+                                          surfaceForceX(jNode) = surfaceForceX(jNode)+forceXij;
+                                          surfaceForceY(jNode) = surfaceForceY(jNode)+forceYij;
+                                      }
+                                          
+                               
+                                      nodeIinteractions++ ;
+                                      contactsEnergy+=0.5*pars.ntnPLEnergy*pow((pars.ntnRadius/drij),12);
+                               
+                           }else if (pars.ntnRepulsionMethod=="harmonic") {
+                               double d = 2*pars.ntnRadius - drij;
+                               
+                               if (d<=0){
+                                   jNodeId = nodesLinkedList[jNodeId];
+                                   continue;
+                               }
+                               
+                               double forceij = pars.ntnHStiffness*d;
+                               double forceXij = forceij*dxij/drij;
+                               double forceYij = forceij*dyij/drij;
+                               
+                               if (iNode<=baseData.numOriginalNodes){
+                                          forceX(iNode) = forceX(iNode)-forceXij;
+                                          forceY(iNode) = forceY(iNode)-forceYij;
+                                          surfaceForceX(iNode) = surfaceForceX(iNode)-forceXij;
+                                          surfaceForceY(iNode) = surfaceForceY(iNode)-forceYij;
+                                      }
+                                      if (jNode<=baseData.numOriginalNodes){
+                                          forceX(jNode) = forceX(jNode)+forceXij;
+                                          forceY(jNode) = forceY(jNode)+forceYij;
+                                          surfaceForceX(jNode) = surfaceForceX(jNode)+forceXij;
+                                          surfaceForceY(jNode) = surfaceForceY(jNode)+forceYij;
+                                      }
+                                          
+                               
+                                      nodeIinteractions++ ;
+                                      contactsEnergy+=0.5*pars.ntnHStiffness*pow(d,2);
+                               
+                           }
+                           
+                           
+                           
+        
+                           
                            
                            jNodeId = nodesLinkedList[jNodeId];
 

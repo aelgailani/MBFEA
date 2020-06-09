@@ -201,6 +201,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="ntsPenaltyMethod") {
         split >> f;
         ntsPenaltyMethod = f;
+        }else if (a=="ntnRepulsionMethod") {
+        split >> f;
+        ntnRepulsionMethod = f;
         }else if (a=="ntsHarmonicPenaltyStiffness") {
             split >> c;
             ntsHarmonicPenaltyStiffness = c;
@@ -209,22 +212,31 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         ntsPowerlawRepulseEnergy = c;
         }else if (a=="ntnRepulseEnergy") {
         split >> c;
-        ntnRepulseEnergy = c;
+        ntnPLEnergy = c;
         }else if (a=="ntsPowerlawLjScale") {
             split >> c;
             ntsPowerlawLjScale = c;
-        }else if (a=="ntnLjScale") {
+        }else if (a=="ntnRadius") {
         split >> c;
-        ntnLjScale = c;
-        }else if (a=="ntnRcutoff") {
+        ntnRadius = c;
+        }else if (a=="ntnHStiffness") {
         split >> c;
-        ntnRcutoff = c;
+        ntnHStiffness = c;
+        }else if (a=="ntnPLRcutoff") {
+        split >> c;
+        ntnPLRcutoff = c;
         }else if (a=="integrator") {
         split >> d;
         integrator = d;
         }else if (a=="gntn_NGhostNodes") {
         split >> d;
         gntn_NGhostNodes = d;
+        }else if (a=="targetPressure") {
+            split >> c;
+            targetPressure = c;
+        }else if (a=="shearTo") {
+            split >> c;
+            shearTo = c;
         }
         
         
@@ -234,14 +246,14 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         runMode = "stepShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = inputRestartFolder+"/data_per_node-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
         
     }
     if (runModeOverWrite=="contineousShear"){
         runMode = "contineousShear";
         startingMode = "restart";
         startingTimeStep = std::stoi(restartStepOverwrite);
-        restartFile = inputRestartFolder+"/data_per_node-"+restartStepOverwrite+".txt";
+        restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
     }
     if (outputFolderName=="auto"){
         outputFolderName = runMode;
@@ -314,6 +326,9 @@ void Parameters::print_to_console(void) const {
         }
     }else if (runMode=="stepShear" || runMode=="continuousShear"){
         printit("targetShear",targetShear);
+    }else if (runMode=="special"){
+        printit("targetPressure",targetPressure);
+        printit("shearTo",shearTo);
     }
     
     printit("startingMode",startingMode);
@@ -343,9 +358,14 @@ void Parameters::print_to_console(void) const {
 
     }else if (contactMethod=="ntn" || contactMethod=="gntn"){
         if (contactMethod=="gntn") printit("gntn_NGhostNodes", gntn_NGhostNodes);
-        printit("ntnRepulseEnergy", ntnRepulseEnergy);
-        printit("ntnLjScale", ntnLjScale);
-        printit("ntnRcutoff", ntnRcutoff);
+        if (ntnRepulsionMethod == "powerlaw"){
+            printit("ntnPLEnergy", ntnPLEnergy);
+            printit("ntnRadius", ntnRadius);
+            printit("ntnPLRcutoff", ntnPLRcutoff);
+        }else if (ntnRepulsionMethod == "harmonic"){
+            printit("ntnHStiffness", ntnHStiffness);
+            printit("ntnRadius", ntnRadius);
+        }
     }
     printit("verletCellCutoff",verletCellCutoff);
     

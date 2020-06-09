@@ -19,7 +19,7 @@
 
 int main(int argc, char* argv[])
 {
-   
+
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     
     
         //Open/create directory to dump the outputs
-    if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") )
+    if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") || (pars.startingMode == "restart" && pars.runMode == "special"))
     {    DIR* dir = opendir(pars.outputFolderName.c_str());
         if (dir)
         {
@@ -160,9 +160,16 @@ int main(int argc, char* argv[])
         compress(baseData, pars, timeStep , mainSys);
     }else if (pars.runMode=="stepShear"){
         stepshear(baseData, pars, timeStep , mainSys);
+    }else if (pars.runMode=="special"){
+        if(pars.solver=="FIRE2"){
+            shear_special_FIRE(baseData, pars, timeStep , mainSys);
+        }else if (pars.solver=="GD"){
+            shear_special_GD(baseData, pars, timeStep, mainSys);
+        }
     }
     
     return 0;
     
 }
+
 

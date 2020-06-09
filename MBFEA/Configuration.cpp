@@ -28,6 +28,15 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lxCur =  baseData.lxRef;
         lyNew = lyCur;
         lxNew = lxCur;
+        
+        triAy=topPos;
+        triBx=leftPos;
+        triCx=rightPos;
+        triBy=botPos;
+        triCy=botPos;
+        triAx=0.5*(triCx + triBx);
+        height = triAy - triBy;
+        base = triCx - triBx;
 
 
     }else if (pars.startingMode=="restart")  {
@@ -81,6 +90,16 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             lyCur = topPos - botPos;
             lyNew = lyCur;
             lxNew = lxCur;
+            
+            triAy=topPos;
+            triBx=leftPos;
+            triCx=rightPos;
+            triBy=botPos;
+            triCy=botPos;
+            triAx=0.5*(triCx + triBx);
+            height = triAy - triBy;
+            base = triCx - triBx;
+            
             std::getline(inFile, line);
             int id = 0;
             curPosX.resize(baseData.numOriginalNodes);
@@ -138,6 +157,8 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                 lyCur = topPos - botPos;
                 lyNew = lyCur;
                 lxNew = lxCur;
+            
+                
             
                 std::getline(inFile, line);
                 std::getline(inFile, line);
@@ -270,8 +291,6 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     }
 }
 
-
-
 void Configuration::update_post_processing_data(const BaseSysData& baseData, const Parameters& pars){
     
     maxR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).maxCoeff());
@@ -311,424 +330,8 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     prev_S2 = S2;
 }
 
-void Configuration::dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose){
-    std::string fname ;
-    std::string first = std::to_string(timeStep/pars.splitDataEvery*pars.splitDataEvery);
-    std::string last =std::to_string(timeStep/pars.splitDataEvery*pars.splitDataEvery+pars.splitDataEvery-1);
-    
-    
-    if (purpose=="running"){
-        fname = "/data-steps-"+first+"-"+last+".txt";
-    }else if (purpose=="final"){
-        fname = "/final-data.txt";
-    }
-   
-    if (mode=="write" || first != lastStepFirst){
-        std::ofstream dataFile;
-        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname);
-        }else{
-            dataFile.open (pars.outputFolderName+fname);
-        }
-        dataFile
-        <<  "step"  << std::setw(30)
-        <<  "totalEnergy"  << std::setw(20)
-        <<  "contactEnergy"  << std::setw(20)
-        <<  "shearVirial"  << std::setw(20)
-        <<  "pressureVirial"  << std::setw(20)
-        <<  "maxResidualF"  << std::setw(20)
-        <<  "pressure1"  << std::setw(20)
-        <<  "pressure2"  << std::setw(20)
-        <<  "KWpressure2"  << std::setw(20)
-        <<  "shearStress1"  << std::setw(20)
-        <<  "shearStress2"  << std::setw(20)
-        <<  "KWshearStress2"  << std::setw(20)
-        <<  "boxArea"  << std::setw(20)
-        <<  "materialArea"  << std::setw(20)
-        <<  "phi"  << std::setw(20)
-        <<  "e0"  << std::setw(20)
-        <<  "e1" << std::setw(20)
-        <<  "DPOverDe0" << std::setw(20)
-        <<  "DSOverDe1qq" << std::setw(20)
-        <<  "dt" << std::setw(20)
-        <<  "defRate" << std::setw(20)
-        <<  "penalty" << std::endl;
-        dataFile.close();
-        
-        
-    }else if (mode=="append"){
-        std::ofstream dataFile;
-        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname,  std::ios_base::app);
-        }else{
-            dataFile.open (pars.outputFolderName+fname,  std::ios_base::app);
-        }
-        dataFile << std::setprecision(9)
-        <<  timeStep  << std::setw(30)
-        <<  totalEnergy  << std::setw(20)
-        <<  contactsEnergy  << std::setw(20)
-        <<  shearVirial  << std::setw(20)
-        <<  pressureVirial  << std::setw(20)
-        <<  maxR  << std::setw(20)
-        <<  P1  << std::setw(20)
-        <<  P2  << std::setw(20)
-        <<  (KWoodYY+KWoodXX)/(2*LX*LY)  << std::setw(20)
-        <<  S1  << std::setw(20)
-        <<  S2  << std::setw(20)
-        <<  (KWoodYY-KWoodXX)/(2*LX*LY)   << std::setw(20)
-        <<  A  << std::setw(20)
-        <<  A_material  << std::setw(20)
-        <<  phi  << std::setw(20)
-        <<  e0  << std::setw(20)
-        <<  e1 << std::setw(20)
-        <<  DPOverDe0 << std::setw(20)
-        <<  DSOverDe1 << std::setw(20)
-        <<  pars.dt  << std::setw(20)
-        <<  pars.deformationRate  << std::setw(20)
-        <<  pars.ntsHarmonicPenaltyStiffness << std::endl;
-        dataFile.close();
-        
-        
-    }
-    
-   lastStepFirst = first;
-}
 
 
-void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
-    std::string step = std::to_string(timeStep);
-    std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-"+step+".txt").c_str());
-    }else{
-        myfile.open (pars.outputFolderName+"/data-per-node-"+step+".txt");
-    }
-    
-    myfile << "Basic_data:" << std::endl;
-    myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "number_of_nodes" << "\t" << baseData.numOriginalNodes << std::endl;
-    myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
-    myfile << "phi" << "\t" << phi << std::endl;
-    myfile << "e0_strain" << "\t" << e0 << std::endl;
-    myfile << "e1_strain" << "\t" << e1 << std::endl;
-    myfile << "dt" << "\t" << pars.dt << std::endl;
-    myfile << "max_residual" << "\t" << maxR << std::endl;
-    myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
-    myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
-    myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
-    myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< "\n"  << std::endl;
-    myfile << "Nodes_data:" << std::endl;
-    myfile
-    << "id"  << std::setw(20)
-    <<  "x"  << std::setw(20)
-    <<  "y"  << std::setw(20)
-    <<  "fx"  << std::setw(20)
-    <<  "fy"  << std::setw(20)
-    <<  "contactFx"  << std::setw(20)
-    <<  "contactFy"  << std::endl;
-    
-    for (int i=0; i<curPosX.size();i++ ) {
-        myfile
-        <<  std::setprecision(9)
-        << i << std::setw(20)
-        << curPosX[i] << std::setw(20)
-        << curPosY[i] << std::setw(20)
-        << forceX[i] << std::setw(20)
-        << forceY[i] << std::setw(20)
-        << surfaceForceX[i] << std::setw(20)
-        << surfaceForceY[i] << std::endl;
-    }
-    
-    myfile.close();
-
-}
-
-void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
-    std::string step = std::to_string(timeStep);
-    std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-periodic-"+step+".txt").c_str());
-    }else{
-        myfile.open (pars.outputFolderName+"/data-per-node-periodic-"+step+".txt");
-    }
-    myfile << "Basic_data:" << std::endl;
-    myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "number_of_augmented_nodes" << "\t" << baseData.numNodes << std::endl;
-    myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
-    myfile << "effective_simulation_box_left_boundary" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
-    myfile << "effective_simulation_box_bot_boundary" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
-    myfile << "numCellsX" << "\t" << numXCells << std::endl;
-    myfile << "numCellsY" << "\t" << numYCells << std::endl;
-    myfile << "cellSizeX" << "\t" << verletCellSizeX << std::endl;
-    myfile << "cellSizeY" << "\t" << verletCellSizeY <<"\n" << std::endl;
-   
-    myfile << "Nodes_data:" << std::endl;
-    myfile
-    << "id"  << std::setw(20)
-    <<  "x"  << std::setw(20)
-    <<  "y"  << std::setw(20)
-    <<  "fx"  << std::setw(20)
-    <<  "fy"  << std::setw(20)
-    <<  "contactFx"  << std::setw(20)
-    <<  "contactFy"  << std::endl;
-    
-    for (int i=0; i<augmentedCurPosX.size();i++ ) {
-        myfile
-        <<  std::setprecision(9)
-        << i << std::setw(20)
-        << augmentedCurPosX[i] << std::setw(20)
-        << augmentedCurPosY[i] << std::setw(20)
-        << forceX[i % baseData.numOriginalNodes] << std::setw(20)
-        << forceY[i % baseData.numOriginalNodes] << std::setw(20)
-        << surfaceForceX[i % baseData.numOriginalNodes] << std::setw(20)
-        << surfaceForceY[i % baseData.numOriginalNodes] << std::endl;
-    }
-    myfile.close();
-    
-}
-
-
-void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
-    
-    
-    // calculated strains
-    DVxDx = gradX * forceX;
-    DVxDy = gradY * forceX;
-    DVyDx = gradY * forceY;
-    DVyDy = gradY * forceY;
-    
-    
-    std::string step = std::to_string(timeStep);
-    std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-ele-"+step+".txt").c_str());
-    }else{
-        myfile.open (pars.outputFolderName+"/data-per-ele-"+step+".txt");
-    }
-    myfile << "Basic_data:" << std::endl;
-    myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "number_of_elements" << "\t" << baseData.numElements << std::endl;
-    myfile << "internal_energy" << "\t" <<  std::setprecision(9)<< internalEnergy << std::endl;
-    myfile << "contacts_energy" << "\t" <<  std::setprecision(9)<< contactsEnergy << std::endl;
-    myfile << "total_energy" << "\t" <<  std::setprecision(9)<< totalEnergy <<"\n"<< std::endl;
-    myfile << "Elements_data:" << std::endl;
-    myfile
-    <<"id" << std::setw(20)
-    << "refArea" << std::setw(20)
-    << "areaRatio" << std::setw(20)
-    << "FXX" << std::setw(20)
-    << "FXY" << std::setw(20)
-    << "FYX" << std::setw(20)
-    << "FYY" << std::setw(20)
-    << "PK1StressXX" << std::setw(20)
-    << "PK1StressXY" << std::setw(20)
-    << "PK1StressYX" << std::setw(20)
-    << "PK1StressYY" << std::setw(20)
-    << "CStressXX" << std::setw(20)
-    << "CStressXY" << std::setw(20)
-    << "CStressYX" << std::setw(20)
-    << "CStressYY" << std::setw(20)
-    << "DVxDx" << std::setw(20)
-    << "DVxDy" << std::setw(20)
-    << "DVyDx" << std::setw(20)
-    << "DVyDy" << std::setw(20)
-    << "swellingPressure" << std::setw(20)
-    << "elasticEnergy" << std::setw(20)
-    << "mixingEnergy" << std::setw(20)
-    << "internalEnergy" << std::endl;
-
-    for (int i=0; i<refArea.size();i++ ) {
-        myfile
-        << i << std::setw(20)
-        << refArea[i] << std::setw(20)
-        << areaRatio[i] << std::setw(20)
-        << defGradXX[i] << std::setw(20)
-        << defGradXY[i] << std::setw(20)
-        << defGradYX[i] << std::setw(20)
-        << defGradYY[i] << std::setw(20)
-        << PK1stressXX[i] << std::setw(20)
-        << PK1stressXY[i] << std::setw(20)
-        << PK1stressYX[i] << std::setw(20)
-        << PK1stressYY[i] << std::setw(20)
-        << CstressXX[i] << std::setw(20)
-        << CstressXY[i] << std::setw(20)
-        << CstressYX[i] << std::setw(20)
-        << CstressYY[i] << std::setw(20)
-        << DVxDx[i] << std::setw(20)
-        << DVxDy[i] << std::setw(20)
-        << DVyDx[i] << std::setw(20)
-        << DVyDy[i] << std::setw(20)
-        << swellingPressurePerEle[i] << std::setw(20)
-        << elasticEnergyPerEle[i] << std::setw(20)
-        << mixingEnergyPerEle[i] << std::setw(20)
-        << internalEnergyPerEle[i] << std::endl;
-    }
-    
-    myfile.close();
-
-}
-
-
-
-void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
-    
-    
-    //    ifstream stream(file);
-    //    for(auto& kv : stored) {
-    //      stream << kv.second << '\n';
-    //      // Add '\n' character  ^^^^
-    //    }
-    //    stream.close();
-    
-    
-    std::string step = std::to_string(timeStep);
-    std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/facets-"+step+".txt").c_str());
-    }else{
-        myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
-    }
-    myfile << "Basic_data:" << std::endl;
-    myfile << "timeStep" << "\t" << timeStep << std::endl;
-    myfile << "\n" << std::endl;
-    myfile << "Facets_data: (in the smNodes, the first entery is a slave node followed by its masters or master nodes or node, then the next slave node and so forth. Notice that slave nodes never duplicate in a row but master nodes can be shared and hence duplicated. Each slave node has two master nodes at max at one master mesh and a minimum of one.)" << std::endl;
-    myfile
-    <<"sMesh" << std::setw(7)
-    << "mMesh" << std::setw(7)
-    << "smNodes" <<  std::endl;
-
-    for(auto& key : facets) {
-        myfile << std::to_string(key.first.first) << std::setw(7) << std::to_string(key.first.second) << std::setw(7);
-        
-        for (auto& node: key.second) {
-            myfile << std::to_string(node) << std::setw(7);
-        }
-        myfile << std::setw(-7)<< std::endl;
-    }
-    myfile << "EOF";
-    myfile.close();
-
-}
-
-
-
-void Configuration::affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain){
-    
-    std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
-    
-    lxNew=lxCur * exp(-strain); // remember the is a a negative sign in the passed strain for cosmetics only so strain = log(Lcur/Lnew) where conventionaly it is log(Lnew/Lcur)
-    lyNew=lyCur * exp(-strain);
-
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
-    
-    // Apply an affine deformation to all nodal positions keeping the cell center fixed.
-    curPosX = curPosX.array() - xMid;
-    curPosX *= 1.0/lxCur*lxNew;
-    curPosX = curPosX.array() + xMid;
-    
-    curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lyCur*lyNew;
-    curPosY = curPosY.array() + yMid;
-    
-}
-
-
-void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain){
-    
-    std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    
-    std::cout << "e1  " << e1 <<std::endl;
-    std::cout << "phi  " << phi <<std::endl;
-    
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
-    
-    lxNew=lxCur * exp(strain);
-    lyNew=lyCur * exp(-strain);
-    
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
-    
-    // Apply an affine deformation to all nodal positions keeping the cell center fixed.
-    curPosX = curPosX.array() - xMid;
-    curPosX *= (1.0/lxCur)*lxNew;
-    curPosX = curPosX.array() + xMid;
-    
-    curPosY = curPosY.array() - yMid;
-    curPosY *= (1.0/lyCur)*lyNew;
-    curPosY = curPosY.array() + yMid;
-    
-    
-}
-
-void Configuration::special_localized_deformation(const BaseSysData& baseData, const Parameters& pars, const double& gammaX,const double& gammaY,const std::vector<int>& targetNodes){
-
-    yMid=0.5*(curPosY.maxCoeff()+ curPosY.minCoeff());
-    xMid=0.5*(curPosX.maxCoeff()+ curPosX.minCoeff());
-    lyCur= curPosY.maxCoeff()-curPosY.minCoeff() ;
-    lxCur= curPosX.maxCoeff()-curPosX.minCoeff() ;
-    
-    lxNew=lxCur;
-    lyNew=lyCur ;
-    
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
-    
-
-    curPosX=curPosX.array()-xMid;
-    curPosX *= exp(gammaX);
-    curPosX=curPosX.array()+xMid;
-    curPosY=curPosY.array()-yMid;
-    curPosY *= exp(gammaY);
-    curPosY=curPosY.array()+yMid;
-    
-
-}
-
-void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
-{
-    
-    std::cout << "**** holding **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    
-    std::cout << "e1  " << e1 <<std::endl;
-    std::cout << "phi  " << phi <<std::endl;
-
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
-    
-    lxNew=lxCur;
-    lyNew=lyCur ;
-    
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
-    
-    // Apply an affine deformation to all nodal positions keeping the cell center fixed.
-    curPosX = curPosX.array() - xMid;
-    curPosX *= 1.0/lxCur*lxNew;
-    curPosX = curPosX.array() + xMid;
-    
-    curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lxCur*lxNew;
-    curPosY = curPosY.array() + yMid;
-}
 
 void Configuration::update_cells_1(const BaseSysData& baseData, const Parameters& pars)
 {

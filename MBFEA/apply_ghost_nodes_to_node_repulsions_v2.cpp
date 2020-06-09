@@ -97,9 +97,9 @@ void Configuration::apply_ghost_nodes_to_node_repulsions_v2(const BaseSysData &b
                                             double drijSq = pow(dxij,2)+ pow(dyij,2);
                                             double drij = sqrt(drijSq);
                                             
-                                            if (drij > pars.ntnRcutoff) continue;
+                                            if (drij > pars.ntnPLRcutoff) continue;
                                             
-                                            double forceij=0.5*pars.ntnRepulseEnergy/pars.ntnLjScale*12*pow((pars.ntnLjScale/drij),13);
+                                            double forceij=0.5*pars.ntnPLEnergy/pars.ntnRadius*12*pow((pars.ntnRadius/drij),13);
                                             double forceXij = forceij*dxij/drij;
                                             double forceYij = forceij*dyij/drij;
                                             if (iNode<=baseData.numOriginalNodes){
@@ -121,7 +121,7 @@ void Configuration::apply_ghost_nodes_to_node_repulsions_v2(const BaseSysData &b
                                             }
                                                
                                                  
-                                              contactsEnergy+=0.5*pars.ntnRepulseEnergy*pow((pars.ntnLjScale/drij),12);
+                                              contactsEnergy+=0.5*pars.ntnPLEnergy*pow((pars.ntnRadius/drij),12);
                                             
                                         }
                         

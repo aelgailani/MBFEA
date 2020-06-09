@@ -47,7 +47,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
     
     // initialize the system
     if (pars.boundaryType == "walls"){
-        mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+        mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
     }else if (pars.boundaryType == "periodic"){
         mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
     }
@@ -69,7 +69,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         std::cout << "timeStep  " << timeStep << std::endl;
 
         if (pars.boundaryType == "walls"){
-            mainSys.compute_forces_harmonic_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+            mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
         }else if (pars.boundaryType == "periodic"){
             mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
         }
@@ -94,6 +94,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         std::cout << "e0  " << mainSys.e0 << std::endl;
         std::cout << "e1  " << mainSys.e1 << std::endl;
         std::cout << "phi  " << mainSys.phi << std::endl;
+        std::cout << "pressure  " << mainSys.P2 << std::endl;
         std::cout << "maxForce  " << mainSys.maxR << std::endl;
         std::cout << "avgForce  " << mainSys.avgR << std::endl;
         std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;

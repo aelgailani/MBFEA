@@ -141,6 +141,18 @@ public:
     double DPOverDe0;
     double DSOverDe1;
     double A_material;
+    
+    //the follwing is mainly for debugging using traiangular walls but can be fully integrated if need be 
+    double triAy, triBx, triCx, triBy, triCy;
+    double triAx;
+    double height;
+    double base;
+    
+    
+    
+    
+    
+    
 //    abs(gap),gapSign,double(node),f,fx,fy,double(node0),f0,f0x,f0y,double(node1),f1,f1x,f1y,nx,ny,s,double(segment),(xi-x0)*nx,(yi-y0)*ny
 //    std::map<std::pair<int,int>, std::vector<double>> gaps;
 //    std::valarray<double> surNodes_gap;
@@ -180,7 +192,7 @@ public:
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     
-    void compute_forces_harmonic_walls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
+    void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void contact_forces(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
     void detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars);
@@ -196,6 +208,10 @@ public:
     void nts_find_closest_approach(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
 
     void affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain);
+    void affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY);
+    void affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY);
+
+
     void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);
     void affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);

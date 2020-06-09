@@ -64,8 +64,9 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
             std::cout << timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
             std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
+            std::cout << "e1   " << mainSys.e1 << std::endl;
 
-            gd_solver(baseData,pars,timeStep, mainSys);
+            gd_solver(baseData,pars,timeStep, mainSys, true);
           
             if (mainSys.phi <= pars.targetPhi)
             {
@@ -110,7 +111,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            std::cout << timeStep << std::endl;
            std::cout << "stage  " << stage << std::endl;
            
-           gd_solver(baseData,pars,timeStep, mainSys);
+           gd_solver(baseData,pars,timeStep, mainSys, false);
          
            if (mainSys.e1 < pars.targetShear) //Here tergetShear is initial nonzerovalue for shear
            {
