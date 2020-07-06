@@ -35,10 +35,12 @@ void Configuration::affine_compression(const BaseSysData& baseData, const Parame
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - xMid;
     curPosX *= 1.0/lxCur*lxNew;
+    
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
     curPosY *= 1.0/lyCur*lyNew;
+ 
     curPosY = curPosY.array() + yMid;
     
 }
@@ -67,39 +69,36 @@ void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Par
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - xMid;
     curPosX *= (1.0/lxCur)*lxNew;
+    //only for reporting. Can be removed if not needed
+    
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
     curPosY *= (1.0/lyCur)*lyNew;
+    //only for reporting. Can be removed if not needed
+    
     curPosY = curPosY.array() + yMid;
     
     
 }
 
-void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY){
+void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
     std::cout << "**** shearing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     std::cout << "strain  " << strain <<std::endl;
 //    std::cout << "e1  " << e1 <<std::endl;
 //    std::cout << "phi  " << phi <<std::endl;
     
-    triAy -=ctrY;
-    triAy *= exp(-strain);
-    triAy+=ctrY;
+    height*=exp(-strain);
+    base*=exp(strain);
     
-    triBy -=ctrY;
-    triBy *= exp(-strain);
-    triBy +=ctrY;
+    triAy = ctrY+height*2.0/3.0;
+    triBy = ctrY-height*1.0/3.0;
     triCy = triBy;
     
-    triBx -=ctrX;
-    triBx *= exp(strain);
-    triBx +=ctrX;
-    
-    triCx -=ctrX;
-    triCx *= exp(strain);
-    triCx +=ctrX;
-    
+    triBx =ctrX-0.5*base;
+    triCx =ctrX+0.5*base;
+
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
     
@@ -114,10 +113,12 @@ void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, 
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - ctrX;
+    if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(strain)-1))/ pars.dt;
     curPosX *= exp(strain);
     curPosX = curPosX.array() + ctrX;
     
     curPosY = curPosY.array() - ctrY;
+    if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(-strain)-1))/ pars.dt;
     curPosY *= exp(-strain);
     curPosY = curPosY.array() + ctrY;
     
@@ -125,38 +126,26 @@ void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, 
 }
 
 
-void Configuration::affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY){
+void Configuration::affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
     std::cout << "**** compressing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
     std::cout << "strain  " << strain <<std::endl;
 //    std::cout << "phi  " << phi <<std::endl;
     
-    triAy -=ctrY;
-    triAy *= exp(strain);
-    triAy+=ctrY;
+    height*=exp(strain);
+    base*=exp(strain);
     
-    triBy -=ctrY;
-    triBy *= exp(strain);
-    triBy +=ctrY;
+    triAy = ctrY+height*2.0/3.0;
+    triBy = ctrY-height*1.0/3.0;
     triCy = triBy;
     
-    triBx -=ctrX;
-    triBx *= exp(strain);
-    triBx +=ctrX;
-    
-    triCx -=ctrX;
-    triCx *= exp(strain);
-    triCx +=ctrX;
+    triBx =ctrX-0.5*base;
+    triCx =ctrX+0.5*base;
     
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
-    
-    std::cout << "lyCur  " << lyCur <<std::endl;
-    std::cout << "lxCur  " << lxCur <<std::endl;
-    
-    std::cout << "lyCur *= exp(strain) " << lyCur*exp(strain)<<std::endl;
-    std::cout << "lxCur *= exp(strain) " << lxCur*exp(strain) <<std::endl;
+
     
     topPos = triAy;
     botPos = triBy;
@@ -166,18 +155,18 @@ void Configuration::affine_compression_triWalls(const BaseSysData& baseData, con
     lyNew= topPos - botPos;
     lxNew= rightPos - leftPos;
 
-    std::cout << "lyNew  " << lyNew <<std::endl;
-    std::cout << "lxNew  " << lxNew <<std::endl;
     
     
     
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - ctrX;
+    if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(strain)-1))/ pars.dt;
     curPosX *= exp(strain);
     curPosX = curPosX.array() + ctrX;
     
     curPosY = curPosY.array() - ctrY;
+    if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(strain)-1))/ pars.dt;
     curPosY *= exp(strain);
     curPosY = curPosY.array() + ctrY;
     

@@ -37,17 +37,47 @@ struct PowerlawRepulsion compute_powerlaw_replusion_by_segment(double x, double 
     double ny = Ny/N_norm;
     double r = (x-x1)*nx+(y-y1)*ny;
     if (r<rcut){
+        
         double f = 0.5*epsilon/sigma*12*pow((sigma/r),13);
         F.fx = f * (nx);
         F.fy = f * (ny);
         F.energy = 0.5*epsilon*pow((sigma/r),12);
-//        std::cout<< "r="<< r<< std::endl;
-//        std::cout<< "Nx="<< Nx<< std::endl;
-//        std::cout<< "Ny="<< Ny<< std::endl;
-//        std::cout<< "fx="<< F.fx<< std::endl;
-//        std::cout<< "fy="<< F.fy<< std::endl;
+        F.nx = nx;
+        F.ny = ny;
+        F.r = r;
+        F.f = f;
     }
+    return F;
+}
+
+
+struct PowerlawRepulsion walldiscretePL(double x, double x0, double x1, double y, double y0,double y1, double sigma, double epsilon, double rcut, int numwallnodes){
     
+    double dx01 = x1 - x0;
+    double dy01 = y1 - y0;
+     
+    struct PowerlawRepulsion F;
+    
+     for (double s = 0; s < 1.0; s+=1.0/numwallnodes){
+         
+         double xs = x0 + s * dx01;
+         double ys = y0 + s * dy01;
+         
+         double dxij = xs - x;
+         double dyij = ys - y;
+         double drijSq = pow(dxij,2)+ pow(dyij,2);
+         double drij = sqrt(drijSq);
+         
+         if (drij > rcut) continue;
+         
+         double forceij=0.5*epsilon/sigma*12*pow((sigma/drij),13);
+         double forceXij = - forceij*dxij/drij;
+         double forceYij = - forceij*dyij/drij;
+        
+         F.fx += forceXij;
+         F.fy += forceYij;
+         F.energy += 0.5*epsilon*pow((sigma/drij),12);
+     }
     return F;
 }
 
@@ -68,7 +98,7 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
         std::cout << "phi  " << mainSys.phi * 2 << "  target is  " << pars.targetPhi << std::endl;
         std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
         
-        mainSys.affine_compression_triWalls(baseData, pars, relativeStrain,1.75*pars.initialStretch, 1*pars.initialStretch);
+        mainSys.affine_compression_triWalls(baseData, pars, relativeStrain,1.75*pars.initialStretch, 1*pars.initialStretch, timeStep);
         
         fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
         
@@ -86,7 +116,7 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
 //         }
         if (mainSys.P2<pars.targetPressure) break;
     }
-    mainSys.dump_global_data(pars, timeStep, "write", "final");
+    mainSys.dump_global_data(pars, timeStep,"data", "write", "final");
     while(step<=numSteps && mainSys.e1 <= pars.shearTo){
         
         
@@ -96,7 +126,7 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
         std::cout << "phi  " << mainSys.phi *2<< std::endl;
         std::cout << "e1  " << mainSys.e1 << "  target is  " << target_e0 << std::endl;
         
-        mainSys.affine_axial_shearing_triWalls(baseData, pars, shearStep,1.75*pars.initialStretch, 1*pars.initialStretch);
+        mainSys.affine_axial_shearing_triWalls(baseData, pars, shearStep,1.75*pars.initialStretch, 1*pars.initialStretch, timeStep);
 
         
         fire2_solver(baseData, pars, timeStep , mainSys, step);
@@ -105,11 +135,18 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
              std::cout << " Failed to coverge !" << std::endl;
              exit(1);
          }else{
-             mainSys.dump_global_data(pars, timeStep, "append", "final");
+             mainSys.dump_global_data(pars, timeStep,"data","append", "final");
              mainSys.dump_per_node(baseData, pars, step);
              mainSys.dump_per_ele(baseData, pars,step);
              if (pars.dumpPeriodicImagesXY){
                  mainSys.dump_per_node_periodic_images_on(baseData, pars, step);
+             }
+             if (pars.identifyAndDumbFacets) {
+                 if (pars.contactMethod=="nts"){
+                     mainSys.dump_facets(baseData, pars, timeStep);
+                 }else{
+                     mainSys.dump_facets_ntn(baseData, pars, timeStep);
+                 }
              }
              
   
@@ -124,66 +161,191 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
 
     double refPhi = pars.Ap/(0.5*baseData.lxRef*baseData.lyRef);
     double target_e0 = - log(sqrt(refPhi/(pars.targetPhi)));
-
+    
+    mainSys.dump_global_data(pars, timeStep,"compression-data", "write", "running");
     // initial compression
-    gd_solver(baseData,pars,timeStep, mainSys, false);
+    gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
 
     while(mainSys.phi <= pars.targetPhi){
         
+        mainSys.affine_compression_triWalls(baseData, pars, - pars.deformationRate * pars.dt ,mainSys.ctrX, mainSys.ctrY, timeStep);
+        
         std::cout << timeStep << std::endl;
+        std::cout << "ctr X   " << mainSys.ctrX << std::endl;
+        std::cout << "ctr Y   " << mainSys.ctrY << std::endl;
+        std::cout << "height   " << mainSys.height << std::endl;
+        std::cout << "base   " << mainSys.base << std::endl;
         std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
         std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
         std::cout << "e1   " << mainSys.e1 << std::endl;
-        std::cout << "ex   " << mainSys.ex << std::endl;
-        std::cout << "ey   " << mainSys.ey << std::endl;
-        std::cout << "X   " << 1.75*pars.initialStretch << std::endl;
-        std::cout << "Y   " << pars.initialStretch << std::endl;
-
-        
         std::cout << "pressure   " << mainSys.P2  <<  std::endl;
 
-        gd_solver(baseData,pars,timeStep, mainSys, false);
+        gd_solver(baseData,pars,timeStep,"compression-data", mainSys, false);
 
         if (mainSys.P2<pars.targetPressure) break;
         
-        mainSys.affine_compression_triWalls(baseData, pars, - pars.deformationRate * pars.dt ,1.75*pars.initialStretch, 1*pars.initialStretch);
+       
     }
-//    long t = timeStep;
-//    while(timeStep<=t+10){
-//
-//        std::cout << timeStep << std::endl;
-//        std::cout << "***** holding *******   " << std::endl;
-//        std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-//        std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-//        std::cout << "pressure   " << mainSys.P2  <<  std::endl;
-//
-//        gd_solver(baseData,pars,timeStep, mainSys, false);
-//
-//    }
-    
-    mainSys.dump_global_data(pars, timeStep, "append", "final");
+
+    mainSys.dump_global_data(pars, timeStep, "compression-data", "append", "final");
     mainSys.dump_per_node(baseData, pars, timeStep);
     mainSys.dump_per_ele(baseData, pars,timeStep);
     if (pars.dumpPeriodicImagesXY){
         mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
     }
+    if (pars.identifyAndDumbFacets) {
+        if (pars.contactMethod=="nts"){
+            mainSys.dump_facets(baseData, pars, timeStep);
+        }else{
+            mainSys.dump_facets_ntn(baseData, pars, timeStep);
+        }
+    }
     
-    timeStep=0;
-    mainSys.dump_global_data(pars, timeStep, "write", "running");
+    timeStep=1;
+    
+    mainSys.dump_global_data(pars, timeStep, "shearing-data","write", "running");
     
     while(mainSys.e1 <= pars.shearTo){
         
+        mainSys.affine_axial_shearing_triWalls(baseData, pars, pars.deformationRate * pars.dt,mainSys.ctrX, mainSys.ctrY, timeStep);
+        
         std::cout << timeStep << std::endl;
+        std::cout << "ctr X   " << mainSys.ctrX << std::endl;
+        std::cout << "ctr Y   " << mainSys.ctrY << std::endl;
+        std::cout << "height   " << mainSys.height << std::endl;
+        std::cout << "base   " << mainSys.base << std::endl;
         std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
         std::cout << "e0   " << mainSys.e0 << std::endl;
         std::cout << "e1   " << mainSys.e1 << std::endl;
         std::cout << "pressure   " << mainSys.P2  <<  std::endl;
 
-        gd_solver(baseData,pars,timeStep, mainSys, true);
+        gd_solver(baseData,pars,timeStep,"shearing-data", mainSys, true);
 
-        mainSys.affine_axial_shearing_triWalls(baseData, pars, pars.deformationRate * pars.dt,1.75*pars.initialStretch, 1*pars.initialStretch);
+        
     }
 }
         
         
         
+void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
+
+    double refPhi = pars.Ap/(0.5*baseData.lxRef*baseData.lyRef);
+    double target_e0 = - log(sqrt(refPhi/(pars.targetPhi)));
+    mainSys.dump_global_data(pars, timeStep,"compression-data", "write", "running");
+    // initial compression
+    gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
+
+    while(mainSys.phi <= pars.targetPhi){
+        
+        mainSys.affine_compression_triWalls(baseData, pars, - pars.deformationRate * pars.dt ,mainSys.ctrX, mainSys.ctrY, timeStep);
+        
+        std::cout << timeStep << std::endl;
+        std::cout << "ctr X   " << mainSys.ctrX << std::endl;
+        std::cout << "ctr Y   " << mainSys.ctrY << std::endl;
+        std::cout << "height   " << mainSys.height << std::endl;
+        std::cout << "base   " << mainSys.base << std::endl;
+        std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+        std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
+        std::cout << "e1   " << mainSys.e1 << std::endl;
+        std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+
+        gd_solver(baseData,pars,timeStep, "compression-data",mainSys, false);
+
+        if (mainSys.P2<pars.targetPressure) break;
+        
+       
+    }
+
+    mainSys.dump_global_data(pars, timeStep, "compression-data", "append", "final");
+    mainSys.dump_per_node(baseData, pars, timeStep);
+    mainSys.dump_per_ele(baseData, pars,timeStep);
+    if (pars.dumpPeriodicImagesXY){
+        mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+    }
+    if (pars.identifyAndDumbFacets) {
+        if (pars.contactMethod=="nts"){
+            mainSys.dump_facets(baseData, pars, timeStep);
+        }else{
+            mainSys.dump_facets_ntn(baseData, pars, timeStep);
+        }
+    }
+    
+    timeStep=0;
+    
+    mainSys.dump_global_data(pars, timeStep,"holding-data", "write", "running");
+    
+    
+    //hold
+    while(mainSys.L2NormResidual >= pars.maxForceTol){
+        
+        std::cout << "**** holding befor shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        std::cout << timeStep << std::endl;
+        std::cout << "ctr X   " << mainSys.ctrX << std::endl;
+        std::cout << "ctr Y   " << mainSys.ctrY << std::endl;
+        std::cout << "height   " << mainSys.height << std::endl;
+        std::cout << "base   " << mainSys.base << std::endl;
+        std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+        std::cout << "e0   " << mainSys.e0 << std::endl;
+        std::cout << "e1   " << mainSys.e1 << std::endl;
+        std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+
+        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+
+        
+    }
+    
+    
+    mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
+    mainSys.dump_per_node(baseData, pars, timeStep);
+    mainSys.dump_per_ele(baseData, pars,timeStep);
+    if (pars.dumpPeriodicImagesXY){
+        mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+    }
+    if (pars.identifyAndDumbFacets) {
+        if (pars.contactMethod=="nts"){
+            mainSys.dump_facets(baseData, pars, timeStep);
+        }else{
+            mainSys.dump_facets_ntn(baseData, pars, timeStep);
+        }
+    }
+    
+    timeStep=0;
+    
+    
+    mainSys.affine_axial_shearing_triWalls(baseData, pars, pars.shearTo ,mainSys.ctrX, mainSys.ctrY, timeStep);
+    
+    while(mainSys.L2NormResidual >= pars.maxForceTol){
+        
+        std::cout << "**** holding after shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        
+        std::cout << timeStep << std::endl;
+        std::cout << "ctr X   " << mainSys.ctrX << std::endl;
+        std::cout << "ctr Y   " << mainSys.ctrY << std::endl;
+        std::cout << "height   " << mainSys.height << std::endl;
+        std::cout << "base   " << mainSys.base << std::endl;
+        std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+        std::cout << "e0   " << mainSys.e0 << std::endl;
+        std::cout << "e1   " << mainSys.e1 << std::endl;
+        std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+
+        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+
+        
+    }
+    
+    mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
+       mainSys.dump_per_node(baseData, pars, timeStep);
+       mainSys.dump_per_ele(baseData, pars,timeStep);
+       if (pars.dumpPeriodicImagesXY){
+           mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+       }
+       if (pars.identifyAndDumbFacets) {
+           if (pars.contactMethod=="nts"){
+               mainSys.dump_facets(baseData, pars, timeStep);
+           }else{
+               mainSys.dump_facets_ntn(baseData, pars, timeStep);
+           }
+       }
+    
+    
+}

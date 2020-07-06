@@ -24,7 +24,7 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, Configuration& mainSys, bool dumpStateData){
+void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, std::string name, Configuration& mainSys, bool dumpStateData){
 
             // calculate forces and energy of the current configuration of the system
             if (pars.boundaryType == "walls"){
@@ -35,7 +35,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
             //dump
-            mainSys.dump_global_data(pars, timeStep, "append", "running");
+            mainSys.dump_global_data(pars, timeStep, name, "append", "running");
             
             if (dumpStateData==true && timeStep % pars.dumpEvery == 0) {
                 mainSys.dump_per_node(baseData, pars, timeStep);
@@ -44,13 +44,19 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
                     mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
                 }
                 if (pars.identifyAndDumbFacets) {
-                    mainSys.dump_facets(baseData, pars, timeStep);
+                    if (pars.contactMethod=="nts"){
+                        mainSys.dump_facets(baseData, pars, timeStep);
+                    }else{
+                        mainSys.dump_facets_ntn(baseData, pars, timeStep);
+                    }
+                    
                 }
 
             }
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
 //            std::cout << "phi  " << mainSys.phi << std::endl;
 //            std::cout << "e0  " << mainSys.e0 << std::endl;
 //            std::cout << "e1  " << mainSys.e1 << std::endl;
@@ -65,7 +71,12 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
                     mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
                 }
                 if (pars.identifyAndDumbFacets) {
-                    mainSys.dump_facets(baseData, pars, timeStep);
+                    if (pars.contactMethod=="nts"){
+                        mainSys.dump_facets(baseData, pars, timeStep);
+                    }else{
+                        mainSys.dump_facets_ntn(baseData, pars, timeStep);
+                    }
+                    
                 }
                 
             } else if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff())){

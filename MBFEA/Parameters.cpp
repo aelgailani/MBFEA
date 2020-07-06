@@ -210,7 +210,7 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="ntsPowerlawRepulseEnergy") {
         split >> c;
         ntsPowerlawRepulseEnergy = c;
-        }else if (a=="ntnRepulseEnergy") {
+        }else if (a=="ntnPLEnergy") {
         split >> c;
         ntnPLEnergy = c;
         }else if (a=="ntsPowerlawLjScale") {
@@ -222,9 +222,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="ntnHStiffness") {
         split >> c;
         ntnHStiffness = c;
-        }else if (a=="ntnPLRcutoff") {
+        }else if (a=="ntnPLRcutoffOverRadius") {
         split >> c;
-        ntnPLRcutoff = c;
+        ntnPLRcutoffOverRadius = c;
         }else if (a=="integrator") {
         split >> d;
         integrator = d;
@@ -358,10 +358,11 @@ void Parameters::print_to_console(void) const {
 
     }else if (contactMethod=="ntn" || contactMethod=="gntn"){
         if (contactMethod=="gntn") printit("gntn_NGhostNodes", gntn_NGhostNodes);
+        printit("ntnRepulsionMethod", ntnRepulsionMethod);
         if (ntnRepulsionMethod == "powerlaw"){
             printit("ntnPLEnergy", ntnPLEnergy);
             printit("ntnRadius", ntnRadius);
-            printit("ntnPLRcutoff", ntnPLRcutoff);
+            printit("ntnPLRcutoffOverRadius", ntnPLRcutoffOverRadius);
         }else if (ntnRepulsionMethod == "harmonic"){
             printit("ntnHStiffness", ntnHStiffness);
             printit("ntnRadius", ntnRadius);
@@ -382,4 +383,9 @@ void Parameters::printit(const std::string name,const T v) const {
         logfile.open (runMode+"-parameters.log", std::ios_base::app);
         logfile << name+" = " << v << std::endl;
         logfile.close();
-}
+        
+        std::ofstream logfile2;
+        logfile2.open (outputFolderName+"/used-parameters.log", std::ios_base::app);
+        logfile2 << name+" = " << v << std::endl;
+        logfile2.close();
+    }

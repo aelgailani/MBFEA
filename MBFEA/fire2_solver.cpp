@@ -17,7 +17,7 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep , Configuration& mainSys, long step){
+void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep ,  Configuration& mainSys, long step){
     
     // simple parameters validation
     if (pars.FIRE_dtmax < pars.FIRE_dtmin) {

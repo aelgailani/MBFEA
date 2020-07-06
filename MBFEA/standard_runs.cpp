@@ -47,7 +47,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                  std::cout << " Failed to coverge !" << std::endl;
 
              }else{
-                 mainSys.dump_global_data(pars, timeStep, "append", "final");
+                 mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
                  mainSys.dump_per_node(baseData, pars, strainStep);
                  mainSys.dump_per_ele(baseData, pars,strainStep);
                  if (pars.dumpPeriodicImagesXY){
@@ -66,7 +66,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
             std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
 
-            gd_solver(baseData,pars,timeStep, mainSys, true);
+            gd_solver(baseData,pars,timeStep, "data", mainSys, true);
           
             if (mainSys.phi <= pars.targetPhi)
             {
@@ -84,7 +84,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
 void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
     
    long stage=0;
-   mainSys.dump_global_data(pars, timeStep, "write", "final"); //open file and write cols names
+   mainSys.dump_global_data(pars, timeStep, "data","write", "final"); //open file and write cols names
    while(stage<2){
        if (pars.solver=="FIRE2"){
            
@@ -96,7 +96,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
                  std::cout << " Failed to coverge !" << std::endl;
                  exit(1);
              }else{
-                 mainSys.dump_global_data(pars, timeStep, "append", "final");
+                 mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
                  mainSys.dump_per_node(baseData, pars, stage);
                  mainSys.dump_per_ele(baseData, pars,stage);
                  if (pars.dumpPeriodicImagesXY){
@@ -111,7 +111,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            std::cout << timeStep << std::endl;
            std::cout << "stage  " << stage << std::endl;
            
-           gd_solver(baseData,pars,timeStep, mainSys, false);
+           gd_solver(baseData,pars,timeStep, "data", mainSys, false);
          
            if (mainSys.e1 < pars.targetShear) //Here tergetShear is initial nonzerovalue for shear
            {
@@ -120,8 +120,8 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            }else if (mainSys.maxR <= pars.maxForceTol){
               
                if (stage==0){
-                   mainSys.dump_global_data(pars, timeStep, "write", "final");
-                   mainSys.dump_global_data(pars, timeStep, "append", "final");
+                   mainSys.dump_global_data(pars, timeStep,"data", "write", "final");
+                   mainSys.dump_global_data(pars, timeStep,"data", "append", "final");
                    mainSys.dump_per_node(baseData, pars, timeStep);
                    mainSys.dump_per_ele(baseData, pars,timeStep);
                    if (pars.dumpPeriodicImagesXY){
@@ -133,7 +133,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
                    mainSys.affine_axial_shearing(baseData, pars, pars.deformationRate * pars.dt);
                    stage++;
                } else if (stage==1){
-                   mainSys.dump_global_data(pars, timeStep, "append", "final");
+                   mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
                    mainSys.dump_per_node(baseData, pars, timeStep);
                    mainSys.dump_per_ele(baseData, pars,timeStep);
                    if (pars.dumpPeriodicImagesXY){

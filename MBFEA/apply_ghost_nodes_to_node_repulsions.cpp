@@ -56,6 +56,13 @@ void Configuration::apply_ghost_nodes_to_node_repulsions(const BaseSysData &base
                            
                            int iNode = baseData.flatSurfaceNodes[iNodeId];
                            int jNode = baseData.flatSurfaceNodes[jNodeId];
+                           
+                           if (iNode>=baseData.numOriginalNodes && jNode>=baseData.numOriginalNodes)
+                                 {
+                                     jNodeId = nodesLinkedList[jNodeId];
+                                     continue;
+                                 }
+                           
                            int segment0 =  baseData.nodeToSegments[jNode][0];
                            
                            int node0 = baseData.surfaceSegments[segment0][0];
@@ -76,19 +83,23 @@ void Configuration::apply_ghost_nodes_to_node_repulsions(const BaseSysData &base
                                double drijSq = pow(dxij,2)+ pow(dyij,2);
                                double drij = sqrt(drijSq);
                                
-                               if (drij > pars.ntnPLRcutoff) continue;
+                               if (drij > pars.ntnPLRcutoffOverRadius*pars.ntnRadius) continue;
                                
-                               double forceij=0.5*pars.ntnPLEnergy/pars.ntnRadius*12*pow((pars.ntnRadius/drij),13);
+                               double A = - 6*pow(1.0/pars.ntnPLRcutoffOverRadius,10);
+                               double forceij= 0.5*pars.ntnPLEnergy/pars.ntnRadius*12*pow((pars.ntnRadius/drij),13)+A/pars.ntnRadius*pow((pars.ntnRadius/drij),3)*1.0/pars.gntn_NGhostNodes;
+                               
                                double forceXij = forceij*dxij/drij;
                                double forceYij = forceij*dyij/drij;
            
                                if (iNode<=baseData.numOriginalNodes){
+                                   
                                    forceX(iNode) = forceX(iNode)-forceXij;
                                    forceY(iNode) = forceY(iNode)-forceYij;
                                    surfaceForceX(iNode) = surfaceForceX(iNode)-forceXij;
                                    surfaceForceY(iNode) = surfaceForceY(iNode)-forceYij;
                                }
                                if (node0<=baseData.numOriginalNodes){
+                                   
                                    forceX(node0) = forceX(node0)+forceXij * (1-s);
                                    forceY(node0) = forceY(node0)+forceYij * (1-s);
                                    surfaceForceX(node0) = surfaceForceX(node0)+forceXij * (1-s);
@@ -101,8 +112,25 @@ void Configuration::apply_ghost_nodes_to_node_repulsions(const BaseSysData &base
                                }
                                   
                                     
-                                 contactsEnergy+=0.5*pars.ntnPLEnergy*pow((pars.ntnRadius/drij),12);
+                               contactsEnergy+=0.5*pars.ntnPLEnergy*pow((pars.ntnRadius/drij),12)+0.5*A*pow((pars.ntnRadius/drij),2)*1.0/pars.gntn_NGhostNodes;
                                
+                               KWoodXX += - forceij * drij * dxij/drij * dxij/drij ;
+                               KWoodYY += - forceij * drij * dyij/drij * dyij/drij ;
+                               
+                               
+                               if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets && (pars.ntnRadius/drij) >= 0.4) {
+                                   
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(iNode);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(s);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(drij);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(forceij);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(augmentedCurPosX[iNode]);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(xs);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(augmentedCurPosY[iNode]);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(ys);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(-forceXij);
+                                   facets_ntn[std::make_pair(iMesh,jMesh)].push_back(-forceYij);
+                               }
                            }
                            
 

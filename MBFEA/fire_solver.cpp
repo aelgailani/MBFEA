@@ -16,7 +16,7 @@
 #include "solvers.hpp"
 #include "Configuration.hpp"
 
-void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
+void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep ,  std::string name, Configuration& mainSys){
     double FIRE_alpha =  pars.FIRE_alpha_start;
     double FIRE_Np = 0; //stepsSincePositvePower
     double FIRE_dt = pars.FIRE_dt_start;
@@ -107,7 +107,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
             FIRE_alpha = pars.FIRE_alpha_start;
             FIRE_Np=0;
             FIRE_dt = pars.FIRE_dt_start;
-            mainSys.dump_global_data(pars, timeStep, "append", "final");
+            mainSys.dump_global_data(pars, timeStep, name, "append", "final");
             mainSys.dump_per_node(baseData, pars, strainStep);
             mainSys.dump_per_ele(baseData, pars,strainStep);
             if (pars.dumpPeriodicImagesXY){
@@ -119,7 +119,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
     }else if (pars.runMode=="stepShear"){
         
         long stage=0;
-        mainSys.dump_global_data(pars, timeStep, "write", "final"); //open file and write cols names
+        mainSys.dump_global_data(pars, timeStep, name, "write", "final"); //open file and write cols names
         while(stage<2){
             
             mainSys.affine_axial_shearing(baseData, pars, pars.targetShear);
@@ -188,7 +188,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
             }
             FIRE_alpha = pars.FIRE_alpha_start;
             FIRE_N = timeStep;
-            mainSys.dump_global_data(pars, timeStep, "append", "final");
+            mainSys.dump_global_data(pars, timeStep, name, "append", "final");
             mainSys.dump_per_node(baseData, pars, stage);
             mainSys.dump_per_ele(baseData, pars,stage);
             if (pars.dumpPeriodicImagesXY){

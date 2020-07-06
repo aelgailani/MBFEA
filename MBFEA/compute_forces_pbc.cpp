@@ -25,6 +25,19 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     contactsEnergy=0;
     KWoodYY=0;
     KWoodXX=0;
+    
+    // fill theser vectors to report it only if needed
+    if (timeStep%pars.dumpEvery==0){
+        prev_CstressXX = CstressXX;
+        prev_CstressXY = CstressXY;
+        prev_CstressYX = CstressYX;
+        prev_CstressYY = CstressYY;
+        prev_defGradXX = defGradXX;
+        prev_defGradYX = defGradYX;
+        prev_defGradXY = defGradXY;
+        prev_defGradYY = defGradYY;
+    }
+    
     // initialize surface interaction forces on nodes to zero
     surfaceForceX.resize(baseData.numOriginalNodes);
     surfaceForceY.resize(baseData.numOriginalNodes);

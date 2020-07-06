@@ -45,8 +45,69 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
 
 }
 
+void Configuration::dump_facets_ntn(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
+    
+    std::string step = std::to_string(timeStep);
+    std::ofstream myfile;
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/facets-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
+    }
+    myfile << "Basic_data:" << std::endl;
+    myfile << "timeStep" << "\t" << timeStep << std::endl;
+    myfile << "\n" << std::endl;
+    
+    
+    if(pars.contactMethod == "ntn"){
+        myfile << "Facets_data:" << std::endl;
+        myfile
+        <<"iMesh" << std::setw(20)
+        << "jMesh" << std::setw(20)
+        << "inode" << std::setw(20)
+        << "jnode" << std::setw(20)
+        << "d" << std::setw(20)
+        << "f" << std::setw(20)
+        << "ix" << std::setw(20)
+        << "jx" << std::setw(20)
+        << "iy" << std::setw(20)
+        << "jy" << std::setw(20)
+        << "fx" << std::setw(20)
+        << "fy" <<  std::endl;
+    }else if (pars.contactMethod == "gntn"){
+        myfile << "Facets_data: " << std::endl;
+        myfile
+        << "iMesh" << std::setw(20)
+        << "jMesh" << std::setw(20)
+        << "inode" << std::setw(20)
+        << "s" << std::setw(20)
+        << "d" << std::setw(20)
+        << "f" << std::setw(20)
+        << "ix" << std::setw(20)
+        << "sx" << std::setw(20)
+        << "iy" << std::setw(20)
+        << "sy" << std::setw(20)
+        << "fx" << std::setw(20)
+        << "fy" <<  std::setw(20)
+        << " there are " << std::to_string(pars.gntn_NGhostNodes) << "  ghost nodes on each segment" << std::endl;
+    }
+    
 
-void Configuration::dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose){
+    for(auto& key : facets_ntn) {
+        myfile << std::to_string(key.first.first) << std::setw(20) << std::to_string(key.first.second) << std::setw(20);
+        
+        for (auto& node: key.second) {
+            myfile << std::to_string(node) << std::setw(20);
+        }
+        myfile << std::setw(-20)<< std::endl;
+    }
+    myfile << "EOF";
+    myfile.close();
+
+}
+
+
+void Configuration::dump_global_data(const Parameters& pars, const long& timeStep, std::string name, std::string mode, std::string purpose){
     int spacing =26;
     std::string fname ;
     std::string first = std::to_string(timeStep/pars.splitDataEvery*pars.splitDataEvery);
@@ -54,7 +115,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
     
     
     if (purpose=="running"){
-        fname = "/data-steps-"+first+"-"+last+".txt";
+        fname = "/"+name+"-steps-"+first+"-"+last+".txt";
     }else if (purpose=="final"){
         fname = "/final-data.txt";
     }
@@ -72,7 +133,9 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  "contactEnergy"  << std::setw(spacing)
         <<  "shearVirial"  << std::setw(spacing)
         <<  "pressureVirial"  << std::setw(spacing)
-        <<  "maxResidualF"  << std::setw(spacing)
+        <<  "maxResidual"  << std::setw(spacing)
+        <<  "meanResidual"  << std::setw(spacing)
+        <<  "residualL2Norm"  << std::setw(spacing)
         <<  "pressure1"  << std::setw(spacing)
         <<  "pressure2"  << std::setw(spacing)
         <<  "KWpressure2"  << std::setw(spacing)
@@ -88,7 +151,8 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  "DSOverDe1qq" << std::setw(spacing)
         <<  "dt" << std::setw(spacing)
         <<  "defRate" << std::setw(spacing)
-        <<  "penalty" << std::endl;
+        <<  "penalty" << std::setw(spacing)
+        <<  "interactions" << std::endl;
         dataFile.close();
         
         
@@ -106,6 +170,8 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  shearVirial  << std::setw(spacing)
         <<  pressureVirial  << std::setw(spacing)
         <<  maxR  << std::setw(spacing)
+        <<  avgR  << std::setw(spacing)
+        <<  L2NormResidual  << std::setw(spacing)
         <<  P1  << std::setw(spacing)
         <<  P2  << std::setw(spacing)
         <<  (KWoodYY+KWoodXX)/(2*LX*LY)  << std::setw(spacing)
@@ -121,7 +187,8 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  DSOverDe1 << std::setw(spacing)
         <<  pars.dt  << std::setw(spacing)
         <<  pars.deformationRate  << std::setw(spacing)
-        <<  pars.ntsHarmonicPenaltyStiffness << std::endl;
+        <<  pars.ntsHarmonicPenaltyStiffness  << std::setw(spacing)
+        <<  nodeIinteractions << std::endl;
         dataFile.close();
         
         
@@ -161,6 +228,10 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     <<  "y"  << std::setw(spacing)
     <<  "fx"  << std::setw(spacing)
     <<  "fy"  << std::setw(spacing)
+    <<  "homVx"  << std::setw(spacing)
+    <<  "homVy"  << std::setw(spacing)
+    <<  "totVx"  << std::setw(spacing)
+    <<  "totVy"  << std::setw(spacing)
     <<  "contactFx"  << std::setw(spacing)
     <<  "contactFy"  << std::endl;
     
@@ -172,6 +243,10 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << curPosY[i] << std::setw(spacing)
         << forceX[i] << std::setw(spacing)
         << forceY[i] << std::setw(spacing)
+        << homVx[i] << std::setw(spacing)
+        << homVy[i] << std::setw(spacing)
+        << homVx[i]+forceX[i] << std::setw(spacing)
+        << homVy[i]+forceY[i] << std::setw(spacing)
         << surfaceForceX[i] << std::setw(spacing)
         << surfaceForceY[i] << std::endl;
     }
@@ -230,10 +305,20 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     
     int spacing =26;
     // calculated strains
-    DVxDx = gradX * forceX;
-    DVxDy = gradY * forceX;
-    DVyDx = gradY * forceY;
-    DVyDy = gradY * forceY;
+    DtotVxDx = gradX * (homVx+forceX);
+    DtotVxDy = gradY * (homVx+forceX);
+    DtotVyDx = gradX * (homVy+forceY);
+    DtotVyDy = gradY * (homVy+forceY);
+    
+    DhomVxDx = gradX * (homVx);
+    DhomVxDy = gradY * (homVx);
+    DhomVyDx = gradX * (homVy);
+    DhomVyDy = gradY * (homVy);
+    
+    DVxDx = gradX * (forceX);
+    DVxDy = gradY * (forceX);
+    DVyDx = gradX * (forceY);
+    DVyDy = gradY * (forceY);
     
     
     std::string step = std::to_string(timeStep);
@@ -258,6 +343,10 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     << "FXY" << std::setw(spacing)
     << "FYX" << std::setw(spacing)
     << "FYY" << std::setw(spacing)
+    << "deltaFXX" << std::setw(spacing)
+    << "deltaFXY" << std::setw(spacing)
+    << "deltaFYX" << std::setw(spacing)
+    << "deltaFYY" << std::setw(spacing)
     << "PK1StressXX" << std::setw(spacing)
     << "PK1StressXY" << std::setw(spacing)
     << "PK1StressYX" << std::setw(spacing)
@@ -266,6 +355,18 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     << "CStressXY" << std::setw(spacing)
     << "CStressYX" << std::setw(spacing)
     << "CStressYY" << std::setw(spacing)
+    << "deltaCStressXX" << std::setw(spacing)
+    << "deltaCStressXY" << std::setw(spacing)
+    << "deltaCStressYX" << std::setw(spacing)
+    << "deltaCStressYY" << std::setw(spacing)
+    << "DtotVxDx" << std::setw(spacing)
+    << "DtotVxDy" << std::setw(spacing)
+    << "DtotVyDx" << std::setw(spacing)
+    << "DtotVyDy" << std::setw(spacing)
+    << "DhomVxDx" << std::setw(spacing)
+    << "DhomVxDy" << std::setw(spacing)
+    << "DhomVyDx" << std::setw(spacing)
+    << "DhomVyDy" << std::setw(spacing)
     << "DVxDx" << std::setw(spacing)
     << "DVxDy" << std::setw(spacing)
     << "DVyDx" << std::setw(spacing)
@@ -285,6 +386,10 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
         << defGradXY[i] << std::setw(spacing)
         << defGradYX[i] << std::setw(spacing)
         << defGradYY[i] << std::setw(spacing)
+        << defGradXX[i]-prev_defGradXX[i] << std::setw(spacing)
+        << defGradXY[i]-prev_defGradXY[i] << std::setw(spacing)
+        << defGradYX[i]-prev_defGradYX[i] << std::setw(spacing)
+        << defGradYY[i]-prev_defGradYY[i] << std::setw(spacing)
         << PK1stressXX[i] << std::setw(spacing)
         << PK1stressXY[i] << std::setw(spacing)
         << PK1stressYX[i] << std::setw(spacing)
@@ -293,6 +398,18 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
         << CstressXY[i] << std::setw(spacing)
         << CstressYX[i] << std::setw(spacing)
         << CstressYY[i] << std::setw(spacing)
+        << CstressXX[i]-prev_CstressXX[i] << std::setw(spacing)
+        << CstressXY[i]-prev_CstressXY[i] << std::setw(spacing)
+        << CstressYX[i]-prev_CstressYX[i] << std::setw(spacing)
+        << CstressYY[i]-prev_CstressYY[i] << std::setw(spacing)
+        << DtotVxDx[i] << std::setw(spacing)
+        << DtotVxDy[i] << std::setw(spacing)
+        << DtotVyDx[i] << std::setw(spacing)
+        << DtotVyDy[i] << std::setw(spacing)
+        << DhomVxDx[i] << std::setw(spacing)
+        << DhomVxDy[i] << std::setw(spacing)
+        << DhomVyDx[i] << std::setw(spacing)
+        << DhomVyDy[i] << std::setw(spacing)
         << DVxDx[i] << std::setw(spacing)
         << DVxDy[i] << std::setw(spacing)
         << DVyDx[i] << std::setw(spacing)

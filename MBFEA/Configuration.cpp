@@ -37,7 +37,8 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         triAx=0.5*(triCx + triBx);
         height = triAy - triBy;
         base = triCx - triBx;
-
+        ctrX = 0.5*(triCx + triBx);
+        ctrY = triBy + height/3.0;
 
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
@@ -99,6 +100,8 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             triAx=0.5*(triCx + triBx);
             height = triAy - triBy;
             base = triCx - triBx;
+            ctrX = 0.5*(triCx + triBx);
+            ctrY = triBy + height/3.0;
             
             std::getline(inFile, line);
             int id = 0;
@@ -216,6 +219,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     gradX.resize(baseData.numElements,baseData.numOriginalNodes);
     gradY.resize(baseData.numElements,baseData.numOriginalNodes);
     
+    
     for (int triID=0; triID<baseData.numElements; triID++) {
         double area = 0.0;
         int a = baseData.triangles.at(triID)[0];
@@ -289,6 +293,16 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         prevVelocityY.resize(baseData.numOriginalNodes);
         
     }
+    
+    
+    // these are stuff for GD writing out
+    homVx.resize(baseData.numOriginalNodes,1);
+    homVy.resize(baseData.numOriginalNodes,1);
+    totVx.resize(baseData.numOriginalNodes,1);
+    totVy.resize(baseData.numOriginalNodes,1);
+    
+    
+    
 }
 
 void Configuration::update_post_processing_data(const BaseSysData& baseData, const Parameters& pars){
@@ -317,7 +331,7 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     phi = pars.Ap / A;
     deltaTotEnergy = totalEnergy - prevTotEnergy;
     prevTotEnergy = totalEnergy;
-    L2NormResidual = - (forceX.dot(forceX) + forceY.dot(forceY));
+    L2NormResidual = sqrt(forceX.dot(forceX) + forceY.dot(forceY));
     
     shearVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));

@@ -97,7 +97,7 @@ void Configuration::apply_ghost_nodes_to_node_repulsions_v2(const BaseSysData &b
                                             double drijSq = pow(dxij,2)+ pow(dyij,2);
                                             double drij = sqrt(drijSq);
                                             
-                                            if (drij > pars.ntnPLRcutoff) continue;
+                                            if (drij > pars.ntnPLRcutoffOverRadius) continue;
                                             
                                             double forceij=0.5*pars.ntnPLEnergy/pars.ntnRadius*12*pow((pars.ntnRadius/drij),13);
                                             double forceXij = forceij*dxij/drij;

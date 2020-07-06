@@ -79,7 +79,7 @@ public:
     double ntsPowerlawRepulseEnergy;
     double ntsPowerlawLjScale;
     double ntnRadius;
-    double ntnPLRcutoff;
+    double ntnPLRcutoffOverRadius;
     std::string ntnRepulsionMethod;
     double ntnHStiffness;
     

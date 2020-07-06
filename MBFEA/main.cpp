@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
         timeStep=0;
     }
    
-    mainSys.dump_global_data(pars, timeStep, "write", "running");
+    mainSys.dump_global_data(pars, timeStep,"data", "write", "running");
 
     
     ///////////////  Main loop
@@ -165,6 +165,8 @@ int main(int argc, char* argv[])
             shear_special_FIRE(baseData, pars, timeStep , mainSys);
         }else if (pars.solver=="GD"){
             shear_special_GD(baseData, pars, timeStep, mainSys);
+        }else if (pars.solver=="stepGD"){
+            shear_special_stepGD(baseData, pars, timeStep, mainSys);
         }
     }
     

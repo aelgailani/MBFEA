@@ -32,6 +32,7 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
     //clear factes map only if required to not hinder the performance; since factes are onlny for post processing
     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
         facets.clear();
+        facets_ntn.clear();
     }
     
     if (pars.contactMethod=="nts"){

@@ -23,8 +23,23 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
     
     //erase previous step data
     contactsEnergy=0;
+    wallsEnergy=0;
     KWoodYY=0;
     KWoodXX=0;
+    
+    //save prev data  only if we are going to dump it because it has no contribution in the dynamics
+    if (timeStep%pars.dumpEvery==0){
+        prev_CstressXX = CstressXX;
+        prev_CstressXY = CstressXY;
+        prev_CstressYX = CstressYX;
+        prev_CstressYY = CstressYY;
+        prev_defGradXX = defGradXX;
+        prev_defGradYX = defGradYX;
+        prev_defGradXY = defGradXY;
+        prev_defGradYY = defGradYY;
+    }
+    
+    
     
     // initialize surface interaction forces on nodes to zero
     surfaceForceX.resize(baseData.numOriginalNodes);
@@ -159,25 +174,61 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
             double y = augmentedCurPosY[baseData.flatSurfaceNodes[node]];
             
             PowerlawRepulsion f1 = compute_powerlaw_replusion_by_segment(x, triBx, triAx, y, triBy ,triAy, pars.PLWallLJScale, pars.PLWallEnergyScale, pars.PLWallLJScale*2.5);
-            
             forceX(baseData.flatSurfaceNodes[node])+= f1.fx;
             forceY(baseData.flatSurfaceNodes[node])+= f1.fy;
-            
             wallsEnergy += f1.energy;
+            KWoodXX += - f1.f * f1.r * f1.nx * f1.nx;
+            KWoodYY += - f1.f * f1.r * f1.ny * f1.ny;
             
             PowerlawRepulsion f2 = compute_powerlaw_replusion_by_segment(x, triAx, triCx, y, triAy ,triCy, pars.PLWallLJScale, pars.PLWallEnergyScale, pars.PLWallLJScale*2.5);
-            
             forceX(baseData.flatSurfaceNodes[node])+= f2.fx;
             forceY(baseData.flatSurfaceNodes[node])+= f2.fy;
-            
             wallsEnergy += f2.energy;
+            KWoodXX += - f2.f * f2.r * f2.nx * f2.nx;
+            KWoodYY += - f2.f * f2.r * f2.ny * f2.ny;
             
             PowerlawRepulsion f3 = compute_powerlaw_replusion_by_segment(x, triCx, triBx, y, triCy ,triBy, pars.PLWallLJScale, pars.PLWallEnergyScale, pars.PLWallLJScale*2.5);
-            
             forceX(baseData.flatSurfaceNodes[node])+= f3.fx;
             forceY(baseData.flatSurfaceNodes[node])+= f3.fy;
-            
             wallsEnergy += f3.energy;
+            KWoodXX += - f3.f * f3.r * f3.nx * f3.nx;
+            KWoodYY += - f3.f * f3.r * f3.ny * f3.ny;
+
+        }
+        
+        
+    }else if (pars.wallStyle=="triPowerlawDiscrete"){
+        
+        
+         //apply hamonic repulsion to boudary nodes
+        int numwallnodes = floor(sqrt((triAx-triCx)*(triAx-triCx)+(triAy-triCy)*(triAy-triCy))/0.29);
+
+        
+        for (int node=0; node<baseData.numSurfaceNodes; node++){
+            
+            double x = augmentedCurPosX[baseData.flatSurfaceNodes[node]];
+            double y = augmentedCurPosY[baseData.flatSurfaceNodes[node]];
+
+            PowerlawRepulsion f1 = walldiscretePL(x, triBx, triAx, y, triBy ,triAy, pars.ntnRadius, pars.PLWallEnergyScale, pars.ntnPLRcutoffOverRadius,numwallnodes);
+            forceX(baseData.flatSurfaceNodes[node])+= f1.fx;
+            forceY(baseData.flatSurfaceNodes[node])+= f1.fy;
+            wallsEnergy += f1.energy;
+            KWoodXX += - f1.f * f1.r * f1.nx * f1.nx;
+            KWoodYY += - f1.f * f1.r * f1.ny * f1.ny;
+            
+            PowerlawRepulsion f2 = walldiscretePL(x, triAx, triCx, y, triAy ,triCy, pars.ntnRadius, pars.PLWallEnergyScale, pars.ntnPLRcutoffOverRadius,numwallnodes);
+            forceX(baseData.flatSurfaceNodes[node])+= f2.fx;
+            forceY(baseData.flatSurfaceNodes[node])+= f2.fy;
+            wallsEnergy += f2.energy;
+            KWoodXX += - f2.f * f2.r * f2.nx * f2.nx;
+            KWoodYY += - f2.f * f2.r * f2.ny * f2.ny;
+            
+            PowerlawRepulsion f3 = walldiscretePL(x, triCx, triBx, y, triCy ,triBy, pars.ntnRadius, pars.PLWallEnergyScale, pars.ntnPLRcutoffOverRadius,numwallnodes);
+            forceX(baseData.flatSurfaceNodes[node])+= f3.fx;
+            forceY(baseData.flatSurfaceNodes[node])+= f3.fy;
+            wallsEnergy += f3.energy;
+            KWoodXX += - f3.f * f3.r * f3.nx * f3.nx;
+            KWoodYY += - f3.f * f3.r * f3.ny * f3.ny;
 
         }
         

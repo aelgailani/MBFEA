@@ -39,6 +39,10 @@ public:
     Eigen::VectorXd invDefGradTransYY;
     Eigen::VectorXd forceX;
     Eigen::VectorXd forceY;
+    Eigen::VectorXd homVx;
+    Eigen::VectorXd homVy;
+    Eigen::VectorXd totVx;
+    Eigen::VectorXd totVy;
     Eigen::VectorXd velocityX;
     Eigen::VectorXd velocityY;
     Eigen::VectorXd prevVelocityX;
@@ -63,6 +67,15 @@ public:
     Eigen::VectorXd DVxDy;
     Eigen::VectorXd DVyDx;
     Eigen::VectorXd DVyDy;
+    Eigen::VectorXd DhomVxDx;
+    Eigen::VectorXd DhomVxDy;
+    Eigen::VectorXd DhomVyDx;
+    Eigen::VectorXd DhomVyDy;
+    Eigen::VectorXd DtotVxDx;
+    Eigen::VectorXd DtotVxDy;
+    Eigen::VectorXd DtotVyDx;
+    Eigen::VectorXd DtotVyDy;
+    
     
     
     Eigen::VectorXd internalEnergyPerEle;
@@ -147,9 +160,10 @@ public:
     double triAx;
     double height;
     double base;
+    double ctrX, ctrY;
     
     
-    
+
     
     
     
@@ -163,6 +177,7 @@ public:
     Eigen::MatrixXd segmentsLinkedList_2;
     Eigen::MatrixXd cellsHeads;
     std::map<std::pair<int,int>, std::vector<int>> facets;
+    std::map<std::pair<int,int>, std::vector<double>> facets_ntn;
     Eigen::MatrixXd slaveMaster;//this map gives you infromation about (master, slave) nodes with duplication allowed. notice that key (1,3) is different from (3,1), the former contains all nodes in mesh 1 while the latter the nodes of mesh 3.
     std::valarray<int> surNodes_mMesh1;
     std::valarray<int> surNodes_mMesh2;
@@ -191,6 +206,7 @@ public:
     void dump_per_node_periodic_images_on(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
+    void dump_facets_ntn(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
@@ -208,14 +224,14 @@ public:
     void nts_find_closest_approach(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
 
     void affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain);
-    void affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY);
-    void affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY);
+    void affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
+    void affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
 
 
     void special_localized_deformation(const BaseSysData& baseData, const Parameters& pars,const double& gammaX, const double& gammaY, const std::vector<int>& targetNodes);
     void affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain);
     void hold(const BaseSysData& baseData, const Parameters& pars);
-    void dump_global_data(const Parameters& pars, const long& timeStep, std::string mode, std::string purpose);  //mode: "w" for writing or "a" for appending. purpose: "i" for inspection or "f" for final results
+    void dump_global_data(const Parameters& pars, const long& timeStep,  std::string name,std::string mode, std::string purpose);  //mode: "w" for writing or "a" for appending. purpose: "i" for inspection or "f" for final results
     
 
     
@@ -279,6 +295,16 @@ public:
     void fill_augmented_Hessian();
     
 
+    //addition for GD info to be reported to final config
+    Eigen::VectorXd prev_CstressXX;
+    Eigen::VectorXd prev_CstressXY;
+    Eigen::VectorXd prev_CstressYX;
+    Eigen::VectorXd prev_CstressYY;
+    Eigen::VectorXd prev_defGradXX;
+    Eigen::VectorXd prev_defGradXY;
+    Eigen::VectorXd prev_defGradYX;
+    Eigen::VectorXd prev_defGradYY;
+   
 };
 
 #endif /* Configuration_hpp */
