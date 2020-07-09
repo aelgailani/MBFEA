@@ -237,6 +237,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="shearTo") {
             split >> c;
             shearTo = c;
+        }else if (a=="writeToConsoleEvery") {
+            split >> l;
+            writeToConsoleEvery = l;
         }
         
         
@@ -277,6 +280,7 @@ void Parameters::print_to_console(void) const {
     printit("Ap",Ap);
     
     printit("dumpEvery",dumpEvery);
+    printit("writeToConsoleEvery",writeToConsoleEvery);
     printit("splitDataEvery",splitDataEvery);
     printit("startingTimeStep",startingTimeStep);
     printit("outputFolderName",outputFolderName);

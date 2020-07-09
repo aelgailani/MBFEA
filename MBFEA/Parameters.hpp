@@ -89,6 +89,9 @@ public:
     
     double targetPressure;
     double shearTo;
+    
+    long writeToConsoleEvery;
+   
 };
 
 #endif /* Parameters_hpp */

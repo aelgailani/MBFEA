@@ -243,7 +243,7 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
     
 //    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
 //    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
-    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
+//    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;

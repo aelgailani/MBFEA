@@ -84,11 +84,12 @@ void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Par
 
 void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
-    std::cout << "**** shearing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    std::cout << "strain  " << strain <<std::endl;
-//    std::cout << "e1  " << e1 <<std::endl;
-//    std::cout << "phi  " << phi <<std::endl;
-    
+     if(timestep%pars.writeToConsoleEvery==0){
+        std::cout << "**** shearing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        std::cout << "strain  " << strain <<std::endl;
+    //    std::cout << "e1  " << e1 <<std::endl;
+    //    std::cout << "phi  " << phi <<std::endl;
+     }
     height*=exp(-strain);
     base*=exp(strain);
     
@@ -128,11 +129,12 @@ void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, 
 
 void Configuration::affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
-    std::cout << "**** compressing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    
-    std::cout << "strain  " << strain <<std::endl;
-//    std::cout << "phi  " << phi <<std::endl;
-    
+     if(timestep%pars.writeToConsoleEvery==0){
+        std::cout << "**** compressing tirangle ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        
+        std::cout << "strain  " << strain <<std::endl;
+    //    std::cout << "phi  " << phi <<std::endl;
+     }
     height*=exp(strain);
     base*=exp(strain);
     

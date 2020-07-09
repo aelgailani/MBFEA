@@ -65,8 +65,6 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
 
     for (long i=1; i<= pars.FIRE_Nmax; i++) {
         
-        std::cout << "step  " << step << "\n" << std::endl;
-        std::cout << "timeStep  " << timeStep << std::endl;
 
         if (pars.boundaryType == "walls"){
             mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
@@ -79,7 +77,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         
         
-        if (mainSys.maxR <= pars.FIRE_RTolerance){
+        if (mainSys.L2NormResidual <= pars.FIRE_RTolerance){
             std::cout << " Done !" << std::endl;
             break;
         }else if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff())){
@@ -88,22 +86,27 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         }
         
         double power = mainSys.forceX.dot(mainSys.velocityX) + mainSys.forceY.dot(mainSys.velocityY);
-
-        std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
-        std::cout << "power   " << power <<std::endl;
-        std::cout << "e0  " << mainSys.e0 << std::endl;
-        std::cout << "e1  " << mainSys.e1 << std::endl;
-        std::cout << "phi  " << mainSys.phi << std::endl;
-        std::cout << "pressure  " << mainSys.P2 << std::endl;
-        std::cout << "maxForce  " << mainSys.maxR << std::endl;
-        std::cout << "avgForce  " << mainSys.avgR << std::endl;
-        std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
-        std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
-        std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
-        std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
-        std::cout << "FIRE_Np-   " << FIRE_N_negative  <<std::endl;
-        std::cout << "\n" << std::endl;
         
+        if(timeStep%pars.writeToConsoleEvery==0){
+            
+            std::cout << "step  " << step << "\n" << std::endl;
+            std::cout << "timeStep  " << timeStep << std::endl;
+            std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
+            std::cout << "power   " << power <<std::endl;
+            std::cout << "e0  " << mainSys.e0 << std::endl;
+            std::cout << "e1  " << mainSys.e1 << std::endl;
+            std::cout << "phi  " << mainSys.phi << std::endl;
+            std::cout << "pressure  " << mainSys.P2 << std::endl;
+            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "avgForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2R  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+            std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
+            std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
+            std::cout << "FIRE_Np-   " << FIRE_N_negative  <<std::endl;
+            std::cout << "\n" << std::endl;
+        }
         
         if (power >0) {
             FIRE_N_positive +=1;
