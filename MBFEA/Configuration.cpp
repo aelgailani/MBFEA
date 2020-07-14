@@ -18,6 +18,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     
     if (pars.startingMode=="new") {
         
+        
         curPosX = baseData.refPosX * pars.initialStretch;
         curPosY = baseData.refPosY * pars.initialStretch;
         topPos = pars.initTopPos;
@@ -28,17 +29,22 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         lxCur =  baseData.lxRef;
         lyNew = lyCur;
         lxNew = lxCur;
+        ctrX = 0.5*(rightPos+ leftPos);
+        ctrY = 0.5*(topPos+ botPos);
         
-        triAy=topPos;
-        triBx=leftPos;
-        triCx=rightPos;
-        triBy=botPos;
-        triCy=botPos;
-        triAx=0.5*(triCx + triBx);
-        height = triAy - triBy;
-        base = triCx - triBx;
-        ctrX = 0.5*(triCx + triBx);
-        ctrY = triBy + height/3.0;
+        
+        if(pars.runMode=="special"){
+            triAy=topPos;
+            triBx=leftPos;
+            triCx=rightPos;
+            triBy=botPos;
+            triCy=botPos;
+            triAx=0.5*(triCx + triBx);
+            height = triAy - triBy;
+            base = triCx - triBx;
+            ctrX = 0.5*(triCx + triBx);
+            ctrY = triBy + height/3.0;
+        }
 
     }else if (pars.startingMode=="restart")  {
         std::ifstream inFile;
@@ -91,18 +97,21 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             lyCur = topPos - botPos;
             lyNew = lyCur;
             lxNew = lxCur;
+            ctrX = 0.5*(rightPos+ leftPos);
+            ctrY = 0.5*(topPos+ botPos);
             
-            triAy=topPos;
-            triBx=leftPos;
-            triCx=rightPos;
-            triBy=botPos;
-            triCy=botPos;
-            triAx=0.5*(triCx + triBx);
-            height = triAy - triBy;
-            base = triCx - triBx;
-            ctrX = 0.5*(triCx + triBx);
-            ctrY = triBy + height/3.0;
-            
+            if(pars.runMode=="special"){
+                triAy=topPos;
+                triBx=leftPos;
+                triCx=rightPos;
+                triBy=botPos;
+                triCy=botPos;
+                triAx=0.5*(triCx + triBx);
+                height = triAy - triBy;
+                base = triCx - triBx;
+                ctrX = 0.5*(triCx + triBx);
+                ctrY = triBy + height/3.0;
+            }
             std::getline(inFile, line);
             int id = 0;
             curPosX.resize(baseData.numOriginalNodes);
@@ -160,6 +169,8 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                 lyCur = topPos - botPos;
                 lyNew = lyCur;
                 lxNew = lxCur;
+                ctrX = 0.5*(rightPos+ leftPos);
+                ctrY = 0.5*(topPos+ botPos);
             
                 
             

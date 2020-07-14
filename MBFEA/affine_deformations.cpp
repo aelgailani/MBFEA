@@ -15,69 +15,69 @@
 #include "BaseSysData.hpp"
 
 
-void Configuration::affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain){
+void Configuration::affine_compression(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
-    std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+    if(timestep%pars.writeToConsoleEvery==0){
+        std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+    }
     
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
     
     lxNew=lxCur * exp(-strain); // remember the is a a negative sign in the passed strain for cosmetics only so strain = log(Lcur/Lnew) where conventionaly it is log(Lnew/Lcur)
     lyNew=lyCur * exp(-strain);
 
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
+    leftPos= ctrX-0.5 * lxNew;
+    rightPos= ctrX+0.5 * lxNew;
+    botPos= ctrY-0.5 * lyNew;
+    topPos= ctrY+0.5 * lyNew;
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
-    curPosX = curPosX.array() - xMid;
-    curPosX *= 1.0/lxCur*lxNew;
-    
-    curPosX = curPosX.array() + xMid;
-    
-    curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lyCur*lyNew;
- 
-    curPosY = curPosY.array() + yMid;
+      // Apply an affine deformation to all nodal positions keeping the cell center fixed.
+      curPosX = curPosX.array() - ctrX;
+      if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(strain)-1))/ pars.dt;
+      curPosX *= exp(strain);
+      curPosX = curPosX.array() + ctrX;
+      
+      curPosY = curPosY.array() - ctrY;
+      if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(strain)-1))/ pars.dt;
+      curPosY *= exp(strain);
+      curPosY = curPosY.array() + ctrY;
     
 }
 
 
-void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain){
+void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
-    std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-    
-    std::cout << "e1  " << e1 <<std::endl;
-    std::cout << "phi  " << phi <<std::endl;
-    
-    yMid=0.5*(topPos+ botPos);
-    xMid=0.5*(rightPos+ leftPos);
+    if(timestep%pars.writeToConsoleEvery==0){
+        std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        
+        std::cout << "e1  " << e1 <<std::endl;
+        std::cout << "phi  " << phi <<std::endl;
+    }
+
     lyCur= topPos - botPos;
     lxCur= rightPos - leftPos;
     
     lxNew=lxCur * exp(strain);
     lyNew=lyCur * exp(-strain);
     
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
+    leftPos= ctrX-0.5 * lxNew;
+    rightPos= ctrX+0.5 * lxNew;
+    botPos= ctrY-0.5 * lyNew;
+    topPos= ctrY+0.5 * lyNew;
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
-    curPosX = curPosX.array() - xMid;
-    curPosX *= (1.0/lxCur)*lxNew;
-    //only for reporting. Can be removed if not needed
+    // Apply an affine deformation to all nodal positions keeping the cell center fixed.
+    curPosX = curPosX.array() - ctrX;
+    if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(strain)-1))/ pars.dt;
+    curPosX *= exp(strain);
+    curPosX = curPosX.array() + ctrX;
     
-    curPosX = curPosX.array() + xMid;
-    
-    curPosY = curPosY.array() - yMid;
-    curPosY *= (1.0/lyCur)*lyNew;
-    //only for reporting. Can be removed if not needed
-    
-    curPosY = curPosY.array() + yMid;
+    curPosY = curPosY.array() - ctrY;
+    if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(-strain)-1))/ pars.dt;
+    curPosY *= exp(-strain);
+    curPosY = curPosY.array() + ctrY;
     
     
 }

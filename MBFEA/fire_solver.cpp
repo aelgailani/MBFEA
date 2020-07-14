@@ -34,7 +34,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
             
             double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
             double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
-            mainSys.affine_compression(baseData, pars, relativeStrain);
+            mainSys.affine_compression(baseData, pars, relativeStrain,mainSys.ctrX, mainSys.ctrY, timeStep);
 
             while (1)
             {
@@ -122,7 +122,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
         mainSys.dump_global_data(pars, timeStep, name, "write", "final"); //open file and write cols names
         while(stage<2){
             
-            mainSys.affine_axial_shearing(baseData, pars, pars.targetShear);
+            mainSys.affine_axial_shearing(baseData, pars, pars.targetShear,mainSys.ctrX, mainSys.ctrY, timeStep);
             
             double FIRE_alpha =  pars.FIRE_alpha_start;
             double FIRE_N = 0;
