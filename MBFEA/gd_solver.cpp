@@ -53,19 +53,19 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
                 }
 
             }
-            if(timeStep%pars.writeToConsoleEvery==0){
-                std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
-                std::cout << "maxForce  " << mainSys.maxR << std::endl;
-                std::cout << "meanForce  " << mainSys.avgR << std::endl;
-                std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
-                std::cout << "\n" << std::endl;
-            }
+//            if(timeStep%pars.writeToConsoleEvery==0){
+//                std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
+//                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+//                std::cout << "meanForce  " << mainSys.avgR << std::endl;
+//                std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+//                std::cout << "\n" << std::endl;
+//            }
             if ( mainSys.L2NormResidual<=pars.maxForceTol){
                 std::cout << "Foce condition met !" << std::endl;
                 
                 
             } else if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff())){
-                
+    
                 std::cout << "System blew up !" << std::endl;
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;
                 std::cout << "meanForce  " << mainSys.avgR << std::endl;

@@ -35,10 +35,11 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
             double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
             double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
             
-            std::cout << timeStep << std::endl;
-            std::cout << "phi  " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-            std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-            
+            if(timeStep%pars.writeToConsoleEvery==0){
+                std::cout << timeStep << std::endl;
+                std::cout << "phi  " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+                std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
+            }
             mainSys.affine_compression(baseData, pars, relativeStrain, mainSys.ctrX, mainSys.ctrY, timeStep);
             
             fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
@@ -60,12 +61,21 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
     }else if (pars.solver=="GD") {
         
         while(1){
-            
-            std::cout << timeStep << std::endl;
+                
+            if(timeStep%pars.writeToConsoleEvery==0){
+                std::cout << timeStep << std::endl;
                 std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
                 std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
                 std::cout << "e1   " << mainSys.e1 << std::endl;
+                std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
+                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+                std::cout << "meanForce  " << mainSys.avgR << std::endl;
+                std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+                std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
 
+                std::cout << "\n" << std::endl;
+            }
+            
             gd_solver(baseData,pars,timeStep, "data", mainSys, true);
           
             if (mainSys.phi <= pars.targetPhi)
@@ -96,8 +106,13 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
+            std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
+            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "\n" << std::endl;
 
          }
         
@@ -134,8 +149,14 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
+            std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
+            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "\n" << std::endl;
+
 
          }
         
