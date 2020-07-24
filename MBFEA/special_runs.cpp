@@ -23,7 +23,7 @@ bool isInsideTriangle(float x, float xo, float x1, float x2, float y, float yo,f
     float v2=((x-x1)*(y1-y2)+(y-y1)*(x2-x1));
     float v3=((x-x2)*(y2-yo)+(y-y2)*(xo-x2));
     
-    if (signbit(v1)==signbit(v2)==signbit(v3)) return true;
+    if (std::signbit(v1)==std::signbit(v2)==std::signbit(v3)) return true;
         else return false;
     
 }

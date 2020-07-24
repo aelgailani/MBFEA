@@ -65,8 +65,10 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
             
     }else if (pars.solver=="GD") {
         
-        while(1){
-                
+       do{
+            
+            gd_solver(baseData,pars,timeStep, "data", mainSys, true);
+
             if(timeStep%pars.writeToConsoleEvery==0){
                 std::cout << timeStep << std::endl;
                 std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
@@ -77,17 +79,25 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                 std::cout << "meanForce  " << mainSys.avgR << std::endl;
                 std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
                 std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
-
                 std::cout << "\n" << std::endl;
             }
+
+            mainSys.affine_compression(baseData, pars, pars.deformationRate * pars.dt, mainSys.ctrX, mainSys.ctrY, timeStep);
+  
             
-            gd_solver(baseData,pars,timeStep, "data", mainSys, true);
-          
-            if (mainSys.phi <= pars.targetPhi)
-            {
-                mainSys.affine_compression(baseData, pars, pars.deformationRate * pars.dt, mainSys.ctrX, mainSys.ctrY, timeStep);
-            }
-        }
+       } while (mainSys.phi <= pars.targetPhi);
+        std::cout << "Done compressing !" << std::endl;
+        std::cout << timeStep << std::endl;
+        std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+        std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
+        std::cout << "e1   " << mainSys.e1 << std::endl;
+        std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
+        std::cout << "maxForce  " << mainSys.maxR << std::endl;
+        std::cout << "meanForce  " << mainSys.avgR << std::endl;
+        std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+        std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+        std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
+
     }
 }
     
@@ -120,6 +130,8 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
+
             std::cout << "\n" << std::endl;
 
          }
