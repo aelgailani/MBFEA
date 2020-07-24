@@ -178,6 +178,7 @@ public:
     Eigen::MatrixXd cellsHeads;
     std::map<std::pair<int,int>, std::vector<int>> facets;
     std::map<std::pair<int,int>, std::vector<double>> facets_ntn;
+    std::map<std::pair<int,int>, std::vector<double>> interactions_nts;
     Eigen::MatrixXd slaveMaster;//this map gives you infromation about (master, slave) nodes with duplication allowed. notice that key (1,3) is different from (3,1), the former contains all nodes in mesh 1 while the latter the nodes of mesh 3.
     std::valarray<int> surNodes_mMesh1;
     std::valarray<int> surNodes_mMesh2;
@@ -191,6 +192,16 @@ public:
     std::valarray<double> surNodes_gap1;
     std::valarray<double> surNodes_gap2;
     std::valarray<double> surNodes_gap3;
+    std::valarray<double> surNodes_smoothCurveX1;
+    std::valarray<double> surNodes_smoothCurveX2;
+    std::valarray<double> surNodes_smoothCurveX3;
+    std::valarray<double> surNodes_smoothCurveY1;
+    std::valarray<double> surNodes_smoothCurveY2;
+    std::valarray<double> surNodes_smoothCurveY3;
+    std::valarray<double> surNodes_smoothCurve_g1;
+    std::valarray<double> surNodes_smoothCurve_g2;
+    std::valarray<double> surNodes_smoothCurve_g3;
+    
     
     
     
@@ -207,6 +218,7 @@ public:
     void dump_per_ele(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     void dump_facets_ntn(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
+    void dump_smoothcurves(const BaseSysData& baseData, const Parameters& pars, long& timeStep);
     
     void compute_forces_walls(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
     void compute_forces_pbc(const BaseSysData& baseData, const Parameters& pars, const long& timeStep, bool surfaceInteractions, bool updatePBC, bool Hessian);
@@ -214,6 +226,7 @@ public:
     void detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars);
     void detect_nts_contacts_two_points_method(const BaseSysData& baseData, const Parameters& pars);
     void apply_nts_harmonic_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
+    void apply_nts_harmonic_penalty_with_smoothing(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, const std::valarray<double>& surNodes_smoothCurveX, const std::valarray<double>& surNodes_smoothCurveY,const std::valarray<double>& surNodes_smoothCurve_g, bool Hessian, const long& timeStep);
     void apply_nts_powerlaw_penalty(const BaseSysData& baseData, const Parameters& pars, const std::valarray<int>& surNodes_mMesh, const std::valarray<int>& surNodes_mSegment, const std::valarray<int>& surNodes_mPart, const std::valarray<double>& surNodes_gap, bool Hessian, const long& timeStep);
 
     void apply_ntn_repulsions(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
@@ -222,6 +235,7 @@ public:
     void apply_ghost_nodes_to_node_repulsions_v2(const BaseSysData& baseData, const Parameters& pars, bool Hessian, const long& timeStep);
 
     void nts_find_closest_approach(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
+    void nts_find_closest_approach_with_smoothing(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
 
     void affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
     void affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);

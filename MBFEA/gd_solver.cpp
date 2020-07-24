@@ -51,6 +51,9 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
                     }
                     
                 }
+                if(pars.dumpSmoothenCurves){
+                    mainSys.dump_smoothcurves(baseData,pars,timeStep);
+                }
 
             }
 //            if(timeStep%pars.writeToConsoleEvery==0){

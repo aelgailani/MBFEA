@@ -16,10 +16,20 @@
 #include "Configuration.hpp"
 #include "solvers.hpp"
 #include <time.h>
+#include "utility_functions.hpp"
 
 int main(int argc, char* argv[])
 {
 
+//    struct closestPointOnHermitianCurve f = find_closest_point_on_Hermitian_interpolation(1, -2, 0, 2, 5, 2, 0, 2, 0.95);
+//    
+//    std::cout <<  "g is " << f.g << std::endl;
+//    std::cout <<  "x is " << f.x << std::endl;
+//    std::cout <<  "y is " << f.y << std::endl;
+    
+//    
+//    
+//    
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
@@ -168,6 +178,8 @@ int main(int argc, char* argv[])
         }else if (pars.solver=="stepGD"){
             shear_special_stepGD(baseData, pars, timeStep, mainSys);
         }
+    }if (pars.runMode=="testfire") {
+       testFire(pars);
     }
     
     return 0;

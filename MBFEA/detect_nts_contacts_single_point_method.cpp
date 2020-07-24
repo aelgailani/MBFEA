@@ -14,6 +14,7 @@
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
+#include "utility_functions.hpp"
 
 void Configuration::detect_nts_contacts_single_point_method(const BaseSysData& baseData, const Parameters& pars)
 {
@@ -68,9 +69,13 @@ void Configuration::detect_nts_contacts_single_point_method(const BaseSysData& b
                             }
 
                         }
-                        
-                        nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
-                        
+                         if (pars.smoothCorners==true){
+                             nts_find_closest_approach_with_smoothing(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+//                             nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+
+                         }else{
+                             nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                         }
                         masterSegment = segmentsLinkedList_1[masterSegment];
                     }
                 }

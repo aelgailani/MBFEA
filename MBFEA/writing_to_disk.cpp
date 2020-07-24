@@ -13,6 +13,8 @@
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
+#include "utility_functions.hpp"
+
 
 void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
     
@@ -422,4 +424,86 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     
     myfile.close();
 
+}
+
+
+void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Parameters& pars, long& timeStep){
+    
+    int spacing =26;
+    std::string step = std::to_string(timeStep);
+    std::ofstream myfile;
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/smoothcurves-"+step+".txt").c_str());
+    }else{
+        myfile.open (pars.outputFolderName+"/smoothcurves-"+step+".txt");
+    }
+    myfile << "numMeshes:   " << baseData.numOriginalMeshes << std::endl;
+    
+    for (const auto& mesh: baseData.originalSurfaceMeshes)
+    {
+    
+        for (const auto& node3: mesh.second)
+        {
+            int segment0 = baseData.nodeToSegments[node3][0];
+            int segment1 = baseData.nodeToSegments[node3][1];
+            
+            int node2 =  baseData.surfaceSegments[segment0][0];
+            double x2 = augmentedCurPosX[node2];
+            double y2 = augmentedCurPosY[node2];
+            
+            int node4 =  baseData.surfaceSegments[segment1][1];
+            double x4 = augmentedCurPosX[node4];
+            double y4 = augmentedCurPosY[node4];
+            
+            double x3 = augmentedCurPosX[node3];
+            double y3 = augmentedCurPosY[node3];
+            
+            
+            
+            for (double g =-1; g<=1; g+=0.05){
+                
+                struct point xy = HermitianInterpolation(x2, x3, x4, y2, y3, y4, pars.alpha_HermitPol, g);
+                
+                myfile
+                <<  std::setprecision(15)
+                << xy.x << std::setw(spacing)
+                << xy.y << std::endl;
+                
+                
+            }
+        }
+        myfile <<  "\n" << std::endl;
+    }
+    
+    myfile.close();
+    
+    
+    ////////////////
+    std::ofstream myfile2;
+
+    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
+    myfile2.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/gaps-"+step+".txt").c_str());
+    }else{
+        myfile2.open (pars.outputFolderName+"/gaps-"+step+".txt");
+    }
+
+    
+    for (const auto& g: interactions_nts)
+    {
+    
+      
+    myfile2
+    <<  std::setprecision(15)
+        << g.second[0] << std::setw(spacing)
+        << g.second[1] << std::setw(spacing)
+        << g.second[2] << std::setw(spacing)
+        << g.second[3]<< std::endl;
+    }
+   myfile2 << "EOF"<< std::endl;
+    
+  
+    
+    myfile2.close();
+    
+    
 }

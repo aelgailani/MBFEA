@@ -35,13 +35,13 @@ void Configuration::affine_compression(const BaseSysData& baseData, const Parame
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
       // Apply an affine deformation to all nodal positions keeping the cell center fixed.
       curPosX = curPosX.array() - ctrX;
-      if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(strain)-1))/ pars.dt;
-      curPosX *= exp(strain);
+      if(timestep%pars.dumpEvery) homVx = (curPosX*(exp(-strain)-1))/ pars.dt;
+      curPosX *= exp(-strain);
       curPosX = curPosX.array() + ctrX;
       
       curPosY = curPosY.array() - ctrY;
-      if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(strain)-1))/ pars.dt;
-      curPosY *= exp(strain);
+      if(timestep%pars.dumpEvery) homVy = (curPosY*(exp(-strain)-1))/ pars.dt;
+      curPosY *= exp(-strain);
       curPosY = curPosY.array() + ctrY;
     
 }

@@ -83,7 +83,7 @@ struct PowerlawRepulsion walldiscretePL(double x, double x0, double x1, double y
 
 void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
     float shearStep=pars.deformationRate;
-    long numSteps=100000;
+    long numSteps=1;
     long step = 0;
     double refPhi = pars.Ap/(0.5*baseData.lxRef*baseData.lyRef);
     double target_e0 = - log(sqrt(refPhi/(pars.targetPhi)));
@@ -111,20 +111,26 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
              std::cout << " Failed to coverge compression !" << std::endl;
 
          }
-//            else{
-//             mainSys.dump_global_data(pars, timeStep, "append", "final");
-//             mainSys.dump_per_node(baseData, pars, strainStep);
-//             mainSys.dump_per_ele(baseData, pars,strainStep);
-//             if (pars.dumpPeriodicImagesXY){
-//                 mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
-//             }
-//         }
+            else{
+            mainSys.dump_per_node(baseData, pars, strainStep);
+              mainSys.dump_per_ele(baseData, pars,strainStep);
+              if (pars.dumpPeriodicImagesXY){
+                  mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+              }
+             if(pars.dumpSmoothenCurves){
+                  mainSys.dump_smoothcurves(baseData,pars,strainStep);
+              }
+
+         }
         if (mainSys.P2<pars.targetPressure){
             
             mainSys.dump_per_node(baseData, pars, strainStep);
              mainSys.dump_per_ele(baseData, pars,strainStep);
              if (pars.dumpPeriodicImagesXY){
                  mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+             }
+            if(pars.dumpSmoothenCurves){
+                 mainSys.dump_smoothcurves(baseData,pars,strainStep);
              }
             break;
         }
@@ -184,6 +190,8 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
                      }else{
                          mainSys.dump_facets_ntn(baseData, pars, step);
                      }
+                 }if(pars.dumpSmoothenCurves){
+                     mainSys.dump_smoothcurves(baseData,pars,step);
                  }
     
     
@@ -215,10 +223,15 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "maxForce  " << mainSys.maxR << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "\n" << std::endl;
+
 
          }
         
-        gd_solver(baseData,pars,timeStep,"compression-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
 
         if (mainSys.P2<pars.targetPressure) break;
         
@@ -237,8 +250,11 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
         }else{
             mainSys.dump_facets_ntn(baseData, pars, timeStep);
         }
+        
     }
-    
+    if(pars.dumpSmoothenCurves){
+        mainSys.dump_smoothcurves(baseData,pars,timeStep);
+    }
     timeStep=1;
     
     mainSys.dump_global_data(pars, timeStep, "shearing-data","write", "running");
@@ -258,6 +274,10 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "\n" << std::endl;
+
 
          }
         
@@ -293,6 +313,10 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "\n" << std::endl;
+
          }
         
         gd_solver(baseData,pars,timeStep, "compression-data",mainSys, false);
@@ -315,7 +339,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             mainSys.dump_facets_ntn(baseData, pars, timeStep);
         }
     }
-    
+    if(pars.dumpSmoothenCurves){
+        mainSys.dump_smoothcurves(baseData,pars,timeStep);
+    }
     timeStep=0;
     
     mainSys.dump_global_data(pars, timeStep,"holding-data", "write", "running");
@@ -336,6 +362,10 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "\n" << std::endl;
+
 
             
          }
@@ -359,7 +389,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             mainSys.dump_facets_ntn(baseData, pars, timeStep);
         }
     }
-    
+    if(pars.dumpSmoothenCurves){
+        mainSys.dump_smoothcurves(baseData,pars,timeStep);
+    }
     timeStep=0;
     
     
@@ -380,6 +412,10 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "meanForce  " << mainSys.avgR << std::endl;
+            std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
+            std::cout << "\n" << std::endl;
+
 
          }
         
@@ -401,6 +437,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
                mainSys.dump_facets_ntn(baseData, pars, timeStep);
            }
        }
+        if(pars.dumpSmoothenCurves){
+            mainSys.dump_smoothcurves(baseData,pars,timeStep);
+        }
     
     
 }

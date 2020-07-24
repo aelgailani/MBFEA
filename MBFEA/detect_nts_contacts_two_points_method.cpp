@@ -14,6 +14,7 @@
 #include "Parameters.hpp"
 #include "Configuration.hpp"
 #include "BaseSysData.hpp"
+#include "utility_functions.hpp"
 
 void Configuration::detect_nts_contacts_two_points_method(const BaseSysData& baseData, const Parameters& pars)
 {
@@ -76,7 +77,11 @@ void Configuration::detect_nts_contacts_two_points_method(const BaseSysData& bas
 
                              }
                           
-                          nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                          if (pars.smoothCorners==true){
+                              nts_find_closest_approach_with_smoothing(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                          }else{
+                              nts_find_closest_approach(slaveNodeId,masterSegment,masterMesh, baseData, pars);
+                          }
                           
                           nextMSegment = segmentsLinkedList_2(masterSegment,column);
                           column = segmentsLinkedList_2(masterSegment,column+1);

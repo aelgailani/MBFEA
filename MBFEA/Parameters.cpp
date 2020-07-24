@@ -183,9 +183,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="dumpPeriodicImagesXY") {
         split >> trueFalse;
         dumpPeriodicImagesXY = trueFalse;
-        }else if (a=="callPythonPlot") {
+        }else if (a=="dumpSmoothenCurves") {
         split >> trueFalse;
-        callPythonPlot = trueFalse;
+        dumpSmoothenCurves = trueFalse;
         }else if (a=="calculateHessian") {
         split >> trueFalse;
         calculateHessian = trueFalse;
@@ -240,6 +240,12 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="writeToConsoleEvery") {
             split >> l;
             writeToConsoleEvery = l;
+        }else if (a=="smoothCorners") {
+            split >> trueFalse;
+            smoothCorners = trueFalse;
+        }else if (a=="alpha_HermitPol") {
+            split >> c;
+            alpha_HermitPol = c;
         }
         
         
@@ -282,6 +288,7 @@ void Parameters::print_to_console(void) const {
     printit("dumpEvery",dumpEvery);
     printit("writeToConsoleEvery",writeToConsoleEvery);
     printit("splitDataEvery",splitDataEvery);
+    printit("dumpSmoothenCurves",dumpSmoothenCurves);
     printit("startingTimeStep",startingTimeStep);
     printit("outputFolderName",outputFolderName);
     printit("surfaceNodesFileName",surfaceNodesFileName);
@@ -358,6 +365,8 @@ void Parameters::print_to_console(void) const {
         printit("segmentCellMethod",segmentCellMethod);
         printit("identifyAndDumbFacets",identifyAndDumbFacets);
         printit("reversibleMasterSlaveRole", reversibleMasterSlaveRole);
+        printit("smoothCorners", smoothCorners);
+        printit("alpha_HermitPol", alpha_HermitPol);
         
 
     }else if (contactMethod=="ntn" || contactMethod=="gntn"){
@@ -374,7 +383,7 @@ void Parameters::print_to_console(void) const {
     }
     printit("verletCellCutoff",verletCellCutoff);
     
-    printit("calculateHessian",callPythonPlot);
+    printit("calculateHessian",calculateHessian);
 
             std::cout << std::endl;
 }

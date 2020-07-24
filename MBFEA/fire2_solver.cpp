@@ -78,10 +78,14 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         
         if (mainSys.L2NormResidual <= pars.FIRE_RTolerance){
-            std::cout << " Done !" << std::endl;
+            std::cout << "step " << step << " is done !" << std::endl;
+           
             break;
         }else if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff())){
             std::cout << "System blew up !" << std::endl;
+            std::cout << "mainSys.areaRatio.sum() = " << mainSys.areaRatio.sum()<<std::endl;
+            std::cout << "SmainSys.forceX.sum() = " << mainSys.forceX.sum() << std::endl;
+            std::cout << "mainSys.forceY.minCoeff()  = " << mainSys.forceY.minCoeff() << std::endl;
             exit(1);
         }
         
@@ -101,6 +105,10 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
             std::cout << "avgForce  " << mainSys.avgR << std::endl;
             std::cout << "L2R  " << mainSys.L2NormResidual << std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+            std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
+            std::cout << "areaRatio.sum() = " << mainSys.areaRatio.sum()<<std::endl;
+            std::cout << "forceX.sum() = " << mainSys.forceX.sum() << std::endl;
+            std::cout << "forceY.minCoeff()  = " << mainSys.forceY.minCoeff() << std::endl;
             std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
             std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
             std::cout << "FIRE_Np+   " << FIRE_N_positive  <<std::endl;
@@ -146,8 +154,11 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         }
         vmax= sqrt((mainSys.velocityX.array()*mainSys.velocityX.array()+mainSys.velocityY.array()*mainSys.velocityY.array()).maxCoeff());
         
-        if (vmax*FIRE_dt>pars.verletCellCutoff*0.5){
-            FIRE_dt = pars.verletCellCutoff*0.5/vmax;
+        while (vmax*FIRE_dt>pars.verletCellCutoff*1.5){
+            if ( FIRE_dt*pars.FIRE_fdec >= pars.FIRE_dtmin){
+                FIRE_dt*=pars.FIRE_fdec;
+                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+            }
         }
         //MD integration
         if (pars.integrator==0) semi_implicit_Euler(mainSys, FIRE_dt, 1, power, scale1, scale2);
@@ -158,6 +169,13 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         timeStep++;
         
+//        if(timeStep==139){
+//             mainSys.dump_smoothcurves(baseData,pars,timeStep);
+//             mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+//            mainSys.dump_per_node(baseData, pars, timeStep);
+//            mainSys.dump_per_ele(baseData, pars,timeStep);
+//
+//        }
     }
         
 }

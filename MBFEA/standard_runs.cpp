@@ -23,29 +23,25 @@
 void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
     
     double refPhi = pars.Ap/(baseData.lxRef*baseData.lyRef);
-    double target_e0 = - log(sqrt(pars.Ap/(pars.targetPhi*baseData.lxRef*baseData.lyRef))); // my conviension is positive e0 for compression
-
-    
+    double target_e0 = - log(sqrt(pars.Ap/(pars.targetPhi*baseData.lxRef*baseData.lyRef))); // my conviension is positive e0 for
+   
     if (pars.solver=="FIRE2"){
         
         assert(pars.FIRE_startingStrainStep <= pars.FIRE_numStrainSteps);
+        
+        
         
         for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
             double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
             double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
-            
-            if(timeStep%pars.writeToConsoleEvery==0){
-                std::cout << timeStep << std::endl;
-                std::cout << "phi  " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-                std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-            }
+
             mainSys.affine_compression(baseData, pars, relativeStrain, mainSys.ctrX, mainSys.ctrY, timeStep);
             
             fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
             
-            if (mainSys.maxR > pars.FIRE_RTolerance){
-                 std::cout << " Failed to coverge !" << std::endl;
+            if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+                 std::cout << " step " << strainStep << " failed to coverge !" << std::endl;
 
              }else{
                  mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
@@ -53,6 +49,15 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                  mainSys.dump_per_ele(baseData, pars,strainStep);
                  if (pars.dumpPeriodicImagesXY){
                      mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+                 }
+                 if(pars.dumpSmoothenCurves){
+                     mainSys.dump_smoothcurves(baseData,pars,strainStep);
+                 }if (pars.identifyAndDumbFacets) {
+                     if (pars.contactMethod=="nts"){
+                          mainSys.dump_facets(baseData, pars, strainStep);
+                     }else{
+                         mainSys.dump_facets_ntn(baseData, pars, strainStep);
+                     }
                  }
              }
         }
@@ -96,9 +101,12 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
     mainSys.dump_global_data(pars, timeStep,"holding-data", "write", "running");
     
-    
+    if (pars.solver=="GD"){
     //hold
-    while(mainSys.maxR > pars.maxForceTol){
+   do{
+        
+        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+
         
          if(timeStep%pars.writeToConsoleEvery==0){
             std::cout << "**** holding before shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
@@ -116,9 +124,8 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
          }
         
-        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
 
-    }
+   } while(mainSys.L2NormResidual > pars.maxForceTol);
     
     
     mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
@@ -133,6 +140,9 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
         }else{
             mainSys.dump_facets_ntn(baseData, pars, timeStep);
         }
+    }
+    if(pars.dumpSmoothenCurves){
+        mainSys.dump_smoothcurves(baseData,pars,timeStep);
     }
     
     timeStep=0;
@@ -163,7 +173,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
         gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
 
         
-    } while(mainSys.maxR > pars.maxForceTol);
+    } while(mainSys.L2NormResidual > pars.maxForceTol);
     
         mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
         mainSys.dump_per_node(baseData, pars, timeStep);
@@ -178,6 +188,72 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
                mainSys.dump_facets_ntn(baseData, pars, timeStep);
            }
        }
+        if(pars.dumpSmoothenCurves){
+            mainSys.dump_smoothcurves(baseData,pars,timeStep);
+    }
+    
+    }else
+    
+    if (pars.solver=="FIRE2"){
+        long strainStep=0;
+
+        /// hold
+        
+               
+               fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
+               
+               if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+                    std::cout << " Failed to coverge !" << std::endl;
+
+                }else{
+                    mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
+                    mainSys.dump_per_node(baseData, pars, strainStep);
+                    mainSys.dump_per_ele(baseData, pars,strainStep);
+                    if (pars.dumpPeriodicImagesXY){
+                        mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+                    }
+                    if(pars.dumpSmoothenCurves){
+                        mainSys.dump_smoothcurves(baseData,pars,strainStep);
+                    }if (pars.identifyAndDumbFacets) {
+                        if (pars.contactMethod=="nts"){
+                             mainSys.dump_facets(baseData, pars, strainStep);
+                        }else{
+                            mainSys.dump_facets_ntn(baseData, pars, strainStep);
+                        }
+                    }
+                }
+           
+         /// shear
+        strainStep++;
+                
+                mainSys.affine_axial_shearing(baseData, pars, pars.targetShear, mainSys.ctrX, mainSys.ctrY, timeStep);
+                
+                fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
+                
+                if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+                     std::cout << " Failed to coverge !" << std::endl;
+
+                 }else{
+                     mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
+                     mainSys.dump_per_node(baseData, pars, strainStep);
+                     mainSys.dump_per_ele(baseData, pars,strainStep);
+                     if (pars.dumpPeriodicImagesXY){
+                         mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+                     }
+                     if(pars.dumpSmoothenCurves){
+                         mainSys.dump_smoothcurves(baseData,pars,strainStep);
+                     }if (pars.identifyAndDumbFacets) {
+                         if (pars.contactMethod=="nts"){
+                              mainSys.dump_facets(baseData, pars, strainStep);
+                         }else{
+                             mainSys.dump_facets_ntn(baseData, pars, strainStep);
+                         }
+                     }
+                 
+            }
+                 
+                
+        }
     
     
 }

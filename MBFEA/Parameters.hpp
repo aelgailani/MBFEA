@@ -70,7 +70,7 @@ public:
     std::vector<int> targetNodes;
     bool dumpPeriodicImagesXY;
     bool calculateHessian;
-    bool callPythonPlot;
+    bool dumpSmoothenCurves;
     bool identifyAndDumbFacets;
     bool reversibleMasterSlaveRole;
     std::string contactMethod;
@@ -92,6 +92,11 @@ public:
     
     long writeToConsoleEvery;
    
+    
+    bool smoothCorners;
+    double alpha_HermitPol;
+    
+    
 };
 
 #endif /* Parameters_hpp */
