@@ -211,7 +211,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
         if(surNodes_mMesh1[slaveNodeId]==-1){
             
             surNodes_mMesh1[slaveNodeId] = masterMesh;
-            surNodes_mSegment1[slaveNodeId] = baseData.surfaceSegments[segment][3]; ///// segment , curves have smae ID which is left node (node0) when you walk on the screen leaving the center of the mesh to your left.  baseData.surfaceSegments[segment][4] gives downstream segment ID
+            surNodes_mSegment1[slaveNodeId] = segment;
             surNodes_mPart1[slaveNodeId] = 1;
             surNodes_gap1[slaveNodeId] = point.gap;
             surNodes_smoothCurveX1[slaveNodeId] = point.x;
@@ -222,7 +222,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
             
             if (abs(surNodes_gap1[slaveNodeId]) > abs(point.gap))
             {
-                surNodes_mSegment1[slaveNodeId] = baseData.surfaceSegments[segment][3];
+                surNodes_mSegment1[slaveNodeId] = segment;
                 surNodes_mPart1[slaveNodeId] = 1;
                 surNodes_gap1[slaveNodeId] = point.gap;
                 surNodes_smoothCurveX1[slaveNodeId] = point.x;
@@ -233,7 +233,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
         }else if(surNodes_mMesh2[slaveNodeId]==-1){
             
             surNodes_mMesh2[slaveNodeId] = masterMesh;
-            surNodes_mSegment2[slaveNodeId] = baseData.surfaceSegments[segment][4]; /////////// segment , curves have smae ID which is left node (node0) when you walk on the screen leaving the center of the mesh to your left .   baseData.surfaceSegments[segment][4] gives downstream segment ID
+            surNodes_mSegment2[slaveNodeId] = segment; /////////// segment , curves have smae ID which is left node (node0) when you walk on the screen leaving the center of the mesh to your left .   baseData.surfaceSegments[segment][4] gives downstream segment ID
                 
             
             surNodes_mPart2[slaveNodeId] = 1;
@@ -246,7 +246,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
             
             if (abs(surNodes_gap2[slaveNodeId]) > abs(point.gap))
             {
-                surNodes_mSegment2[slaveNodeId] = baseData.surfaceSegments[segment][3];
+                surNodes_mSegment2[slaveNodeId] = segment;
                 surNodes_mPart2[slaveNodeId] = 1;
                 surNodes_gap2[slaveNodeId] = point.gap;
                 surNodes_smoothCurveX2[slaveNodeId] = point.x;
@@ -258,7 +258,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
             
       
             surNodes_mMesh3[slaveNodeId] = masterMesh;
-            surNodes_mSegment3[slaveNodeId] = baseData.surfaceSegments[segment][3]; // segment , curves have smae ID which is left node (node0) when you walk on the screen leaving the center of the mesh to your left
+            surNodes_mSegment3[slaveNodeId] = segment; // segment , curves have smae ID which is left node (node0) when you walk on the screen leaving the center of the mesh to your left
                 
             
             surNodes_mPart3[slaveNodeId] = 1;
@@ -270,7 +270,7 @@ void Configuration::nts_find_closest_approach_with_smoothing(const int& slaveNod
         }else if (surNodes_mMesh3[slaveNodeId] == masterMesh){
             if (abs(surNodes_gap3[slaveNodeId]) > abs(point.gap))
             {
-                surNodes_mSegment3[slaveNodeId] = baseData.surfaceSegments[segment][3];
+                surNodes_mSegment3[slaveNodeId] = segment;
                 surNodes_mPart3[slaveNodeId] = 1;
                 surNodes_gap3[slaveNodeId] = point.gap;
                 surNodes_smoothCurveX3[slaveNodeId] = point.x;

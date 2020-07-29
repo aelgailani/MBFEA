@@ -110,11 +110,11 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
             if (pars.ntsPenaltyMethod=="harmonic"){
                 apply_nts_harmonic_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1,Hessian, timeStep);
                 apply_nts_harmonic_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2, Hessian, timeStep);
-                apply_nts_harmonic_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3, Hessian, timeStep);
+                apply_nts_harmonic_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart3, surNodes_gap3, Hessian, timeStep);
             }else if (pars.ntsPenaltyMethod=="powerlaw"){
                apply_nts_powerlaw_penalty(baseData, pars, surNodes_mMesh1, surNodes_mSegment1, surNodes_mPart1, surNodes_gap1,Hessian, timeStep);
                 apply_nts_powerlaw_penalty(baseData, pars, surNodes_mMesh2, surNodes_mSegment2, surNodes_mPart2, surNodes_gap2, Hessian, timeStep);
-                apply_nts_powerlaw_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart1, surNodes_gap3, Hessian, timeStep);
+                apply_nts_powerlaw_penalty(baseData, pars, surNodes_mMesh3, surNodes_mSegment3, surNodes_mPart3, surNodes_gap3, Hessian, timeStep);
                 
             }else{
                 std::cout << "Please specify a valid ntsPenaltyMethod. Either powerlaw or harmonic . " << std::endl;;
