@@ -33,6 +33,7 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
     if (timeStep % pars.dumpEvery == 0 && pars.identifyAndDumbFacets) {
         facets.clear();
         facets_ntn.clear();
+        if (pars.dumpSmoothenCurves) interactions_nts.clear();
     }
     
     if (pars.contactMethod=="nts"){

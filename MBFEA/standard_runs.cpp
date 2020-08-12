@@ -40,7 +40,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
             
             fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
             
-            if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+            if (mainSys.maxR > pars.FIRE_RTolerance){
                  std::cout << " step " << strainStep << " failed to coverge !" << std::endl;
 
              }else{
@@ -79,6 +79,8 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                 std::cout << "meanForce  " << mainSys.avgR << std::endl;
                 std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
                 std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
+                std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
+
                 std::cout << "\n" << std::endl;
             }
 
@@ -86,6 +88,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
   
             
        } while (mainSys.phi <= pars.targetPhi);
+        
         std::cout << "Done compressing !" << std::endl;
         std::cout << timeStep << std::endl;
         std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
@@ -137,7 +140,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
          }
         
 
-   } while(mainSys.L2NormResidual > pars.maxForceTol);
+   } while(mainSys.maxR > pars.maxForceTol);
     
     
     mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
@@ -185,7 +188,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
         gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
 
         
-    } while(mainSys.L2NormResidual > pars.maxForceTol);
+    } while(mainSys.maxR > pars.maxForceTol);
     
         mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
         mainSys.dump_per_node(baseData, pars, timeStep);
@@ -207,14 +210,14 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     }else
     
     if (pars.solver=="FIRE2"){
-        long strainStep=0;
+        long strainStep=pars.startingTimeStep;
 
         /// hold
         
                
                fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
                
-               if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+               if (mainSys.maxR > pars.FIRE_RTolerance){
                     std::cout << " Failed to coverge !" << std::endl;
 
                 }else{
@@ -242,7 +245,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 
                 fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
                 
-                if (mainSys.L2NormResidual > pars.FIRE_RTolerance){
+                if (mainSys.maxR > pars.FIRE_RTolerance){
                      std::cout << " Failed to coverge !" << std::endl;
 
                  }else{

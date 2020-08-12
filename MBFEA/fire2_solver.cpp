@@ -77,7 +77,7 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
         
         
-        if (mainSys.L2NormResidual <= pars.FIRE_RTolerance){
+        if (mainSys.maxR <= pars.FIRE_RTolerance){
             std::cout << "step " << step << " is done !" << std::endl;
            
             break;

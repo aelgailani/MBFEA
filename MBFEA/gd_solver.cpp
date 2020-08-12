@@ -63,7 +63,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
 //                std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
 //                std::cout << "\n" << std::endl;
 //            }
-            if ( mainSys.L2NormResidual<=pars.maxForceTol){
+            if ( mainSys.maxR<=pars.maxForceTol){
                 std::cout << "Foce condition met !" << std::endl;
                 
                 

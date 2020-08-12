@@ -218,11 +218,19 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "e0_strain" << "\t" << e0 << std::endl;
     myfile << "e1_strain" << "\t" << e1 << std::endl;
     myfile << "dt" << "\t" << pars.dt << std::endl;
+    myfile << "max_penetration" << "\t" << maxInterference << std::endl;
     myfile << "max_residual" << "\t" << maxR << std::endl;
+    myfile << "L2Residual" << "\t" << L2NormResidual << std::endl;
     myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
     myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
     myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
-    myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< "\n"  << std::endl;
+    myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< std::endl;
+    myfile << "alpha" << "\t" << pars.alpha_HermitPol <<  std::endl;
+    myfile << "sigma_ntn" << "\t" << pars.ntnRadius <<  std::endl;
+    myfile << "Ap" << "\t" << pars.Ap <<  "\n"   <<  std::endl;
+
+
+    
     myfile << "Nodes_data:" << std::endl;
     myfile
     << "id"  << std::setw(spacing)

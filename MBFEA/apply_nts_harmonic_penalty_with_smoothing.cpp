@@ -115,6 +115,13 @@ void Configuration::apply_nts_harmonic_penalty_with_smoothing(const BaseSysData&
                             KWoodYY += -f*(Dd1Dyi*yi+Dd1Dy0*y0+Dd1Dy1*y1);
 //                        std::cout << KWoodXX << std::endl;
 //                        std::cout << KWoodYY << std::endl;
+                        if(timeStep % pars.dumpEvery == 0 && pars.dumpSmoothenCurves){
+                            int masterMesh = surNodes_mMesh[nodeID];
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(xi);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(yi);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(x0+s*dx);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(y0+s*dy);
+                        }
                     }
                     
                     // add the Hessian part
@@ -131,13 +138,7 @@ void Configuration::apply_nts_harmonic_penalty_with_smoothing(const BaseSysData&
                         facets[std::make_pair(slaveMesh,masterMesh)].push_back(node1);
                     }
                     
-                    if(timeStep % pars.dumpEvery == 0 && pars.dumpSmoothenCurves){
-                        int masterMesh = surNodes_mMesh[nodeID];
-                        interactions_nts[std::make_pair(node0,masterMesh)].push_back(xi);
-                        interactions_nts[std::make_pair(node0,masterMesh)].push_back(yi);
-                        interactions_nts[std::make_pair(node0,masterMesh)].push_back(x0+s*dx);
-                        interactions_nts[std::make_pair(node0,masterMesh)].push_back(y0+s*dy);
-                    }
+                    
                     
                 }else if(whichPart==1){
                     int node2 =  baseData.surfaceSegments[baseData.surfaceSegments[segment][3]][0];
@@ -219,10 +220,10 @@ void Configuration::apply_nts_harmonic_penalty_with_smoothing(const BaseSysData&
 
                         if(timeStep % pars.dumpEvery == 0 && pars.dumpSmoothenCurves){
                             int masterMesh = surNodes_mMesh[nodeID];
-                            interactions_nts[std::make_pair(node0,masterMesh)].push_back(xi);
-                            interactions_nts[std::make_pair(node0,masterMesh)].push_back(yi);
-                            interactions_nts[std::make_pair(node0,masterMesh)].push_back(xg);
-                            interactions_nts[std::make_pair(node0,masterMesh)].push_back(yg);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(xi);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(yi);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(xg);
+                            interactions_nts[std::make_pair(node,masterMesh)].push_back(yg);
                         }
                     }
                     
