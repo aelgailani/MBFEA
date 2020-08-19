@@ -73,6 +73,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                 std::cout <<"next dump number    "<< step << std::endl;
                 std::cout << "timestep   "<<timeStep << std::endl;
                 std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+                std::cout << "pressure   " << mainSys.P2 << std::endl;
                 std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
                 std::cout << "e1   " << mainSys.e1 << std::endl;
                 std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
@@ -93,6 +94,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
         std::cout <<"last dump number    "<< step-1 << std::endl;
         std::cout << "timestep   "<<timeStep << std::endl;
         std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
+        std::cout << "pressure   " << mainSys.P2 << std::endl;
         std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
         std::cout << "e1   " << mainSys.e1 << std::endl;
         std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
@@ -128,6 +130,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+            std::cout << "pressure   " << mainSys.P2 << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
@@ -179,6 +182,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+            std::cout << "pressure   " << mainSys.P2 << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;

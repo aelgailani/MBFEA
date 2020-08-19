@@ -216,6 +216,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "Ap" << "\t" << pars.Ap <<  std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
+    myfile << "pressure" << "\t" << P2 << std::endl;
     myfile << "e0_strain" << "\t" << e0 << std::endl;
     myfile << "e1_strain" << "\t" << e1 << std::endl;
     myfile << "tol_max_residual" << "\t" << pars.maxForceTol << std::endl;
