@@ -24,7 +24,7 @@ public:
     double initialStretch;
     long dumpEvery;
     long splitDataEvery;
-    long startingTimeStep;
+    long startingStepNum;
     std::string outputFolderName;
     std::string trianglesFileName;
     std::string surfaceNodesFileName;

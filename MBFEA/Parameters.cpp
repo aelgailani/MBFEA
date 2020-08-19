@@ -44,9 +44,9 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         }else if (a=="splitDataEvery") {
             split >> l;
             splitDataEvery = l;
-        }else if (a=="startingTimeStep") {
+        }else if (a=="startingStepNum") {
             split >> l;
-            startingTimeStep = l;
+            startingStepNum = l;
         }else if (a=="outputFolderName") {
             split >> f;
             outputFolderName = f;
@@ -254,14 +254,14 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
     if (runModeOverWrite=="stepShear"){
         runMode = "stepShear";
         startingMode = "restart";
-        startingTimeStep = std::stoi(restartStepOverwrite);
+        startingStepNum = std::stoi(restartStepOverwrite);
         restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
         
     }
     if (runModeOverWrite=="contineousShear"){
         runMode = "contineousShear";
         startingMode = "restart";
-        startingTimeStep = std::stoi(restartStepOverwrite);
+        startingStepNum = std::stoi(restartStepOverwrite);
         restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
     }
     if (outputFolderName=="auto"){
@@ -289,7 +289,7 @@ void Parameters::print_to_console(void) const {
     printit("writeToConsoleEvery",writeToConsoleEvery);
     printit("splitDataEvery",splitDataEvery);
     printit("dumpSmoothenCurves",dumpSmoothenCurves);
-    printit("startingTimeStep",startingTimeStep);
+    printit("startingTimeStep",startingStepNum);
     printit("outputFolderName",outputFolderName);
     printit("surfaceNodesFileName",surfaceNodesFileName);
     printit("trianglesFileName",trianglesFileName);

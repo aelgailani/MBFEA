@@ -24,8 +24,8 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, std::string name, Configuration& mainSys, bool dumpStateData){
-
+void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, long& step, std::string name, Configuration& mainSys, bool dumpStateData){
+            
             // calculate forces and energy of the current configuration of the system
             if (pars.boundaryType == "walls"){
                 mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
@@ -46,23 +46,23 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             mainSys.dump_global_data(pars, timeStep, name, "append", "running");
             
             if (dumpStateData==true && timeStep % pars.dumpEvery == 0) {
-                mainSys.dump_per_node(baseData, pars, timeStep);
-                mainSys.dump_per_ele(baseData, pars,timeStep);
+                mainSys.dump_per_node(baseData, pars, step);
+                mainSys.dump_per_ele(baseData, pars,step);
                 if (pars.dumpPeriodicImagesXY){
-                    mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+                    mainSys.dump_per_node_periodic_images_on(baseData, pars, step);
                 }
                 if (pars.identifyAndDumbFacets) {
                     if (pars.contactMethod=="nts"){
-                        mainSys.dump_facets(baseData, pars, timeStep);
+                        mainSys.dump_facets(baseData, pars, step);
                     }else{
-                        mainSys.dump_facets_ntn(baseData, pars, timeStep);
+                        mainSys.dump_facets_ntn(baseData, pars, step);
                     }
                     
                 }
                 if(pars.dumpSmoothenCurves){
-                    mainSys.dump_smoothcurves(baseData,pars,timeStep);
+                    mainSys.dump_smoothcurves(baseData,pars,step);
                 }
-
+                step++;
             }
 //            if(timeStep%pars.writeToConsoleEvery==0){
 //                std::cout << "force tolerance  " << pars.maxForceTol << std::endl;

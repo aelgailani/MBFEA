@@ -199,13 +199,13 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
 }
 
 void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
-
+    long step = 0;
     double refPhi = pars.Ap/(0.5*baseData.lxRef*baseData.lyRef);
     double target_e0 = - log(sqrt(refPhi/(pars.targetPhi)));
     
     mainSys.dump_global_data(pars, timeStep,"compression-data", "write", "running");
     // initial compression
-    gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
+    gd_solver(baseData,pars,timeStep,step, "compression-data", mainSys, true);
 
     
     while(mainSys.phi <= pars.targetPhi){
@@ -231,7 +231,7 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
 
          }
         
-        gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
+        gd_solver(baseData,pars,timeStep,step,"compression-data", mainSys, true);
 
         if (mainSys.P2<pars.targetPressure) break;
         
@@ -281,7 +281,7 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
 
          }
         
-        gd_solver(baseData,pars,timeStep,"shearing-data", mainSys, true);
+        gd_solver(baseData,pars,timeStep,step,"shearing-data", mainSys, true);
 
         
     }
@@ -290,13 +290,13 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
         
         
 void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
-
+    long step = 0;
     double refPhi = pars.Ap/(0.5*baseData.lxRef*baseData.lyRef);
     double target_e0 = - log(sqrt(refPhi/(pars.targetPhi)));
     mainSys.dump_global_data(pars, timeStep,"compression-data", "write", "running");
     mainSys.dump_global_data(pars, timeStep,"final-data", "write", "final");
     // initial compression
-    gd_solver(baseData,pars,timeStep,"compression-data", mainSys, true);
+    gd_solver(baseData,pars,timeStep,step,"compression-data", mainSys, true);
 
     while(mainSys.phi <= pars.targetPhi){
         
@@ -319,7 +319,7 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
 
          }
         
-        gd_solver(baseData,pars,timeStep, "compression-data",mainSys, false);
+        gd_solver(baseData,pars,timeStep,step, "compression-data",mainSys, false);
 
         if (mainSys.P2<pars.targetPressure) break;
         
@@ -370,7 +370,7 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             
          }
         
-        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep, step, "holding-data", mainSys, false);
 
         
     }
@@ -419,7 +419,7 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
 
          }
         
-        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep, step, "holding-data", mainSys, false);
 
         
     } while(mainSys.L2NormResidual > pars.maxForceTol);
@@ -446,8 +446,8 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
 
 
 void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
-    
-    mainSys.dump_global_data(pars, timeStep,"final-data", "write", "final");
+    long step=0;
+     mainSys.dump_global_data(pars, timeStep,"final-data", "write", "final");
 
      mainSys.dump_global_data(pars, timeStep,"holding-data", "write", "running");
      
@@ -455,7 +455,7 @@ void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long t
      //hold
     do{
          
-         gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+         gd_solver(baseData,pars,timeStep, step, "holding-data", mainSys, false);
 
          
           if(timeStep%pars.writeToConsoleEvery==0){
@@ -522,7 +522,7 @@ void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long t
 
           }
          
-         gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+         gd_solver(baseData,pars,timeStep, step, "holding-data", mainSys, false);
 
          
      } while(mainSys.maxR > pars.maxForceTol);

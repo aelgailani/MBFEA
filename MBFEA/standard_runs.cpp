@@ -64,13 +64,14 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
              
             
     }else if (pars.solver=="GD") {
-        
+        long step=pars.startingStepNum; // just an ordinal number of the dumpped config.
        do{
             
-            gd_solver(baseData,pars,timeStep, "data", mainSys, true);
+            gd_solver(baseData,pars,timeStep,step, "data", mainSys, true);
 
             if(timeStep%pars.writeToConsoleEvery==0){
-                std::cout << timeStep << std::endl;
+                std::cout <<"next dump number    "<< step << std::endl;
+                std::cout << "timestep   "<<timeStep << std::endl;
                 std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
                 std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
                 std::cout << "e1   " << mainSys.e1 << std::endl;
@@ -80,7 +81,6 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                 std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
                 std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
                 std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
-
                 std::cout << "\n" << std::endl;
             }
 
@@ -90,7 +90,8 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
        } while (mainSys.phi <= pars.targetPhi);
         
         std::cout << "Done compressing !" << std::endl;
-        std::cout << timeStep << std::endl;
+        std::cout <<"last dump number    "<< step-1 << std::endl;
+        std::cout << "timestep   "<<timeStep << std::endl;
         std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
         std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
         std::cout << "e1   " << mainSys.e1 << std::endl;
@@ -119,12 +120,13 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     if (pars.solver=="GD"){
     //hold
    do{
-        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep, stage, "holding-data", mainSys, false);
 
         
          if(timeStep%pars.writeToConsoleEvery==0){
             std::cout << "**** holding before shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
-            std::cout << timeStep << std::endl;
+            std::cout <<"stage   "<< stage << std::endl;
+            std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
@@ -164,7 +166,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     
     stage++;
         
-    timeStep=0;
+//    timeStep=0;
     
     
     mainSys.affine_axial_shearing(baseData, pars, pars.targetShear ,mainSys.ctrX, mainSys.ctrY, timeStep);
@@ -174,7 +176,8 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
          if(timeStep%pars.writeToConsoleEvery==0){
             std::cout << "**** holding after shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
             
-            std::cout << timeStep << std::endl;
+           std::cout <<"stage   "<< stage << std::endl;
+            std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
@@ -189,7 +192,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
          }
         
-        gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep,stage, "holding-data", mainSys, false);
 
         
     } while(mainSys.maxR > pars.maxForceTol);
@@ -214,7 +217,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     }else
     
     if (pars.solver=="FIRE2"){
-        long strainStep=pars.startingTimeStep;
+        long strainStep=pars.startingStepNum;
         long stage=0;
         /// hold
    

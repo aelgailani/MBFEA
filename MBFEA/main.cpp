@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         }
     }else if (pars.startingMode == "restart" && (pars.runMode == "stepShear" || pars.runMode =="surfaceShear")){
         DIR* dir1 = opendir(pars.outputFolderName.c_str());
-        DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str());
+        DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str());
         if (dir1)
         {
             closedir(dir1);
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
         if (dir2){
             closedir(dir2);
         } else if (ENOENT == errno){
-            const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err) {
                 printf("Error creating step directory!");
                 exit(1);
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
     
    
     
-    long timeStep = pars.startingTimeStep;
+    long timeStep = pars.startingStepNum;
     if (pars.runMode != "compress") {
         timeStep=0;
     }

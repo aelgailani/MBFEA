@@ -21,7 +21,7 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/facets-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
     }
@@ -52,7 +52,7 @@ void Configuration::dump_facets_ntn(const BaseSysData& baseData, const Parameter
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/facets-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
     }
@@ -125,7 +125,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
     if (mode=="write" || first != lastStepFirst){
         std::ofstream dataFile;
         if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname);
+        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname);
         }else{
             dataFile.open (pars.outputFolderName+fname);
         }
@@ -161,7 +161,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
     }else if (mode=="append"){
         std::ofstream dataFile;
         if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str()+fname,  std::ios_base::app);
+        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname,  std::ios_base::app);
         }else{
             dataFile.open (pars.outputFolderName+fname,  std::ios_base::app);
         }
@@ -205,7 +205,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/data-per-node-"+step+".txt");
     }
@@ -214,7 +214,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "timeStep" << "\t" << timeStep << std::endl;
     myfile << "number_of_nodes" << "\t" << baseData.numOriginalNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
-    myfile << "Ap" << "\t" << pars.Ap <<  "\n"   <<  std::endl;
+    myfile << "Ap" << "\t" << pars.Ap <<  std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
     myfile << "e0_strain" << "\t" << e0 << std::endl;
     myfile << "e1_strain" << "\t" << e1 << std::endl;
@@ -224,7 +224,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "L2Residual" << "\t" << L2NormResidual << std::endl;
     myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
     myfile << "ref_box_LRBT" << "\t" << pars.initLeftPos << "\t" << pars.initRightPos << "\t" << pars.initBotPos << "\t" << pars.initTopPos << std::endl;
-    myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< std::endl;
+    myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<<  "\n"   << std::endl;
     
     
     myfile << "solver" << "\t" << pars.solver << std::endl;
@@ -237,16 +237,16 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "contact_method" << "\t" << pars.contactMethod << std::endl;
     if (pars.contactMethod=="ntn" || pars.contactMethod=="gntn"){
         myfile << "sigma" << "\t" << pars.ntnRadius <<  std::endl;
-        myfile << "RcutOverSigma" << "\t" << pars.ntnPLRcutoffOverRadius <<  std::endl;
+        myfile << "RcutOverSigma" << "\t" << pars.ntnPLRcutoffOverRadius <<  "\n"   <<  std::endl;
         if (pars.contactMethod=="gntn"){
-            myfile << "ghost_nodes_per_segment" << "\t" << pars.gntn_NGhostNodes <<  std::endl;
+            myfile << "ghost_nodes_per_segment" << "\t" << pars.gntn_NGhostNodes <<  "\n"   <<  std::endl;
         }
 
     }else if (pars.contactMethod=="nts"){
         myfile << "max_penetration" << "\t" << maxInterference << std::endl;
         myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
         if (pars.smoothCorners){
-            myfile << "Hermit_alpha" << "\t" << pars.alpha_HermitPol <<  std::endl;
+            myfile << "Hermit_alpha" << "\t" << pars.alpha_HermitPol <<  "\n"   <<  std::endl;
         }
        
     }
@@ -292,7 +292,7 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-node-periodic-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-periodic-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/data-per-node-periodic-"+step+".txt");
     }
@@ -356,7 +356,7 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/data-per-ele-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-ele-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/data-per-ele-"+step+".txt");
     }
@@ -463,7 +463,7 @@ void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Paramet
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/smoothcurves-"+step+".txt").c_str());
+    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/smoothcurves-"+step+".txt").c_str());
     }else{
         myfile.open (pars.outputFolderName+"/smoothcurves-"+step+".txt");
     }
@@ -512,7 +512,7 @@ void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Paramet
     std::ofstream myfile2;
 
     if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile2.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))+"/gaps-"+step+".txt").c_str());
+    myfile2.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/gaps-"+step+".txt").c_str());
     }else{
         myfile2.open (pars.outputFolderName+"/gaps-"+step+".txt");
     }
