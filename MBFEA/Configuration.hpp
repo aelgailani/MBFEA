@@ -238,6 +238,7 @@ public:
     void nts_find_closest_approach_with_smoothing(const int& node, const int& segment,const int& masterMesh, const BaseSysData& baseData, const Parameters& pars);
 
     void affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
+    void surface_nodes_affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
     void affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
     void affine_compression_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep);
 

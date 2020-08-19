@@ -110,6 +110,8 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
 
 void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys){
     
+    long stage=0;
+
     mainSys.dump_global_data(pars, timeStep,"final-data", "write", "final");
 
     mainSys.dump_global_data(pars, timeStep,"holding-data", "write", "running");
@@ -117,7 +119,6 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     if (pars.solver=="GD"){
     //hold
    do{
-        
         gd_solver(baseData,pars,timeStep, "holding-data", mainSys, false);
 
         
@@ -142,24 +143,27 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
    } while(mainSys.maxR > pars.maxForceTol);
     
-    
+   
+        
     mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
-    mainSys.dump_per_node(baseData, pars, timeStep);
-    mainSys.dump_per_ele(baseData, pars,timeStep);
+    mainSys.dump_per_node(baseData, pars, stage);
+    mainSys.dump_per_ele(baseData, pars,stage);
     if (pars.dumpPeriodicImagesXY){
-        mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+        mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
     }
     if (pars.identifyAndDumbFacets) {
         if (pars.contactMethod=="nts"){
-            mainSys.dump_facets(baseData, pars, timeStep);
+            mainSys.dump_facets(baseData, pars, stage);
         }else{
-            mainSys.dump_facets_ntn(baseData, pars, timeStep);
+            mainSys.dump_facets_ntn(baseData, pars, stage);
         }
     }
     if(pars.dumpSmoothenCurves){
-        mainSys.dump_smoothcurves(baseData,pars,timeStep);
+        mainSys.dump_smoothcurves(baseData,pars,stage);
     }
     
+    stage++;
+        
     timeStep=0;
     
     
@@ -191,30 +195,29 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     } while(mainSys.maxR > pars.maxForceTol);
     
         mainSys.dump_global_data(pars, timeStep, "final-data","append", "final");
-        mainSys.dump_per_node(baseData, pars, timeStep);
-        mainSys.dump_per_ele(baseData, pars,timeStep);
+        mainSys.dump_per_node(baseData, pars, stage);
+        mainSys.dump_per_ele(baseData, pars,stage);
        if (pars.dumpPeriodicImagesXY){
-           mainSys.dump_per_node_periodic_images_on(baseData, pars, timeStep);
+           mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
        }
        if (pars.identifyAndDumbFacets) {
            if (pars.contactMethod=="nts"){
-                mainSys.dump_facets(baseData, pars, timeStep);
+                mainSys.dump_facets(baseData, pars, stage);
            }else{
-               mainSys.dump_facets_ntn(baseData, pars, timeStep);
+               mainSys.dump_facets_ntn(baseData, pars, stage);
            }
        }
         if(pars.dumpSmoothenCurves){
-            mainSys.dump_smoothcurves(baseData,pars,timeStep);
+            mainSys.dump_smoothcurves(baseData,pars,stage);
     }
     
     }else
     
     if (pars.solver=="FIRE2"){
         long strainStep=pars.startingTimeStep;
-
+        long stage=0;
         /// hold
-        
-               
+   
                fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
                
                if (mainSys.maxR > pars.FIRE_RTolerance){
@@ -222,24 +225,25 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
                 }else{
                     mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
-                    mainSys.dump_per_node(baseData, pars, strainStep);
-                    mainSys.dump_per_ele(baseData, pars,strainStep);
+                    mainSys.dump_per_node(baseData, pars, stage);
+                    mainSys.dump_per_ele(baseData, pars,stage);
                     if (pars.dumpPeriodicImagesXY){
-                        mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+                        mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
                     }
                     if(pars.dumpSmoothenCurves){
-                        mainSys.dump_smoothcurves(baseData,pars,strainStep);
+                        mainSys.dump_smoothcurves(baseData,pars,stage);
                     }if (pars.identifyAndDumbFacets) {
                         if (pars.contactMethod=="nts"){
-                             mainSys.dump_facets(baseData, pars, strainStep);
+                             mainSys.dump_facets(baseData, pars, stage);
                         }else{
-                            mainSys.dump_facets_ntn(baseData, pars, strainStep);
+                            mainSys.dump_facets_ntn(baseData, pars, stage);
                         }
                     }
                 }
            
          /// shear
         strainStep++;
+        stage++;
                 
                 mainSys.affine_axial_shearing(baseData, pars, pars.targetShear, mainSys.ctrX, mainSys.ctrY, timeStep);
                 
@@ -250,18 +254,18 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
                  }else{
                      mainSys.dump_global_data(pars, timeStep, "data", "append", "final");
-                     mainSys.dump_per_node(baseData, pars, strainStep);
-                     mainSys.dump_per_ele(baseData, pars,strainStep);
+                     mainSys.dump_per_node(baseData, pars, stage);
+                     mainSys.dump_per_ele(baseData, pars,stage);
                      if (pars.dumpPeriodicImagesXY){
-                         mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+                         mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
                      }
                      if(pars.dumpSmoothenCurves){
-                         mainSys.dump_smoothcurves(baseData,pars,strainStep);
+                         mainSys.dump_smoothcurves(baseData,pars,stage);
                      }if (pars.identifyAndDumbFacets) {
                          if (pars.contactMethod=="nts"){
-                              mainSys.dump_facets(baseData, pars, strainStep);
+                              mainSys.dump_facets(baseData, pars, stage);
                          }else{
-                             mainSys.dump_facets_ntn(baseData, pars, strainStep);
+                             mainSys.dump_facets_ntn(baseData, pars, stage);
                          }
                      }
                  

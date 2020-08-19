@@ -82,6 +82,47 @@ void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Par
     
 }
 
+void Configuration::surface_nodes_affine_axial_shearing(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
+    
+    if(timestep%pars.writeToConsoleEvery==0){
+        std::cout << "**** shearing surface nodes only ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
+        
+        std::cout << "e1  " << e1 <<std::endl;
+        std::cout << "phi  " << phi <<std::endl;
+    }
+
+    lyCur= topPos - botPos;
+    lxCur= rightPos - leftPos;
+    
+    lxNew=lxCur * exp(strain);
+    lyNew=lyCur * exp(-strain);
+    
+    leftPos= ctrX-0.5 * lxNew;
+    rightPos= ctrX+0.5 * lxNew;
+    botPos= ctrY-0.5 * lyNew;
+    topPos= ctrY+0.5 * lyNew;
+    
+    // Apply an affine deformation to surface nodal positions keeping the cell center fixed.
+    // Apply an affine deformation to surface nodal positions keeping the cell center fixed.
+    homVx = curPosX*0;
+    homVy = curPosX*0;
+    for (int nodeID=0; nodeID < baseData.numOriginalSurfaceNodes; nodeID++)
+    {
+           curPosX[baseData.flatSurfaceNodes[nodeID]] = curPosX[baseData.flatSurfaceNodes[nodeID]] - ctrX;
+           if(timestep%pars.dumpEvery) homVx[baseData.flatSurfaceNodes[nodeID]] = (curPosX[baseData.flatSurfaceNodes[nodeID]]*(exp(strain)-1))/ pars.dt;
+           curPosX[baseData.flatSurfaceNodes[nodeID]] = curPosX[baseData.flatSurfaceNodes[nodeID]] * exp(strain);
+           curPosX[baseData.flatSurfaceNodes[nodeID]] = curPosX[baseData.flatSurfaceNodes[nodeID]] + ctrX;
+           
+           curPosY[baseData.flatSurfaceNodes[nodeID]] =curPosY[baseData.flatSurfaceNodes[nodeID]] - ctrY;
+           if(timestep%pars.dumpEvery) homVy[baseData.flatSurfaceNodes[nodeID]] = (curPosY[baseData.flatSurfaceNodes[nodeID]]*(exp(-strain)-1))/ pars.dt;
+           curPosY[baseData.flatSurfaceNodes[nodeID]] =curPosY[baseData.flatSurfaceNodes[nodeID]]* exp(-strain);
+           curPosY[baseData.flatSurfaceNodes[nodeID]] = curPosY[baseData.flatSurfaceNodes[nodeID]] + ctrY;
+           
+        
+    }
+          
+}
+
 void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, const Parameters& pars, double strain, double ctrX, double ctrY, long timestep){
     
      if(timestep%pars.writeToConsoleEvery==0){

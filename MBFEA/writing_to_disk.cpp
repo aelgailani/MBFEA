@@ -214,20 +214,42 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "timeStep" << "\t" << timeStep << std::endl;
     myfile << "number_of_nodes" << "\t" << baseData.numOriginalNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
+    myfile << "Ap" << "\t" << pars.Ap <<  "\n"   <<  std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
     myfile << "e0_strain" << "\t" << e0 << std::endl;
     myfile << "e1_strain" << "\t" << e1 << std::endl;
-    myfile << "dt" << "\t" << pars.dt << std::endl;
-    myfile << "max_penetration" << "\t" << maxInterference << std::endl;
+    myfile << "tol_max_residual" << "\t" << pars.maxForceTol << std::endl;
     myfile << "max_residual" << "\t" << maxR << std::endl;
+    myfile << "mean_residual" << "\t" << avgR << std::endl;
     myfile << "L2Residual" << "\t" << L2NormResidual << std::endl;
-    myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
-    myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
     myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
-    myfile << "original_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< std::endl;
-    myfile << "alpha" << "\t" << pars.alpha_HermitPol <<  std::endl;
-    myfile << "sigma_ntn" << "\t" << pars.ntnRadius <<  std::endl;
-    myfile << "Ap" << "\t" << pars.Ap <<  "\n"   <<  std::endl;
+    myfile << "ref_box_LRBT" << "\t" << pars.initLeftPos << "\t" << pars.initRightPos << "\t" << pars.initBotPos << "\t" << pars.initTopPos << std::endl;
+    myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<< std::endl;
+    
+    
+    myfile << "solver" << "\t" << pars.solver << std::endl;
+       if (pars.solver=="GD"){
+           myfile << "dt" << "\t" << pars.dt << std::endl;
+           myfile << "deformation_rate" << "\t" << pars.deformationRate   << std::endl;
+
+       }
+    
+    myfile << "contact_method" << "\t" << pars.contactMethod << std::endl;
+    if (pars.contactMethod=="ntn" || pars.contactMethod=="gntn"){
+        myfile << "sigma" << "\t" << pars.ntnRadius <<  std::endl;
+        myfile << "RcutOverSigma" << "\t" << pars.ntnPLRcutoffOverRadius <<  std::endl;
+        if (pars.contactMethod=="gntn"){
+            myfile << "ghost_nodes_per_segment" << "\t" << pars.gntn_NGhostNodes <<  std::endl;
+        }
+
+    }else if (pars.contactMethod=="nts"){
+        myfile << "max_penetration" << "\t" << maxInterference << std::endl;
+        myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
+        if (pars.smoothCorners){
+            myfile << "Hermit_alpha" << "\t" << pars.alpha_HermitPol <<  std::endl;
+        }
+       
+    }
 
 
     

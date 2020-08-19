@@ -31,3 +31,6 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
 void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys);
 void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys);
 
+void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long timeStep , Configuration& mainSys);
+
+    

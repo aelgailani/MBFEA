@@ -60,6 +60,13 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
     if (pars.integrator == 1){
         mainSys.velocityX -= 0.5*FIRE_dt * mainSys.forceX;
         mainSys.velocityY -= 0.5*FIRE_dt * mainSys.forceY;
+        
+        if (pars.runMode=="surfaceShear"){
+               for (int nodeID=0; nodeID < baseData.numOriginalSurfaceNodes; nodeID++){
+                   mainSys.velocityX[baseData.flatSurfaceNodes[nodeID]]=0;
+                   mainSys.velocityY[baseData.flatSurfaceNodes[nodeID]]=0;
+               }
+        }
     }
 
 
@@ -72,6 +79,12 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
             mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
         }
        
+        if (pars.runMode=="surfaceShear"){
+               for (int nodeID=0; nodeID < baseData.numSurfaceNodes; nodeID++){
+                   mainSys.forceX[baseData.flatSurfaceNodes[nodeID]]=0;
+                   mainSys.forceY[baseData.flatSurfaceNodes[nodeID]]=0;
+               }
+        }
         
         mainSys.update_post_processing_data(baseData, pars);
         

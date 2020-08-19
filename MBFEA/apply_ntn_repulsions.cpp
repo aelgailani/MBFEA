@@ -82,7 +82,7 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                                double forceXij = forceij*dxij/drij;
                                double forceYij = forceij*dyij/drij;
                                
-                               if (iNode<=baseData.numOriginalNodes){
+                               if (iNode<baseData.numOriginalNodes){
                                       forceX(iNode) = forceX(iNode)-forceXij;
                                       forceY(iNode) = forceY(iNode)-forceYij;
                                       surfaceForceX(iNode) = surfaceForceX(iNode)-forceXij;
@@ -90,7 +90,7 @@ void Configuration::apply_ntn_repulsions(const BaseSysData &baseData, const Para
                                    
                                    
                                   }
-                              if (jNode<=baseData.numOriginalNodes){
+                              if (jNode<baseData.numOriginalNodes){
                                       forceX(jNode) = forceX(jNode)+forceXij;
                                       forceY(jNode) = forceY(jNode)+forceYij;
                                       surfaceForceX(jNode) = surfaceForceX(jNode)+forceXij;

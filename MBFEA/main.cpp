@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
                 exit(1);
             }
         }
-    }else if (pars.startingMode == "restart" && pars.runMode == "stepShear"){
+    }else if (pars.startingMode == "restart" && (pars.runMode == "stepShear" || pars.runMode =="surfaceShear")){
         DIR* dir1 = opendir(pars.outputFolderName.c_str());
         DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingTimeStep))).c_str());
         if (dir1)
@@ -170,6 +170,8 @@ int main(int argc, char* argv[])
         compress(baseData, pars, timeStep , mainSys);
     }else if (pars.runMode=="stepShear"){
         stepshear(baseData, pars, timeStep , mainSys);
+    }else if (pars.runMode=="surfaceShear"){
+        deform_surfaces(baseData, pars, timeStep , mainSys);
     }else if (pars.runMode=="special"){
         if(pars.solver=="FIRE2"){
             shear_special_FIRE(baseData, pars, timeStep , mainSys);

@@ -32,6 +32,14 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             } else if (pars.boundaryType == "periodic"){
                 mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
             }
+    
+            // zero out surface nodes forces if you want them fixed in their homo position
+            if (pars.runMode=="surfaceShear"){
+                for (int nodeID=0; nodeID < baseData.numOriginalSurfaceNodes; nodeID++){
+                    mainSys.forceX[baseData.flatSurfaceNodes[nodeID]]=0;
+                    mainSys.forceY[baseData.flatSurfaceNodes[nodeID]]=0;
+                }
+            }
             // Postporcesseing calculations
             mainSys.update_post_processing_data(baseData, pars);
             //dump
@@ -77,6 +85,7 @@ void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeSt
             }
             
             // Take explicit Euler step
+    
         mainSys.curPosX += mainSys.forceX * pars.dt;
         mainSys.curPosY += mainSys.forceY *  pars.dt;
         
