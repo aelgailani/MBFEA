@@ -211,6 +211,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     }
     
     myfile << "Basic_data:" << std::endl;
+    myfile << "step" << "\t" << timeStep << std::endl;
     myfile << "timeStep" << "\t" << timeStep << std::endl;
     myfile << "number_of_nodes" << "\t" << baseData.numOriginalNodes << std::endl;
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;

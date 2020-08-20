@@ -83,7 +83,7 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                     split >> l;
                 }
 
-                if (a=="original_box_LRBT") {
+                if (a=="cur_box_LRBT") {
                     split >> b >> c >> x >> y;
                     leftPos = b;
                     rightPos = c;

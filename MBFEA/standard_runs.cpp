@@ -129,7 +129,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout << "**** holding before shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
             std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
-            std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+            std::cout << "phi   " << mainSys.phi<< std::endl;
             std::cout << "pressure   " << mainSys.P2 << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
@@ -181,7 +181,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             
            std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
-            std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
+            std::cout << "phi   " << mainSys.phi  << std::endl;
             std::cout << "pressure   " << mainSys.P2 << std::endl;
             std::cout << "e0   " << mainSys.e0 << std::endl;
             std::cout << "e1   " << mainSys.e1 << std::endl;
