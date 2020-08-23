@@ -18,15 +18,22 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
     
     if (pars.startingMode=="new") {
         
+        refLeftPos = pars.initLeftPos;
+        refRightPos = pars.initRightPos;
+        refBotPos = pars.initBotPos;
+        refTopPos = pars.initTopPos;
+        refLx = refRightPos-refLeftPos;
+        refLy = refTopPos-refBotPos;
         
         curPosX = baseData.refPosX * pars.initialStretch;
         curPosY = baseData.refPosY * pars.initialStretch;
-        topPos = pars.initTopPos;
-        botPos = pars.initBotPos;
-        rightPos = pars.initRightPos;
-        leftPos = pars.initLeftPos;
-        lyCur = baseData.lyRef;
-        lxCur =  baseData.lxRef;
+        topPos =refTopPos;
+        botPos = refBotPos;
+        rightPos = refRightPos;
+        leftPos = refLeftPos;
+        
+        lyCur = refLy;
+        lxCur = refLx;
         lyNew = lyCur;
         lxNew = lxCur;
         ctrX = 0.5*(rightPos+ leftPos);
@@ -90,13 +97,24 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                     botPos = x;
                     topPos = y;
                 }
+                if (a=="ref_box_LRBT") {
+                    split >> b >> c >> x >> y;
+                    refLeftPos = b;
+                    refRightPos = c;
+                    refBotPos = x;
+                    refTopPos = y;
+                }
 
             }
-            
+            refLx = refRightPos-refLeftPos;
+            refLy = refTopPos-refBotPos;
             lxCur = rightPos - leftPos;
             lyCur = topPos - botPos;
             lyNew = lyCur;
             lxNew = lxCur;
+            
+            
+            
             ctrX = 0.5*(rightPos+ leftPos);
             ctrY = 0.5*(topPos+ botPos);
             
@@ -194,8 +212,8 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             }
         }
 
-    ex = log(lxNew/baseData.lxRef);
-    ey = log(lyNew/baseData.lyRef);
+    ex = log(lxNew/refLx);
+    ey = log(lyNew/refLy);
     A = lxNew * lyNew;
     e0 = - 0.5*(ex+ey); // my conviension is positive for compression
     e1 = (ex-ey);
@@ -333,8 +351,8 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     S1 = 0.5*(Fv/lxNew-Fh/lyNew);
     S2 = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX).dot((refArea.array()*areaRatio.array()).matrix())+(KWoodYY-KWoodXX))/(2*LX*LY);
 //    S2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
-    ex = log(lxNew/baseData.lxRef);
-    ey = log(lyNew/baseData.lyRef);
+    ex = log(lxNew/refLx);
+    ey = log(lyNew/refLy);
     A = lxNew * lyNew;
     A_material = refArea.dot(areaRatio);
     e0 = - 0.5*(ex+ey); // my conviension is positive for compression

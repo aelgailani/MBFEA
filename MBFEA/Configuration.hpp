@@ -117,7 +117,7 @@ public:
     int segmentIinteractions, nodeIinteractions;
     double totalEnergy=0, internalEnergy=0, wallsEnergy=0, contactsEnergy=0, shearVirial=0, pressureVirial=0;
     double prevTotEnergy=0, deltaTotEnergy=0, L2NormResidual=0 ;
-    double topPos, botPos, leftPos, rightPos;
+    double topPos, botPos, leftPos, rightPos, refTopPos, refBotPos, refLeftPos, refRightPos, refLx, refLy;
     double KWoodXX, KWoodXY, KWoodYX, KWoodYY;
     double xMid, yMid;
     double lyCur;

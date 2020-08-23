@@ -225,6 +225,10 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "mean_residual" << "\t" << avgR << std::endl;
     myfile << "L2Residual" << "\t" << L2NormResidual << std::endl;
     myfile << "verlet_cell_cutoff" << "\t" << pars.verletCellCutoff << std::endl;
+    myfile << "boundariesType" << "\t" << pars.boundaryType << std::endl;
+    if (pars.boundaryType=="periodic"){
+        myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
+    }
     myfile << "ref_box_LRBT" << "\t" << pars.initLeftPos << "\t" << pars.initRightPos << "\t" << pars.initBotPos << "\t" << pars.initTopPos << std::endl;
     myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<<  "\n"   << std::endl;
     

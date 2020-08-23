@@ -40,6 +40,16 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
     }
     
     
+    // initialize walls forces to zero
+    wallForceTop.resize(baseData.numOriginalSurfaceNodes);
+    wallForceTop.fill(0);
+    wallForceBottom.resize(baseData.numOriginalSurfaceNodes);
+    wallForceBottom.fill(0);
+    wallForceRight.resize(baseData.numOriginalSurfaceNodes);
+    wallForceRight.fill(0);
+    wallForceLeft.resize(baseData.numOriginalSurfaceNodes);
+    wallForceLeft.fill(0);
+   
     
     // initialize surface interaction forces on nodes to zero
     surfaceForceX.resize(baseData.numOriginalNodes);
@@ -137,7 +147,40 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
         contact_forces(baseData,pars,Hessian, timeStep);
     }
     
-    if(pars.wallStyle=="harmonic"){
+    if(pars.wallStyle=="powerlaw"){
+    
+         //apply hamonic repulsion to boudary nodes
+       for (int nodeID=0; nodeID < baseData.numSurfaceNodes; nodeID++)
+        {
+           double x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
+           double y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
+            
+           double forceTop = 6*pars.PLWallEnergyScale/pars.PLWallLJScale*pow((pars.PLWallLJScale/(y-topPos)),13);
+           double forceBot = 6*pars.PLWallEnergyScale/pars.PLWallLJScale*pow((pars.PLWallLJScale/(y-botPos)),13);
+           double forceRight = 6*pars.PLWallEnergyScale/pars.PLWallLJScale*pow((pars.PLWallLJScale/(x-rightPos)),13);
+           double forceLeft = 6*pars.PLWallEnergyScale/pars.PLWallLJScale*pow((pars.PLWallLJScale/(x-leftPos)),13);
+            
+            wallForceTop[nodeID]=forceTop;
+            wallForceBottom[nodeID]=forceBot;
+           //
+            wallForceRight[nodeID]=forceRight;
+            wallForceLeft[nodeID]=forceLeft;
+
+            forceX[baseData.flatSurfaceNodes[nodeID]]=forceX[baseData.flatSurfaceNodes[nodeID]] + forceRight + forceLeft ;
+            forceY[baseData.flatSurfaceNodes[nodeID]]=forceY[baseData.flatSurfaceNodes[nodeID]] + forceTop + forceBot ;
+               
+            KWoodXX +=  forceRight * (x-rightPos) - forceLeft * (x-leftPos) ;
+            KWoodYY += forceTop * (y-topPos) - forceBot * (x-botPos) ;
+               
+            wallsEnergy += 0.5*pars.PLWallEnergyScale*pow((pars.PLWallLJScale/(y-topPos)),12);
+            wallsEnergy += 0.5*pars.PLWallEnergyScale*pow((pars.PLWallLJScale/(y-botPos)),12);
+            wallsEnergy += 0.5*pars.PLWallEnergyScale*pow((pars.PLWallLJScale/(x-rightPos)),12);
+            wallsEnergy += 0.5*pars.PLWallEnergyScale*pow((pars.PLWallLJScale/(x-leftPos)),12);
+            
+        }
+       
+        
+    }else if(pars.wallStyle=="harmonic"){
     
          //apply hamonic repulsion to boudary nodes
             wallForceTop = pars.HWallStiffness*(0.5*((curPosY.array() - topPos).sign()+1))*(topPos-curPosY.array());
