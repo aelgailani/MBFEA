@@ -138,22 +138,67 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  "maxResidual"  << std::setw(spacing)
         <<  "meanResidual"  << std::setw(spacing)
         <<  "residualL2Norm"  << std::setw(spacing)
-        <<  "pressure1"  << std::setw(spacing)
-        <<  "pressure2"  << std::setw(spacing)
-        <<  "KWpressure2"  << std::setw(spacing)
-        <<  "shearStress1"  << std::setw(spacing)
-        <<  "shearStress2"  << std::setw(spacing)
-        <<  "KWshearStress2"  << std::setw(spacing)
+        
+        <<  "pressure_BW"  << std::setw(spacing)
+        <<  "pressure_BB"  << std::setw(spacing)
+        <<  "KWpressure_BW"  << std::setw(spacing)
+        
+        
+        <<  "shearStress_BW"  << std::setw(spacing)
+        <<  "shearStress_BB"  << std::setw(spacing)
+        <<  "shearStress_BB_CSxy"  << std::setw(spacing)
+        <<  "KWshearStress_BW"  << std::setw(spacing)
+        
         <<  "boxArea"  << std::setw(spacing)
         <<  "materialArea"  << std::setw(spacing)
         <<  "phi"  << std::setw(spacing)
-        <<  "e0"  << std::setw(spacing)
-        <<  "e1" << std::setw(spacing)
-        <<  "DPOverDe0" << std::setw(spacing)
-        <<  "DSOverDe1qq" << std::setw(spacing)
-        <<  "dt" << std::setw(spacing)
-        <<  "defRate" << std::setw(spacing)
-        <<  "penalty" << std::setw(spacing)
+        <<  "phi_B"  << std::setw(spacing)
+        <<  "e0_W"  << std::setw(spacing)
+        <<  "e1_W" << std::setw(spacing)
+        <<  "e0_B"  << std::setw(spacing)
+        <<  "e1_B" << std::setw(spacing)
+        <<  "Fh_B" << std::setw(spacing)
+        <<  "Fv_B" << std::setw(spacing)
+        <<  "Fh_B_CSxy" << std::setw(spacing)
+        <<  "Fv_B_CSxy" << std::setw(spacing)
+        <<  "LXref_B" << std::setw(spacing)
+        <<  "LYref_B" << std::setw(spacing)
+        <<  "LX_B" << std::setw(spacing)
+        <<  "LY_B" << std::setw(spacing)
+        
+        
+        <<  "DPOverDe0_BW" << std::setw(spacing)
+        <<  "DSOverDe1_BW" << std::setw(spacing)
+    
+        <<  "DPOverDe0_BB" << std::setw(spacing)
+        <<  "DSOverDe1_BB";
+        if (pars.boundaryType=="wall"){
+            dataFile
+            << std::setw(spacing)
+            <<  "pressure_WW"  << std::setw(spacing)
+            <<  "shearStress_WW"  << std::setw(spacing)
+            <<  "Fh_W" << std::setw(spacing)
+            <<  "Fv_W" << std::setw(spacing)
+            
+            
+            <<  "topForce" << std::setw(spacing)
+            <<  "botForce" << std::setw(spacing)
+            <<  "rightForce" << std::setw(spacing)
+            <<  "leftForce";
+        }
+        if (pars.solver=="GD"){
+            dataFile
+            << std::setw(spacing)
+            <<  "dt" << std::setw(spacing)
+            <<  "defRate" ;
+        }
+        if (pars.contactMethod=="nts"){
+            dataFile
+            << std::setw(spacing)
+            <<  "penalty";
+        }
+        dataFile
+        << std::setw(spacing)
         <<  "interactions" << std::endl;
         dataFile.close();
         
@@ -174,22 +219,60 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  maxR  << std::setw(spacing)
         <<  avgR  << std::setw(spacing)
         <<  L2NormResidual  << std::setw(spacing)
-        <<  P1  << std::setw(spacing)
-        <<  P2  << std::setw(spacing)
-        <<  (KWoodYY+KWoodXX)/(2*LX*LY)  << std::setw(spacing)
-        <<  S1  << std::setw(spacing)
-        <<  S2  << std::setw(spacing)
-        <<  (KWoodYY-KWoodXX)/(2*LX*LY)   << std::setw(spacing)
-        <<  A  << std::setw(spacing)
-        <<  A_material  << std::setw(spacing)
+        
+        <<  P_BW  << std::setw(spacing)
+        <<  P_BB  << std::setw(spacing)
+        <<  (KWoodYY+KWoodXX)/(2*LX_W*LY_W)  << std::setw(spacing)
+        <<  S_BW  << std::setw(spacing)
+        <<  S_BB  << std::setw(spacing)
+        <<  S_BB_CSxy  << std::setw(spacing)
+        <<  (KWoodYY-KWoodXX)/(2*LX_W*LY_W)   << std::setw(spacing)
+        <<  A_W  << std::setw(spacing)
+        <<  A_B  << std::setw(spacing)
         <<  phi  << std::setw(spacing)
-        <<  e0  << std::setw(spacing)
-        <<  e1 << std::setw(spacing)
-        <<  DPOverDe0 << std::setw(spacing)
-        <<  DSOverDe1 << std::setw(spacing)
-        <<  pars.dt  << std::setw(spacing)
-        <<  pars.deformationRate  << std::setw(spacing)
-        <<  pars.ntsHarmonicPenaltyStiffness  << std::setw(spacing)
+        <<  phi_B  << std::setw(spacing)
+        <<  e0_W  << std::setw(spacing)
+        <<  e1_W << std::setw(spacing)
+        <<  e0_B  << std::setw(spacing)
+        <<  e1_B << std::setw(spacing)
+        <<  Fh_B << std::setw(spacing)
+        <<  Fv_B << std::setw(spacing)
+        <<  Fh_B_CSxy << std::setw(spacing)
+        <<  Fv_B_CSxy << std::setw(spacing)
+        <<  refLX_B << std::setw(spacing)
+        <<  refLY_B << std::setw(spacing)
+        <<  LX_B << std::setw(spacing)
+        <<  LY_B << std::setw(spacing)
+        
+        <<  DPOverDe0_BW << std::setw(spacing)
+        <<  DSOverDe1_BW << std::setw(spacing)
+        <<  DPOverDe0_BB << std::setw(spacing)
+        <<  DSOverDe1_BB ;
+        if (pars.boundaryType=="wall"){
+            dataFile
+            << std::setw(spacing)
+            <<  P_WW << std::setw(spacing)
+            <<  S_WW  << std::setw(spacing)
+            <<  Fh_W << std::setw(spacing)
+            <<  Fv_W << std::setw(spacing)
+            <<  wallForceTop.sum() << std::setw(spacing)
+            <<  wallForceBottom.sum() << std::setw(spacing)
+            <<  wallForceRight.sum() << std::setw(spacing)
+            <<  wallForceLeft.sum();
+        }
+        if (pars.solver=="GD"){
+            dataFile
+            << std::setw(spacing)
+            <<  pars.dt << std::setw(spacing)
+            <<  pars.deformationRate;
+        }
+        if (pars.contactMethod=="nts"){
+            dataFile
+            << std::setw(spacing)
+            <<  pars.ntsHarmonicPenaltyStiffness;
+        }
+        dataFile
+        << std::setw(spacing)
         <<  nodeIinteractions << std::endl;
         dataFile.close();
         
@@ -217,9 +300,20 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "kTOverOmega" << "\t" << pars.kTOverOmega << std::endl;
     myfile << "Ap" << "\t" << pars.Ap <<  std::endl;
     myfile << "phi" << "\t" << phi << std::endl;
-    myfile << "pressure" << "\t" << P2 << std::endl;
-    myfile << "e0_strain" << "\t" << e0 << std::endl;
-    myfile << "e1_strain" << "\t" << e1 << std::endl;
+    myfile << "phi_B" << "\t" << phi_B << std::endl;
+    myfile << "pressure_BW" << "\t" << P_BW << std::endl;
+    myfile << "pressure_BB" << "\t" << P_BB << std::endl;
+    myfile << "shear_stress_BW" << "\t" << S_BW << std::endl;
+    myfile << "shear_stress_BB" << "\t" << S_BB << std::endl;
+    myfile << "Fh_B" << "\t" << Fh_B << std::endl;
+    myfile << "Fv_B" << "\t" << Fv_B << std::endl;
+    myfile << "Fh_B_CSxy" << "\t" << Fh_B_CSxy << std::endl;
+    myfile << "Fv_B_CSxy" << "\t" << Fv_B_CSxy << std::endl;
+    myfile << "shear_stress_BB" << "\t" << S_BB << std::endl;
+    myfile << "e0_strain_W" << "\t" << e0_W << std::endl;
+    myfile << "e0_strain_B" << "\t" << e0_B << std::endl;
+    myfile << "e1_strain_W" << "\t" << e1_W << std::endl;
+    myfile << "e1_strain_B" << "\t" << e1_B << std::endl;
     myfile << "tol_max_residual" << "\t" << pars.maxForceTol << std::endl;
     myfile << "max_residual" << "\t" << maxR << std::endl;
     myfile << "mean_residual" << "\t" << avgR << std::endl;
@@ -229,6 +323,10 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     if (pars.boundaryType=="periodic"){
         myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
     }
+    myfile << "ref_box_LXLY_B" << "\t" << refLX_B << "\t" << refLY_B << std::endl;
+    myfile << "cur_box_LXLY_B" << "\t" << LX_B << "\t" << LY_B << std::endl;
+    myfile << "ref_box_LXLY_W" << "\t" << refLX_W << "\t" << refLY_W << std::endl;
+    myfile << "cur_box_LXLY_W" << "\t" << LX_W << "\t" << LY_W << std::endl;
     myfile << "ref_box_LRBT" << "\t" << pars.initLeftPos << "\t" << pars.initRightPos << "\t" << pars.initBotPos << "\t" << pars.initTopPos << std::endl;
     myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<<  "\n"   << std::endl;
     
@@ -271,7 +369,18 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     <<  "totVx"  << std::setw(spacing)
     <<  "totVy"  << std::setw(spacing)
     <<  "contactFx"  << std::setw(spacing)
-    <<  "contactFy"  << std::endl;
+    <<  "contactFy";
+    if (pars.boundaryType=="walls"){
+        myfile
+        << std::setw(spacing)
+        <<  "wallForceTop"  << std::setw(spacing)
+        <<  "wallForceBot"  << std::setw(spacing)
+        <<  "wallForceRight"  << std::setw(spacing)
+        <<  "wallForceLeft"  << std::endl;
+    }else{
+        myfile << std::endl;
+    }
+        
     
     for (int i=0; i<curPosX.size();i++ ) {
         myfile
@@ -286,7 +395,18 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         << homVx[i]+forceX[i] << std::setw(spacing)
         << homVy[i]+forceY[i] << std::setw(spacing)
         << surfaceForceX[i] << std::setw(spacing)
-        << surfaceForceY[i] << std::endl;
+        << surfaceForceY[i];
+        if (pars.boundaryType=="walls"){
+            myfile
+            << std::setw(spacing)
+            <<  surfaceForceY[i]  << std::setw(spacing)
+            <<  wallForceTop[i] << std::setw(spacing)
+            <<  wallForceBottom[i]  << std::setw(spacing)
+            <<  wallForceRight[i]  << std::setw(spacing)
+            <<  wallForceLeft[i]  << std::endl;
+        }else{
+            myfile << std::endl;
+        }
     }
     
     myfile.close();
@@ -306,8 +426,8 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     myfile << "timeStep" << "\t" << timeStep << std::endl;
     myfile << "number_of_augmented_nodes" << "\t" << baseData.numNodes << std::endl;
     myfile << "images_margin" << "\t" << pars.imagesMargin << std::endl;
-    myfile << "effective_simulation_box_left_boundary" << "\t" << leftPos - pars.imagesMargin*lxNew << std::endl;
-    myfile << "effective_simulation_box_bot_boundary" << "\t" << botPos - pars.imagesMargin*lyNew << std::endl;
+    myfile << "effective_simulation_box_left_boundary" << "\t" << leftPos - pars.imagesMargin*newLX_W << std::endl;
+    myfile << "effective_simulation_box_bot_boundary" << "\t" << botPos - pars.imagesMargin*newLY_W << std::endl;
     myfile << "numCellsX" << "\t" << numXCells << std::endl;
     myfile << "numCellsY" << "\t" << numYCells << std::endl;
     myfile << "cellSizeX" << "\t" << verletCellSizeX << std::endl;

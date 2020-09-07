@@ -100,7 +100,7 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
             std::cout << "**** compressing ****" << std::endl;
             std::cout << timeStep << std::endl;
             std::cout << "phi  " << mainSys.phi * 2 << "  target is  " << pars.targetPhi << std::endl;
-            std::cout << "e0  " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
+            std::cout << "e0  " << mainSys.e0_W << "  target is  " << target_e0 << std::endl;
          }
         
         mainSys.affine_compression_triWalls(baseData, pars, relativeStrain,mainSys.ctrX, mainSys.ctrY, timeStep);
@@ -122,7 +122,7 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
               }
 
          }
-        if (mainSys.P2<pars.targetPressure){
+        if (mainSys.P_BB<pars.targetPressure){
             
             mainSys.dump_per_node(baseData, pars, strainStep);
              mainSys.dump_per_ele(baseData, pars,strainStep);
@@ -138,13 +138,13 @@ void shear_special_FIRE(const BaseSysData& baseData, const Parameters& pars, lon
     
     mainSys.dump_global_data(pars, timeStep,"final-data", "append", "final");
     
-    while(step<=numSteps && mainSys.e1 <= pars.shearTo){
+    while(step<=numSteps && mainSys.e1_W <= pars.shearTo){
         
          if(timeStep%pars.writeToConsoleEvery==0){
             std::cout << "**** shearing ****" << std::endl;
             std::cout << timeStep << std::endl;
             std::cout << "phi  " << mainSys.phi *2<< std::endl;
-            std::cout << "e1  " << mainSys.e1 << "  target is  " << target_e0 << std::endl;
+            std::cout << "e1  " << mainSys.e1_W << "  target is  " << target_e0 << std::endl;
          }
         mainSys.affine_axial_shearing_triWalls(baseData, pars, shearStep,mainSys.ctrX, mainSys.ctrY, timeStep);
 
@@ -219,9 +219,9 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
             std::cout << "height   " << mainSys.height << std::endl;
             std::cout << "base   " << mainSys.base << std::endl;
             std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-            std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "e0   " << mainSys.e0_W << "  target is  " << target_e0 << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
@@ -233,7 +233,7 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
         
         gd_solver(baseData,pars,timeStep,step,"compression-data", mainSys, true);
 
-        if (mainSys.P2<pars.targetPressure) break;
+        if (mainSys.P_BB<pars.targetPressure) break;
         
        
     }
@@ -259,7 +259,7 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
     
     mainSys.dump_global_data(pars, timeStep, "shearing-data","write", "running");
     
-    while(mainSys.e1 <= pars.shearTo){
+    while(mainSys.e1_W <= pars.shearTo){
         
         mainSys.affine_axial_shearing_triWalls(baseData, pars, pars.deformationRate * pars.dt,mainSys.ctrX, mainSys.ctrY, timeStep);
          
@@ -270,9 +270,9 @@ void shear_special_GD(const BaseSysData& baseData, const Parameters& pars, long 
             std::cout << "height   " << mainSys.height << std::endl;
             std::cout << "base   " << mainSys.base << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
-            std::cout << "e0   " << mainSys.e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "e0   " << mainSys.e0_W << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
@@ -309,9 +309,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "height   " << mainSys.height << std::endl;
             std::cout << "base   " << mainSys.base << std::endl;
             std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-            std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "e0   " << mainSys.e0_W << "  target is  " << target_e0 << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
@@ -321,7 +321,7 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
         
         gd_solver(baseData,pars,timeStep,step, "compression-data",mainSys, false);
 
-        if (mainSys.P2<pars.targetPressure) break;
+        if (mainSys.P_BB<pars.targetPressure) break;
         
        
     }
@@ -358,9 +358,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "height   " << mainSys.height << std::endl;
             std::cout << "base   " << mainSys.base << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
-            std::cout << "e0   " << mainSys.e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "e0   " << mainSys.e0_W << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
@@ -408,9 +408,9 @@ void shear_special_stepGD(const BaseSysData& baseData, const Parameters& pars, l
             std::cout << "height   " << mainSys.height << std::endl;
             std::cout << "base   " << mainSys.base << std::endl;
             std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
-            std::cout << "e0   " << mainSys.e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "e0   " << mainSys.e0_W << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
@@ -462,13 +462,13 @@ void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long t
              std::cout << "**** holding before shearing **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
              std::cout << timeStep << std::endl;
              std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
-             std::cout << "e0   " << mainSys.e0 << std::endl;
-             std::cout << "e1   " << mainSys.e1 << std::endl;
+             std::cout << "e0   " << mainSys.e0_W << std::endl;
+             std::cout << "e1   " << mainSys.e1_W << std::endl;
              std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
              std::cout << "maxForce  " << mainSys.maxR << std::endl;
              std::cout << "meanForce  " << mainSys.avgR << std::endl;
              std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
-             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+             std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
              std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
              std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
 
@@ -509,13 +509,13 @@ void deform_surfaces(const BaseSysData& baseData, const Parameters& pars, long t
              
              std::cout << timeStep << std::endl;
              std::cout << "phi   " << mainSys.phi << pars.targetPhi << std::endl;
-             std::cout << "e0   " << mainSys.e0 << std::endl;
-             std::cout << "e1   " << mainSys.e1 << std::endl;
+             std::cout << "e0   " << mainSys.e0_W << std::endl;
+             std::cout << "e1   " << mainSys.e1_W << std::endl;
              std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
              std::cout << "maxForce  " << mainSys.maxR << std::endl;
              std::cout << "meanForce  " << mainSys.avgR << std::endl;
              std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
-             std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+             std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
              std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
              std::cout << "\n" << std::endl;
 

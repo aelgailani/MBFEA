@@ -22,8 +22,10 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         refRightPos = pars.initRightPos;
         refBotPos = pars.initBotPos;
         refTopPos = pars.initTopPos;
-        refLx = refRightPos-refLeftPos;
-        refLy = refTopPos-refBotPos;
+        refLX_W = refRightPos-refLeftPos;
+        refLY_W = refTopPos-refBotPos;
+        
+        
         
         curPosX = baseData.refPosX * pars.initialStretch;
         curPosY = baseData.refPosY * pars.initialStretch;
@@ -32,10 +34,10 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
         rightPos = refRightPos;
         leftPos = refLeftPos;
         
-        lyCur = refLy;
-        lxCur = refLx;
-        lyNew = lyCur;
-        lxNew = lxCur;
+        curLY_W = refLY_W;
+        curLX_W = refLX_W;
+        newLY_W = curLY_W;
+        newLX_W = curLX_W;
         ctrX = 0.5*(rightPos+ leftPos);
         ctrY = 0.5*(topPos+ botPos);
         
@@ -106,12 +108,12 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                 }
 
             }
-            refLx = refRightPos-refLeftPos;
-            refLy = refTopPos-refBotPos;
-            lxCur = rightPos - leftPos;
-            lyCur = topPos - botPos;
-            lyNew = lyCur;
-            lxNew = lxCur;
+            refLX_W = refRightPos-refLeftPos;
+            refLY_W = refTopPos-refBotPos;
+            curLX_W = rightPos - leftPos;
+            curLY_W = topPos - botPos;
+            newLY_W = curLY_W;
+            newLX_W = curLX_W;
             
             
             
@@ -183,10 +185,10 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
                     topPos = y;
                 }
                 
-                lxCur = rightPos - leftPos;
-                lyCur = topPos - botPos;
-                lyNew = lyCur;
-                lxNew = lxCur;
+                curLX_W = rightPos - leftPos;
+                curLY_W = topPos - botPos;
+                newLY_W = curLY_W;
+                newLX_W = curLX_W;
                 ctrX = 0.5*(rightPos+ leftPos);
                 ctrY = 0.5*(topPos+ botPos);
             
@@ -212,12 +214,14 @@ Configuration::Configuration(const BaseSysData& baseData, const Parameters& pars
             }
         }
 
-    ex = log(lxNew/refLx);
-    ey = log(lyNew/refLy);
-    A = lxNew * lyNew;
-    e0 = - 0.5*(ex+ey); // my conviension is positive for compression
-    e1 = (ex-ey);
-    phi = pars.Ap / A;
+    ex_W = log(newLX_W/refLX_W);
+    ey_W = log(newLY_W/refLY_W);
+    A_W = newLX_W * newLY_W;
+    e0_W = - 0.5*(ex_W+ey_W); // my conviension is positive for compression
+    e1_W = (ex_W-ey_W);
+    phi = pars.Ap / A_W;
+    refLX_B = sqrt(pars.Ap*refLX_W/refLY_W);
+    refLY_B = sqrt(pars.Ap*refLY_W/refLX_W);
     
     curPosXAtLastStep = curPosX;
     curPosYAtLastStep = curPosY;
@@ -340,24 +344,37 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     avgR = sqrt((forceX.array()*forceX.array()+forceY.array()*forceY.array()).mean());
 //    LX = (curPosX.maxCoeff()-curPosX.minCoeff());
 //    LY = (curPosY.maxCoeff()-curPosY.minCoeff());
-    LX = (rightPos-leftPos);
-    LY = (topPos-botPos);
-    Fh = 0.5*(-wallForceRight.sum()+wallForceLeft.sum());
-    Fv = 0.5*(-wallForceTop.sum()+wallForceBottom.sum());
-    P1 = 0.5*(Fv/lxNew+Fh/lyNew);
-//    P2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
-    P2 = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX).dot((refArea.array()*areaRatio.array()).matrix())+(KWoodYY+KWoodXX))/(2*LX*LY);
+    LX_W = (rightPos-leftPos);
+    LY_W = (topPos-botPos);
+    LX_B = sqrt(refArea.dot(areaRatio)*LX_W/LY_W);
+    LY_B = sqrt(refArea.dot(areaRatio)*LY_W/LX_W);
+    Fh_W = 0.5*(-wallForceRight.sum()+wallForceLeft.sum());
+    Fv_W = 0.5*(-wallForceTop.sum()+wallForceBottom.sum());
+    Fv_B = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()))/(LY_B);
+    Fh_B = ((CstressXX).dot((refArea.array()*areaRatio.array()).matrix()))/(LX_B);
+    Fv_B_CSxy = (CstressXY).dot((refArea.array()*areaRatio.array()).matrix())/(LX_B);
+    Fh_B_CSxy = (CstressYX).dot((refArea.array()*areaRatio.array()).matrix())/(LY_B);
+    P_WW = 0.5*(Fv_W/LX_W+Fh_W/LY_W);
+    P_BW = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_W*LY_W);
+    P_BB = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressXX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_B*LY_B);
+    P_BB_CSxy = ((CstressXY).dot((refArea.array()*areaRatio.array()).matrix()) + (CstressYX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_B*LY_B);
     
-    S1 = 0.5*(Fv/lxNew-Fh/lyNew);
-    S2 = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX).dot((refArea.array()*areaRatio.array()).matrix())+(KWoodYY-KWoodXX))/(2*LX*LY);
-//    S2 = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX*LY);
-    ex = log(lxNew/refLx);
-    ey = log(lyNew/refLy);
-    A = lxNew * lyNew;
-    A_material = refArea.dot(areaRatio);
-    e0 = - 0.5*(ex+ey); // my conviension is positive for compression
-    e1 = (ex-ey);
-    phi = pars.Ap / A;
+    S_WW = 0.5*(Fv_W/LX_W-Fh_W/LY_W);
+    S_BW = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_W*LY_W);
+    S_BB = ((CstressYY).dot((refArea.array()*areaRatio.array()).matrix()) - (CstressXX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_B*LY_B);
+    S_BB_CSxy = ((CstressXY).dot((refArea.array()*areaRatio.array()).matrix()) - (CstressYX).dot((refArea.array()*areaRatio.array()).matrix()))/(2*LX_B*LY_B);
+    ex_W = log(newLX_W/refLX_W);
+    ey_W = log(newLY_W/refLY_W);
+    ex_B = log(LX_B/refLX_B);
+    ey_B = log(LY_B/refLY_B);
+    A_W = LX_W * LY_W;
+    A_B = refArea.dot(areaRatio);
+    e0_W = - 0.5*(ex_W+ey_W); // my conviension is positive for compression
+    e1_W = (ex_W-ey_W);
+    e0_B = - 0.5*(ex_B+ey_B); // my conviension is positive for compression
+    e1_B = (ex_B-ey_B);
+    phi = pars.Ap / A_W;
+    phi_B = pars.Ap / (LX_B * LY_B);
     deltaTotEnergy = totalEnergy - prevTotEnergy;
     prevTotEnergy = totalEnergy;
     L2NormResidual = sqrt(forceX.dot(forceX) + forceY.dot(forceY));
@@ -365,12 +382,21 @@ void Configuration::update_post_processing_data(const BaseSysData& baseData, con
     shearVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())- (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     pressureVirial = ((CstressYY+CstressYX).dot((refArea.array()*areaRatio.array()).matrix())+ (CstressXX+CstressXY).dot((refArea.array()*areaRatio.array()).matrix()));
     
-    DPOverDe0 = (prev_P2-P2)/(prev_e0-e0);
-    DSOverDe1 = (prev_S2-S2)/(prev_e1-e1);
-    prev_e0 = e0;
-    prev_e1 =e1;
-    prev_P2 = P2;
-    prev_S2 = S2;
+    
+    DPOverDe0_BW = (prev_P_BW-P_BW)/(prev_e0_W-e0_W);
+    DSOverDe1_BW = (prev_S_BW-S_BW)/(prev_e1_W-e1_W);
+    prev_e0_W = e0_W;
+    prev_e1_W = e1_W;
+    prev_P_BW = P_BW;
+    prev_S_BW = S_BW;
+    
+    
+    DPOverDe0_BB = (prev_P_BB-P_BB)/(prev_e0_B-e0_B);
+    DSOverDe1_BB = (prev_S_BB-S_BB)/(prev_e1_B-e0_B);
+    prev_e0_B = e0_B;
+    prev_e1_B = e1_B;
+    prev_P_BB = P_BB;
+    prev_S_BB = S_BB;
 }
 
 
@@ -388,8 +414,8 @@ void Configuration::update_cells_1(const BaseSysData& baseData, const Parameters
     {
         x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
         y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
-        xCell = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
-        yCell = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+        xCell = int( floor( (x-(leftPos-pars.imagesMargin*newLX_W))/verletCellSizeX) );
+        yCell = int( floor( (y-(botPos-pars.imagesMargin*newLY_W))/verletCellSizeY) );
 
     if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
     {
@@ -426,8 +452,8 @@ void Configuration::update_cells_2(const BaseSysData& baseData, const Parameters
     {
         x = augmentedCurPosX[baseData.flatSurfaceNodes[nodeID]];
         y = augmentedCurPosY[baseData.flatSurfaceNodes[nodeID]];
-        xCell = int( floor( (x-(leftPos-pars.imagesMargin*lxNew))/verletCellSizeX) );
-        yCell = int( floor( (y-(botPos-pars.imagesMargin*lyNew))/verletCellSizeY) );
+        xCell = int( floor( (x-(leftPos-pars.imagesMargin*newLX_W))/verletCellSizeX) );
+        yCell = int( floor( (y-(botPos-pars.imagesMargin*newLY_W))/verletCellSizeY) );
         
         if ( (xCell < 0) || (yCell < 0) || (xCell >= numXCells)  || (yCell >= numYCells) )
         {

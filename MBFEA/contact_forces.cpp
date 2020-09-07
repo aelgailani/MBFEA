@@ -21,10 +21,10 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
     nodeIinteractions = 0;
     
     // remember imagesMargies = 0 if walls are used 
-    numXCells = floor(lxNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-    numYCells = floor(lyNew*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
-    verletCellSizeX  = lxNew*(1+2*pars.imagesMargin)/numXCells;
-    verletCellSizeY = lyNew*(1+2*pars.imagesMargin)/numYCells;
+    numXCells = floor(newLX_W*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+    numYCells = floor(newLY_W*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
+    verletCellSizeX  = newLX_W*(1+2*pars.imagesMargin)/numXCells;
+    verletCellSizeY = newLY_W*(1+2*pars.imagesMargin)/numYCells;
     
     
     nodesLinkedList.resize(numXCells*numYCells+baseData.numSurfaceNodes,-1);

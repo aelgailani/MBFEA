@@ -110,10 +110,10 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
             std::cout << "timeStep  " << timeStep << std::endl;
             std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
             std::cout << "power   " << power <<std::endl;
-            std::cout << "e0  " << mainSys.e0 << std::endl;
-            std::cout << "e1  " << mainSys.e1 << std::endl;
+            std::cout << "e0  " << mainSys.e0_W << std::endl;
+            std::cout << "e1  " << mainSys.e1_W << std::endl;
             std::cout << "phi  " << mainSys.phi << std::endl;
-            std::cout << "pressure  " << mainSys.P2 << std::endl;
+            std::cout << "pressure  " << mainSys.P_BB << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "avgForce  " << mainSys.avgR << std::endl;
             std::cout << "L2R  " << mainSys.L2NormResidual << std::endl;

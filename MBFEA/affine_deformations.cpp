@@ -21,16 +21,16 @@ void Configuration::affine_compression(const BaseSysData& baseData, const Parame
         std::cout << "**** compressing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     }
     
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
     
-    lxNew=lxCur * exp(-strain); // remember the is a a negative sign in the passed strain for cosmetics only so strain = log(Lcur/Lnew) where conventionaly it is log(Lnew/Lcur)
-    lyNew=lyCur * exp(-strain);
+    newLX_W=curLX_W * exp(-strain); // remember the is a a negative sign in the passed strain for cosmetics only so strain = log(Lcur/Lnew) where conventionaly it is log(Lnew/Lcur)
+    newLY_W=curLY_W * exp(-strain);
 
-    leftPos= ctrX-0.5 * lxNew;
-    rightPos= ctrX+0.5 * lxNew;
-    botPos= ctrY-0.5 * lyNew;
-    topPos= ctrY+0.5 * lyNew;
+    leftPos= ctrX-0.5 * newLX_W;
+    rightPos= ctrX+0.5 * newLX_W;
+    botPos= ctrY-0.5 * newLY_W;
+    topPos= ctrY+0.5 * newLY_W;
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
       // Apply an affine deformation to all nodal positions keeping the cell center fixed.
@@ -52,20 +52,20 @@ void Configuration::affine_axial_shearing(const BaseSysData& baseData, const Par
     if(timestep%pars.writeToConsoleEvery==0){
         std::cout << "**** shearing ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
         
-        std::cout << "e1  " << e1 <<std::endl;
+        std::cout << "e1  " << e1_W <<std::endl;
         std::cout << "phi  " << phi <<std::endl;
     }
 
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
     
-    lxNew=lxCur * exp(strain);
-    lyNew=lyCur * exp(-strain);
+    newLX_W=curLX_W * exp(strain);
+    newLY_W=curLY_W * exp(-strain);
     
-    leftPos= ctrX-0.5 * lxNew;
-    rightPos= ctrX+0.5 * lxNew;
-    botPos= ctrY-0.5 * lyNew;
-    topPos= ctrY+0.5 * lyNew;
+    leftPos= ctrX-0.5 * newLX_W;
+    rightPos= ctrX+0.5 * newLX_W;
+    botPos= ctrY-0.5 * newLY_W;
+    topPos= ctrY+0.5 * newLY_W;
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
@@ -87,20 +87,20 @@ void Configuration::surface_nodes_affine_axial_shearing(const BaseSysData& baseD
     if(timestep%pars.writeToConsoleEvery==0){
         std::cout << "**** shearing surface nodes only ****   rate " << pars.deformationRate << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
         
-        std::cout << "e1  " << e1 <<std::endl;
+        std::cout << "e1  " << e1_W <<std::endl;
         std::cout << "phi  " << phi <<std::endl;
     }
 
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
     
-    lxNew=lxCur * exp(strain);
-    lyNew=lyCur * exp(-strain);
+    newLX_W=curLX_W * exp(strain);
+    newLY_W=curLY_W * exp(-strain);
     
-    leftPos= ctrX-0.5 * lxNew;
-    rightPos= ctrX+0.5 * lxNew;
-    botPos= ctrY-0.5 * lyNew;
-    topPos= ctrY+0.5 * lyNew;
+    leftPos= ctrX-0.5 * newLX_W;
+    rightPos= ctrX+0.5 * newLX_W;
+    botPos= ctrY-0.5 * newLY_W;
+    topPos= ctrY+0.5 * newLY_W;
     
     // Apply an affine deformation to surface nodal positions keeping the cell center fixed.
     // Apply an affine deformation to surface nodal positions keeping the cell center fixed.
@@ -141,16 +141,16 @@ void Configuration::affine_axial_shearing_triWalls(const BaseSysData& baseData, 
     triBx =ctrX-0.5*base;
     triCx =ctrX+0.5*base;
 
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
     
     topPos = triAy;
     botPos = triBy;
     rightPos = triCx;
     leftPos = triBx;
     
-    lyNew= topPos - botPos;
-    lxNew= rightPos - leftPos;
+    newLY_W= topPos - botPos;
+    newLX_W= rightPos - leftPos;
 
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
@@ -186,8 +186,8 @@ void Configuration::affine_compression_triWalls(const BaseSysData& baseData, con
     triBx =ctrX-0.5*base;
     triCx =ctrX+0.5*base;
     
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
 
     
     topPos = triAy;
@@ -195,8 +195,8 @@ void Configuration::affine_compression_triWalls(const BaseSysData& baseData, con
     rightPos = triCx;
     leftPos = triBx;
     
-    lyNew= topPos - botPos;
-    lxNew= rightPos - leftPos;
+    newLY_W= topPos - botPos;
+    newLX_W= rightPos - leftPos;
 
     
     
@@ -221,16 +221,16 @@ void Configuration::special_localized_deformation(const BaseSysData& baseData, c
 
     yMid=0.5*(curPosY.maxCoeff()+ curPosY.minCoeff());
     xMid=0.5*(curPosX.maxCoeff()+ curPosX.minCoeff());
-    lyCur= curPosY.maxCoeff()-curPosY.minCoeff() ;
-    lxCur= curPosX.maxCoeff()-curPosX.minCoeff() ;
+    curLY_W= curPosY.maxCoeff()-curPosY.minCoeff() ;
+    curLX_W= curPosX.maxCoeff()-curPosX.minCoeff() ;
     
-    lxNew=lxCur;
-    lyNew=lyCur ;
+    newLX_W=curLX_W;
+    newLY_W=curLY_W ;
     
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
+    leftPos= xMid-0.5 * newLX_W;
+    rightPos= xMid+0.5 * newLX_W;
+    botPos= yMid-0.5 * newLY_W;
+    topPos= yMid+0.5 * newLY_W;
     
 
     curPosX=curPosX.array()-xMid;
@@ -250,28 +250,28 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
     
     std::cout << "**** holding **** " << "\t dt \t" << pars.dt << " \t " << pars.boundaryType << " \t " << pars.contactMethod << std::endl;
     
-    std::cout << "e1  " << e1 <<std::endl;
+    std::cout << "e1  " << e1_W <<std::endl;
     std::cout << "phi  " << phi <<std::endl;
 
     yMid=0.5*(topPos+ botPos);
     xMid=0.5*(rightPos+ leftPos);
-    lyCur= topPos - botPos;
-    lxCur= rightPos - leftPos;
+    curLY_W= topPos - botPos;
+    curLX_W= rightPos - leftPos;
     
-    lxNew=lxCur;
-    lyNew=lyCur ;
+    newLX_W=curLX_W;
+    newLY_W=curLY_W ;
     
-    leftPos= xMid-0.5 * lxNew;
-    rightPos= xMid+0.5 * lxNew;
-    botPos= yMid-0.5 * lyNew;
-    topPos= yMid+0.5 * lyNew;
+    leftPos= xMid-0.5 * newLX_W;
+    rightPos= xMid+0.5 * newLX_W;
+    botPos= yMid-0.5 * newLY_W;
+    topPos= yMid+0.5 * newLY_W;
     
     // Apply an affine deformation to all nodal positions keeping the cell center fixed.
     curPosX = curPosX.array() - xMid;
-    curPosX *= 1.0/lxCur*lxNew;
+    curPosX *= 1.0/curLX_W*newLX_W;
     curPosX = curPosX.array() + xMid;
     
     curPosY = curPosY.array() - yMid;
-    curPosY *= 1.0/lxCur*lxNew;
+    curPosY *= 1.0/curLX_W*newLX_W;
     curPosY = curPosY.array() + yMid;
 }

@@ -34,7 +34,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
         for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
             double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
-            double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
+            double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0_W;  // strain between current and new configuration
 
             mainSys.affine_compression(baseData, pars, relativeStrain, mainSys.ctrX, mainSys.ctrY, timeStep);
             
@@ -73,9 +73,9 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
                 std::cout <<"next dump number    "<< step << std::endl;
                 std::cout << "timestep   "<<timeStep << std::endl;
                 std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-                std::cout << "pressure   " << mainSys.P2 << std::endl;
-                std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-                std::cout << "e1   " << mainSys.e1 << std::endl;
+                std::cout << "pressure   " << mainSys.P_BB << std::endl;
+                std::cout << "e0   " << mainSys.e0_W << "  target is  " << target_e0 << std::endl;
+                std::cout << "e1   " << mainSys.e1_W << std::endl;
                 std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;
                 std::cout << "meanForce  " << mainSys.avgR << std::endl;
@@ -94,9 +94,9 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
         std::cout <<"last dump number    "<< step-1 << std::endl;
         std::cout << "timestep   "<<timeStep << std::endl;
         std::cout << "phi   " << mainSys.phi << "  target is  " << pars.targetPhi << std::endl;
-        std::cout << "pressure   " << mainSys.P2 << std::endl;
-        std::cout << "e0   " << mainSys.e0 << "  target is  " << target_e0 << std::endl;
-        std::cout << "e1   " << mainSys.e1 << std::endl;
+        std::cout << "pressure   " << mainSys.P_BB << std::endl;
+        std::cout << "e0   " << mainSys.e0_W << "  target is  " << target_e0 << std::endl;
+        std::cout << "e1   " << mainSys.e1_W << std::endl;
         std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
         std::cout << "maxForce  " << mainSys.maxR << std::endl;
         std::cout << "meanForce  " << mainSys.avgR << std::endl;
@@ -130,14 +130,14 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
             std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi<< std::endl;
-            std::cout << "pressure   " << mainSys.P2 << std::endl;
-            std::cout << "e0   " << mainSys.e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB << std::endl;
+            std::cout << "e0   " << mainSys.e0_W << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "maximum peneteration  " << mainSys.maxInterference << std::endl;
 
@@ -182,14 +182,14 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
            std::cout <<"stage   "<< stage << std::endl;
             std::cout << "timestep   "<<timeStep << std::endl;
             std::cout << "phi   " << mainSys.phi  << std::endl;
-            std::cout << "pressure   " << mainSys.P2 << std::endl;
-            std::cout << "e0   " << mainSys.e0 << std::endl;
-            std::cout << "e1   " << mainSys.e1 << std::endl;
+            std::cout << "pressure   " << mainSys.P_BB << std::endl;
+            std::cout << "e0   " << mainSys.e0_W << std::endl;
+            std::cout << "e1   " << mainSys.e1_W << std::endl;
             std::cout << "force tolerance  " << pars.maxForceTol << std::endl;
             std::cout << "maxForce  " << mainSys.maxR << std::endl;
             std::cout << "meanForce  " << mainSys.avgR << std::endl;
             std::cout << "L2NormR  " << mainSys.L2NormResidual << std::endl;
-            std::cout << "pressure   " << mainSys.P2  <<  std::endl;
+            std::cout << "pressure   " << mainSys.P_BB  <<  std::endl;
             std::cout << "interactions  " << mainSys.nodeIinteractions + mainSys.segmentIinteractions << std::endl;
             std::cout << "\n" << std::endl;
 

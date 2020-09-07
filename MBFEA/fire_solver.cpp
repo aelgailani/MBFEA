@@ -33,7 +33,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
         for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
             double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
-            double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0;  // strain between current and new configuration
+            double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0_W;  // strain between current and new configuration
             mainSys.affine_compression(baseData, pars, relativeStrain,mainSys.ctrX, mainSys.ctrY, timeStep);
 
             while (1)
@@ -51,7 +51,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                 
                 std::cout << "timeStep  " << timeStep << std::endl;
                 std::cout << "strainStep  " << strainStep<<"   out of  " << pars.FIRE_numStrainSteps <<std::endl;
-                std::cout << "e0  " << mainSys.e0 << ", target is  " << target_e0 <<std::endl;
+                std::cout << "e0  " << mainSys.e0_W << ", target is  " << target_e0 <<std::endl;
                 std::cout << "phi  " << mainSys.phi << ", target is  " << pars.targetPhi <<std::endl;
                 std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;
@@ -141,7 +141,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                 
                 std::cout << "timeStep  " << timeStep << std::endl;
                 std::cout << "stage  " << stage << std::endl;
-                std::cout << "e1  " << mainSys.e1 << std::endl;
+                std::cout << "e1  " << mainSys.e1_W << std::endl;
                 std::cout << "phi  " << mainSys.phi <<std::endl;
                 std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
                 std::cout << "maxForce  " << mainSys.maxR << std::endl;

@@ -41,13 +41,13 @@ void Configuration::compute_forces_walls(const BaseSysData& baseData, const Para
     
     
     // initialize walls forces to zero
-    wallForceTop.resize(baseData.numOriginalSurfaceNodes);
+    wallForceTop.resize(baseData.numOriginalNodes);
     wallForceTop.fill(0);
-    wallForceBottom.resize(baseData.numOriginalSurfaceNodes);
+    wallForceBottom.resize(baseData.numOriginalNodes);
     wallForceBottom.fill(0);
-    wallForceRight.resize(baseData.numOriginalSurfaceNodes);
+    wallForceRight.resize(baseData.numOriginalNodes);
     wallForceRight.fill(0);
-    wallForceLeft.resize(baseData.numOriginalSurfaceNodes);
+    wallForceLeft.resize(baseData.numOriginalNodes);
     wallForceLeft.fill(0);
    
     

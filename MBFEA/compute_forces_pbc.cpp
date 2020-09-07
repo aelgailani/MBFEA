@@ -123,23 +123,23 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
     // Create images x y
     if (updatePBC) {
-        curPosXL = curPosX.array()-lxNew;
-        curPosXR = curPosX.array()+lxNew;
+        curPosXL = curPosX.array()-newLX_W;
+        curPosXR = curPosX.array()+newLX_W;
         curPosXB = curPosX;
         curPosXT = curPosX;
-        curPosXBL = curPosX.array()-lxNew;
-        curPosXBR = curPosX.array()+lxNew;
-        curPosXTL = curPosX.array()-lxNew;
-        curPosXTR = curPosX.array()+lxNew;
+        curPosXBL = curPosX.array()-newLX_W;
+        curPosXBR = curPosX.array()+newLX_W;
+        curPosXTL = curPosX.array()-newLX_W;
+        curPosXTR = curPosX.array()+newLX_W;
         
         curPosYL = curPosY;
         curPosYR = curPosY;
-        curPosYB = curPosY.array()-lyNew;
-        curPosYT = curPosY.array()+lyNew;
-        curPosYBL = curPosY.array()-lyNew;
-        curPosYBR = curPosY.array()-lyNew;
-        curPosYTL = curPosY.array()+lyNew;
-        curPosYTR = curPosY.array()+lyNew;
+        curPosYB = curPosY.array()-newLY_W;
+        curPosYT = curPosY.array()+newLY_W;
+        curPosYBL = curPosY.array()-newLY_W;
+        curPosYBR = curPosY.array()-newLY_W;
+        curPosYTL = curPosY.array()+newLY_W;
+        curPosYTR = curPosY.array()+newLY_W;
 
     }
     
