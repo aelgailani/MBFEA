@@ -328,7 +328,7 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "ref_box_LXLY_W" << "\t" << refLX_W << "\t" << refLY_W << std::endl;
     myfile << "cur_box_LXLY_W" << "\t" << LX_W << "\t" << LY_W << std::endl;
     myfile << "ref_box_LRBT" << "\t" << pars.initLeftPos << "\t" << pars.initRightPos << "\t" << pars.initBotPos << "\t" << pars.initTopPos << std::endl;
-    myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<<  "\n"   << std::endl;
+    myfile << "cur_box_LRBT" << "\t" << leftPos << "\t" << rightPos << "\t" << botPos << "\t" << topPos<<  "\n--------------------------"   << std::endl;
     
     
     myfile << "solver" << "\t" << pars.solver << std::endl;
@@ -341,16 +341,16 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     myfile << "contact_method" << "\t" << pars.contactMethod << std::endl;
     if (pars.contactMethod=="ntn" || pars.contactMethod=="gntn"){
         myfile << "sigma" << "\t" << pars.ntnRadius <<  std::endl;
-        myfile << "RcutOverSigma" << "\t" << pars.ntnPLRcutoffOverRadius <<  "\n"   <<  std::endl;
+        myfile << "RcutOverSigma" << "\t" << pars.ntnPLRcutoffOverRadius <<  "\n--------------------------"   <<  std::endl;
         if (pars.contactMethod=="gntn"){
-            myfile << "ghost_nodes_per_segment" << "\t" << pars.gntn_NGhostNodes <<  "\n"   <<  std::endl;
+            myfile << "ghost_nodes_per_segment" << "\t" << pars.gntn_NGhostNodes <<  "\n--------------------------"   <<  std::endl;
         }
 
     }else if (pars.contactMethod=="nts"){
         myfile << "max_penetration" << "\t" << maxInterference << std::endl;
         myfile << "penalty_stiffness" << "\t" << pars.ntsHarmonicPenaltyStiffness << std::endl;
         if (pars.smoothCorners){
-            myfile << "Hermit_alpha" << "\t" << pars.alpha_HermitPol <<  "\n"   <<  std::endl;
+            myfile << "Hermit_alpha" << "\t" << pars.alpha_HermitPol <<  "\n--------------------------"   <<  std::endl;
         }
        
     }
@@ -399,7 +399,6 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
         if (pars.boundaryType=="walls"){
             myfile
             << std::setw(spacing)
-            <<  surfaceForceY[i]  << std::setw(spacing)
             <<  wallForceTop[i] << std::setw(spacing)
             <<  wallForceBottom[i]  << std::setw(spacing)
             <<  wallForceRight[i]  << std::setw(spacing)
