@@ -26,6 +26,18 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     KWoodYY=0;
     KWoodXX=0;
     
+    // fill theser vectors to report it only if needed
+    if (timeStep%pars.dumpEvery==0){
+        prev_CstressXX = CstressXX;
+        prev_CstressXY = CstressXY;
+        prev_CstressYX = CstressYX;
+        prev_CstressYY = CstressYY;
+        prev_defGradXX = defGradXX;
+        prev_defGradYX = defGradYX;
+        prev_defGradXY = defGradXY;
+        prev_defGradYY = defGradYY;
+    }
+    
     // initialize surface interaction forces on nodes to zero
     surfaceForceX.resize(baseData.numOriginalNodes);
     surfaceForceY.resize(baseData.numOriginalNodes);
@@ -37,9 +49,6 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     defGradXY = gradY * curPosX;
     defGradYY = gradY * curPosY;
     
-//    auto finish1 = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed1 = finish1 - start1;
-//    std::cout << "elapsed time in defGrad:  " << elapsed1.count() << std::endl;
     
     //compute the determinant of defGrad
     areaRatio = defGradXX.array() * defGradYY.array() - defGradXY.array() * defGradYX.array();
@@ -114,23 +123,23 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
     // Create images x y
     if (updatePBC) {
-        curPosXL = curPosX.array()-lxNew;
-        curPosXR = curPosX.array()+lxNew;
+        curPosXL = curPosX.array()-newLX_W;
+        curPosXR = curPosX.array()+newLX_W;
         curPosXB = curPosX;
         curPosXT = curPosX;
-        curPosXBL = curPosX.array()-lxNew;
-        curPosXBR = curPosX.array()+lxNew;
-        curPosXTL = curPosX.array()-lxNew;
-        curPosXTR = curPosX.array()+lxNew;
+        curPosXBL = curPosX.array()-newLX_W;
+        curPosXBR = curPosX.array()+newLX_W;
+        curPosXTL = curPosX.array()-newLX_W;
+        curPosXTR = curPosX.array()+newLX_W;
         
         curPosYL = curPosY;
         curPosYR = curPosY;
-        curPosYB = curPosY.array()-lyNew;
-        curPosYT = curPosY.array()+lyNew;
-        curPosYBL = curPosY.array()-lyNew;
-        curPosYBR = curPosY.array()-lyNew;
-        curPosYTL = curPosY.array()+lyNew;
-        curPosYTR = curPosY.array()+lyNew;
+        curPosYB = curPosY.array()-newLY_W;
+        curPosYT = curPosY.array()+newLY_W;
+        curPosYBL = curPosY.array()-newLY_W;
+        curPosYBR = curPosY.array()-newLY_W;
+        curPosYTL = curPosY.array()+newLY_W;
+        curPosYTR = curPosY.array()+newLY_W;
 
     }
     
@@ -143,7 +152,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
 //    std::cout << "elapsed time in periodic images:  " << elapsed13.count() << std::endl;
     
     if (Hessian){
-        calculate_the_Hessian_H(pars);
+        calculate_the_hessian(pars);
     }
 //    auto finish14 = std::chrono::high_resolution_clock::now();
 //    std::chrono::duration<double> elapsed14 = finish14 - finish13;
@@ -155,7 +164,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
     //This part must come only after the main Hessian because it will be overwritten
     if (surfaceInteractions){
-        compute_surface_forces(baseData,pars,Hessian, timeStep);
+        contact_forces(baseData,pars,Hessian, timeStep);
     }
     
 //    auto finish16 = std::chrono::high_resolution_clock::now();
@@ -167,7 +176,7 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
     
 //    std::cout << "segmentIinteractions  " << segmentIinteractions << std::endl;
 //    std::cout << "nodeIinteractions  " << nodeIinteractions << std::endl;
-    std::cout << "interactions  " << nodeIinteractions + segmentIinteractions << std::endl;
+   
 //    std::cout << "max skin interference   " << maxInterference << std::endl;
 //    std::cout << "max wall interference   " << maxWallinterference << std::endl;
 //    std::cout << "min J  " <<areaRatio.array().minCoeff() << std::endl;
@@ -225,3 +234,4 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
 //    std::cout << "Hixjy " <<Hixjx << std::endl;
 
 }
+

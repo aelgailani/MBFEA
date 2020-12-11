@@ -1,10 +1,3 @@
-//
-//  gd_solver.cpp
-//  MBFEA
-//
-//  Created by Ahmed Elgailani on 7/10/19.
-//  Copyright © 2019 Ahmed Elgailani. All rights reserved.
-//
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,74 +15,145 @@
 #include "BaseSysData.hpp"
 #include "solvers.hpp"
 #include "Configuration.hpp"
-//#include "visualization.hpp"
 
-void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep, int stage, Configuration& mainSys){
-//    auto t0 = std::chrono::high_resolution_clock::now();
-
+void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeStep ,  std::string name, Configuration& mainSys){
     double FIRE_alpha =  pars.FIRE_alpha_start;
-    double FIRE_N = 0;
+    double FIRE_Np = 0; //stepsSincePositvePower
     double FIRE_dt = pars.FIRE_dt_start;
     double FIRE_prevDt = pars.FIRE_dt_start;
-//    double RTolerance;
-    if (pars.runMode=="compress"){  //  compressing ***********************************************************************************************
-        assert(pars.startingStrainStep <= pars.numStrainSteps);
-        
-        for (long strainStep = pars.startingStrainStep ; strainStep<= pars.numStrainSteps ; strainStep++) {
+    double force_magnitude;
+    double velocity_magnitude;
+    double scale1;
+    double scale2;
+    if (pars.runMode=="compress"){
+        assert(pars.FIRE_startingStrainStep <= pars.FIRE_numStrainSteps);
+        double refPhi = pars.Ap/(baseData.lxRef*baseData.lyRef);
+        double target_e0 = - log(sqrt(pars.Ap/(pars.targetPhi*baseData.lxRef*baseData.lyRef))); // my conviension is positive e0 for compression
+
+        for (long strainStep = pars.FIRE_startingStrainStep ; strainStep<= pars.FIRE_numStrainSteps ; strainStep++) {
             
-//            auto t1 = std::chrono::high_resolution_clock::now();
-            
-            
-            mainSys.compress(baseData, pars, pars.maxCompression * float(strainStep)/float(pars.numStrainSteps));
+            double stepPhi = refPhi + (pars.targetPhi - refPhi) * float(strainStep)/float(pars.FIRE_numStrainSteps); // the required phi of this step as a fraction of the required target phi
+            double relativeStrain = - log(sqrt(pars.Ap/(stepPhi*baseData.lxRef*baseData.lyRef))) - mainSys.e0_W;  // strain between current and new configuration
+            mainSys.affine_compression(baseData, pars, relativeStrain,mainSys.ctrX, mainSys.ctrY, timeStep);
 
             while (1)
             {
-                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.numStrainSteps <<std::endl;
-                std::cout << "energy  " << mainSys.totalEnergy <<std::endl;
-                std::cout << timeStep << std::endl;
                 
-                // Calculate F
+
                 if (pars.boundaryType == "walls"){
-                    mainSys.compute_forces_pbc(baseData, pars, timeStep,1,1,0);
+                    mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
                 }else if (pars.boundaryType == "periodic"){
-                    mainSys.compute_forces_pbc(baseData, pars, timeStep,1,1,0);
+                    mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+                }
+               
+                
+                mainSys.update_post_processing_data(baseData, pars);
+                
+                std::cout << "timeStep  " << timeStep << std::endl;
+                std::cout << "strainStep  " << strainStep<<"   out of  " << pars.FIRE_numStrainSteps <<std::endl;
+                std::cout << "e0  " << mainSys.e0_W << ", target is  " << target_e0 <<std::endl;
+                std::cout << "phi  " << mainSys.phi << ", target is  " << pars.targetPhi <<std::endl;
+                std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
+                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+                std::cout << "avgForce  " << mainSys.avgR << std::endl;
+                
+                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.FIRE_RTolerance){
+                    std::cout << "Foce condition met !" << std::endl;
+                    break;
+                }
+                
+                double power = mainSys.forceX.dot(mainSys.velocityX)+ mainSys.forceY.dot(mainSys.velocityY);
+
+                if (power <=0) {
+                    FIRE_dt *= pars.FIRE_fdec;
+                    mainSys.velocityX.fill(0);
+                    mainSys.velocityY.fill(0);
+                    FIRE_alpha = pars.FIRE_alpha_start;
+                    FIRE_Np=0;
+                } else {
+                    FIRE_Np +=1;
+                    if (FIRE_Np > pars.FIRE_N_positive_min){
+                        FIRE_prevDt = FIRE_dt;
+                        FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
+                        FIRE_alpha *= pars.FIRE_falpha;
+                    }
+                    scale1=(1-FIRE_alpha);
+                    force_magnitude = (mainSys.forceX.array().pow(2)+mainSys.forceY.array().pow(2)).sum();
+                    velocity_magnitude = (mainSys.velocityX.array().pow(2)+mainSys.velocityY.array().pow(2)).sum();
+                    if (force_magnitude <= 1e-20) scale2 = 0.0;
+                    else scale2 = FIRE_alpha * sqrt(velocity_magnitude/force_magnitude);
+                    mainSys.velocityX = scale1 * mainSys.velocityX+ scale2 * mainSys.forceX;
+                    mainSys.velocityY = scale1 * mainSys.velocityY+ scale2 * mainSys.forceY;
                 }
                 
                 mainSys.velocityX += mainSys.forceX*FIRE_dt;
                 mainSys.velocityY += mainSys.forceY*FIRE_dt;
+                mainSys.curPosX += mainSys.velocityX*FIRE_dt;
+                mainSys.curPosY += mainSys.velocityY*FIRE_dt;
+                
+                
+                
+                std::cout << "power   " << power <<std::endl;
+                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+                std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
+                std::cout << "FIRE_Np   " << FIRE_Np  <<std::endl;
+                
+                std::cout << "\n" << std::endl;
+                timeStep++;
+                
+                
+
+            }
+            FIRE_alpha = pars.FIRE_alpha_start;
+            FIRE_Np=0;
+            FIRE_dt = pars.FIRE_dt_start;
+            mainSys.dump_global_data(pars, timeStep, name, "append", "final");
+            mainSys.dump_per_node(baseData, pars, strainStep);
+            mainSys.dump_per_ele(baseData, pars,strainStep);
+            if (pars.dumpPeriodicImagesXY){
+                mainSys.dump_per_node_periodic_images_on(baseData, pars, strainStep);
+            }
+           
+        }
+        
+    }else if (pars.runMode=="stepShear"){
+        
+        long stage=0;
+        mainSys.dump_global_data(pars, timeStep, name, "write", "final"); //open file and write cols names
+        while(stage<2){
+            
+            mainSys.affine_axial_shearing(baseData, pars, pars.targetShear,mainSys.ctrX, mainSys.ctrY, timeStep);
+            
+            double FIRE_alpha =  pars.FIRE_alpha_start;
+            double FIRE_N = 0;
+            double FIRE_dt = pars.FIRE_dt_start;
+            double FIRE_prevDt = pars.FIRE_dt_start;
+            
+            while (1)
+            {
+                
+                if (pars.boundaryType == "walls"){
+                    mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                }else if (pars.boundaryType == "periodic"){
+                    mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+                }
+                mainSys.update_post_processing_data(baseData, pars);
+                
+                std::cout << "timeStep  " << timeStep << std::endl;
+                std::cout << "stage  " << stage << std::endl;
+                std::cout << "e1  " << mainSys.e1_W << std::endl;
+                std::cout << "phi  " << mainSys.phi <<std::endl;
+                std::cout << "energy  " <<  std::setprecision(12) << mainSys.totalEnergy <<std::endl;
+                std::cout << "maxForce  " << mainSys.maxR << std::endl;
+                std::cout << "avgForce  " << mainSys.avgR << std::endl;
+                
+                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.FIRE_RTolerance){
+                   std::cout << "Foce condition met !" << std::endl;
+                   break;
+                }
                 
                 double power = mainSys.forceX.dot(mainSys.velocityX)+ mainSys.forceY.dot(mainSys.velocityY);
-                std::cout << "power   " << power <<std::endl;
-                
-//                if (timeStep==152716 || timeStep== 152717 || timeStep== 152715){
-//                    mainSys.dump_per_node(baseData, pars, timeStep);
-//                    mainSys.dump_per_ele(baseData, pars,timeStep);
-//                    plotWithPython(timeStep);
-//                    std::this_thread::sleep_for (std::chrono::milliseconds(700));
-//                }
-                
-                // make sure nothing is screwed up
-                
-                
-                if (isnan(power) || isnan(mainSys.forceX.sum()) || isnan(mainSys.forceY.sum()) || isnan(mainSys.areaRatio.sum()) || isnan(mainSys.velocityX.sum()) || isnan(mainSys.velocityY.sum()) || mainSys.areaRatio.minCoeff()<= 1.0 ){
-//                    mainSys.dump_per_node(baseData, pars, timeStep);
-//                    mainSys.dump_per_ele(baseData, pars,timeStep);
-//                    plotWithPython(timeStep);
-                    mainSys.curPosX =  mainSys.curPosXAtLastStep;
-                    mainSys.curPosY = mainSys.curPosYAtLastStep;
-                    mainSys.velocityX = mainSys.prevVelocityX;
-                    mainSys.velocityY = mainSys.prevVelocityY;
-//                    mainSys.forceX.fill(0);
-//                    mainSys.forceY.fill(0);
-                    FIRE_alpha = pars.FIRE_alpha_start;
-                    FIRE_N = timeStep;
-                    FIRE_dt = FIRE_prevDt * pars.FIRE_fdec *0.2;
-                    FIRE_prevDt = FIRE_dt;
-                    mainSys.curPosX += mainSys.velocityX*FIRE_dt;
-                    mainSys.curPosY += mainSys.velocityY*FIRE_dt;
-                    continue;
 
-                }else
                 if (power <=0) {
                     FIRE_dt *= pars.FIRE_fdec;
                     mainSys.velocityX.fill(0);
@@ -97,7 +161,7 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                     FIRE_alpha = pars.FIRE_alpha_start;
                     FIRE_N = timeStep;
                 } else {
-                    if ((timeStep - FIRE_N) > pars.FIRE_Nmin){
+                    if ((timeStep - FIRE_N) > pars.FIRE_N_positive_min){
                         FIRE_prevDt = FIRE_dt;
                         FIRE_dt = fmin(FIRE_dt * pars.FIRE_finc, pars.FIRE_dtmax);
                         FIRE_alpha *= pars.FIRE_falpha;
@@ -107,155 +171,35 @@ void fire_solver(const BaseSysData& baseData, const Parameters& pars, long timeS
                     mainSys.velocityX = (1 - FIRE_alpha)*mainSys.velocityX.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceX.array()/force_magnitude.array();
                     mainSys.velocityY = (1 - FIRE_alpha)*mainSys.velocityY.array()+FIRE_alpha*velocity_magnitude.array()*mainSys.forceY.array()/force_magnitude.array();
                 }
-                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
-                mainSys.curPosXAtLastStep = mainSys.curPosX;
-                mainSys.curPosYAtLastStep = mainSys.curPosY;
-                mainSys.prevVelocityX =  mainSys.velocityX;
-                mainSys.prevVelocityY =  mainSys.velocityY;
                 
                 
-                
+               
                 mainSys.curPosX += mainSys.velocityX*FIRE_dt;
                 mainSys.curPosY += mainSys.velocityY*FIRE_dt;
+                mainSys.velocityX += mainSys.forceX*FIRE_dt;
+                mainSys.velocityY += mainSys.forceY*FIRE_dt;
                 
-                
-
-
-                mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
-                
-                // Postporcesseing calculations
-                mainSys.update_post_processing_data(baseData, pars);
-                
-                
-                //dump
-                mainSys.dump_global_data(pars, timeStep, "append", "running");
-//                if (timeStep < 188669 && timeStep > 188660) {
-//                    mainSys.dump_per_node(baseData, pars, timeStep);
-//                    mainSys.dump_per_ele(baseData, pars,timeStep);
-//                    plotWithPython(timeStep);
-//                }
-
-//                auto t2 = std::chrono::high_resolution_clock::now();
-//                std::chrono::duration<double> elapsed = t2 - t1;
-//                std::chrono::duration<double> elapsed0 = t2 - t0;
-                
-                timeStep++;
-                std::cout << "maxForce  " << mainSys.maxR << std::endl;
-                std::cout << "avgForce  " << mainSys.avgR << std::endl;
-                std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff()<< std::endl;
-//                std::cout << "phi  " << mainSys.phi << std::endl;
-//                std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//                std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
+                std::cout << "power   " << power <<std::endl;
+                std::cout << "FIRE_dt   " << FIRE_dt <<std::endl;
+                std::cout << "FIRE_alpha   " << FIRE_alpha  <<std::endl;
                 std::cout << "\n" << std::endl;
                 
-                if ( mainSys.maxR > 1E10  || mainSys.maxR <= pars.RTolerance){
-                    std::cout << "Foce condition met !" << std::endl;
-                    break;
-                }
-
+                timeStep++;
             }
-//            mainSys.check_force_energy_consistency(baseData, pars);
             FIRE_alpha = pars.FIRE_alpha_start;
             FIRE_N = timeStep;
-            mainSys.dump_global_data(pars, timeStep, "append", "running");
-            mainSys.dump_per_node(baseData, pars, strainStep);
-            mainSys.dump_per_ele(baseData, pars,strainStep);
-//            plotWithPython(strainStep);
+            mainSys.dump_global_data(pars, timeStep, name, "append", "final");
+            mainSys.dump_per_node(baseData, pars, stage);
+            mainSys.dump_per_ele(baseData, pars,stage);
+            if (pars.dumpPeriodicImagesXY){
+                mainSys.dump_per_node_periodic_images_on(baseData, pars, stage);
+            }
+            
+            stage+=1;
+            
         }
-        
+    
     }
-//        else if (pars.runMode=="shear"){  //  shearing ***********************************************************************************************
-//        mainSys.maxR = 9999;
-//        while (1)
-//        {
-//            double initialFiniteShear = 0.0;
-//            auto t1 = std::chrono::high_resolution_clock::now();
-//            std::cout << timeStep << std::endl;
-//
-//
-//
-//            if (timeStep * pars.deformationRate * pars.dt < initialFiniteShear )
-//            {
-//                mainSys.shear(baseData, pars, pars.deformationRate * pars.dt);
-//
-//            }else if (mainSys.maxR >= pars.maxForceTol)
-//            {
-//                mainSys.hold(baseData, pars);
-//
-//            }else if (stage==0){
-//
-//                mainSys.shear(baseData, pars, pars.shearStep);
-//                stage++;
-//
-//            }else if (stage==1){
-//                stage++;
-//            }
-//
-//
-//            // Take an Euler step
-//            if (pars.boundaryType == "walls"){
-//                mainSys.compute_forces_pbc(baseData, pars, timeStep);
-//            }else if (pars.boundaryType == "periodic"){
-//                mainSys.compute_forces_pbc(baseData, pars, timeStep);
-//            }
-//
-//            mainSys.curPosX = mainSys.curPosX.array() + mainSys.forceX.array() * pars.dt;
-//            mainSys.curPosY = mainSys.curPosY.array() + mainSys.forceY.array() * pars.dt;
-//            mainSys.displacementSinceLastStep = ((mainSys.curPosX.array() - mainSys.curPosXAtLastStep.array()).pow(2)+(mainSys.curPosY.array()-mainSys.curPosYAtLastStep.array()).pow(2)).pow(0.5);
-//            if (mainSys.displacementSinceLastStep.maxCoeff() >= pars.verletCellCutoff){
-//                // updated curPos AtLastGridUpdate
-//                mainSys.curPosXAtLastStep = mainSys.curPosX;
-//                mainSys.curPosYAtLastStep = mainSys.curPosY;
-//            }
-//
-//            // Postporcesseing calculations
-//            mainSys.update_post_processing_data(baseData, pars);
-//
-//
-//            // Dump data
-//            mainSys.dump_global_data(pars, 'a', 'i');
-//
-//            if (stage==0){
-//
-//                mainSys.dump_global_data(pars, 'w' , 'f');
-//                mainSys.dump_global_data(pars, 'a' , 'f');
-//
-//            }else if (stage==2){
-//
-//                mainSys.dump_global_data(pars, 'a' , 'f');
-//
-//            }
-//
-//
-//            if (timeStep % pars.dumpEvery == 0) {
-//                mainSys.dump_per_node(baseData, pars, timeStep);
-//                mainSys.dump_per_ele(baseData, pars,timeStep);
-//            }
-//
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            std::chrono::duration<double> elapsed = t2 - t1;
-//            std::chrono::duration<double> elapsed0 = t2 - t0;
-//            timeStep++;
-//            std::cout << "stage  " << stage << std::endl;
-//            std::cout << "maxForce  " << mainSys.maxR << std::endl;
-//            std::cout << "maxDisplacement  " << mainSys.displacementSinceLastStep.maxCoeff() << std::endl;
-//            std::cout << "elapsed time per step:  " << elapsed.count() << std::endl;
-//            std::cout << "elapsed total:  " << elapsed0.count() << std::endl;
-//            std::cout << "\n" << std::endl;
-//
-//            if (stage==2){
-//                std::cout << "Done !" << std::endl;
-//                break;
-//            }
-//            if ( (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) > 1E10  || (mainSys.forceX.dot(mainSys.forceX)+ mainSys.forceY.dot(mainSys.forceY)) < 1E-10 || mainSys.maxR>50.0){
-//                std::cout << "Foce condition met !" << std::endl;
-//                break;
-//            }
-//            if ( isnan(mainSys.areaRatio.sum()) || isnan(mainSys.forceX.sum()) ||  isnan(mainSys.forceY.minCoeff()) ||  isnan(mainSys.maxR) ){
-//                std::cout << "System blew up !" << std::endl;
-//                break;
-//            }
-//        }
-//    }
+        
 }
 
