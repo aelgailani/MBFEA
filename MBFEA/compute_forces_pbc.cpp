@@ -234,3 +234,4 @@ void Configuration::compute_forces_pbc(const BaseSysData& baseData, const Parame
 //    std::cout << "Hixjy " <<Hixjx << std::endl;
 
 }
+

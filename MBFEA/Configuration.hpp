@@ -178,7 +178,7 @@ public:
     double DSOverDe1_BW;
     double A_B;
     
-    //the follwing is mainly for debugging using traiangular walls but can be fully integrated if need be 
+    //the follwing is mainly for debugging using traiangular walls but can be fully integrated if need be
     double triAy, triBx, triCx, triBy, triCy;
     double triAx;
     double height;
@@ -346,3 +346,4 @@ public:
 };
 
 #endif /* Configuration_hpp */
+

@@ -22,20 +22,21 @@ int main(int argc, char* argv[])
 {
 
 //    struct closestPointOnHermitianCurve f = find_closest_point_on_Hermitian_interpolation(1, -2, 0, 2, 5, 2, 0, 2, 0.95);
-//    
+//
 //    std::cout <<  "g is " << f.g << std::endl;
 //    std::cout <<  "x is " << f.x << std::endl;
 //    std::cout <<  "y is " << f.y << std::endl;
     
-//    
-//    
-//    
+//
+//
+//
     //Assign input file name to default if not passed
     std::string inputFileName = "setParameters.txt";  //default file name
     std::string sartingMode = "new";
     std::string runMode = "none";
     std::string restartStep = "none" ;  //restarting step
     std::string inputRestartFolder = "none";  //default file name
+    std::string outputSubFolder = "none";  //default file name
     
     // This section is for passing parameters as arguments. NOT finishid yet so just use the parameters input file for now
     if (argc>1) {
@@ -62,6 +63,15 @@ int main(int argc, char* argv[])
                 std::cout << "restarting step is  "<<restartStep<< std::endl;
                 sartingMode = "restart";
                 runMode = "stepShear";
+            }else if (std::string(argv[i]) == "--stepsurfaceshearrestartstep" || std::string(argv[i])== "-sss") {
+                restartStep = std::string(argv[i+1]);
+                inputRestartFolder = std::string(argv[i+2]);
+                std::cout << "restarting step is  "<<restartStep<< std::endl;
+                sartingMode = "restart";
+                runMode = "surfaceShear";
+            }else if (std::string(argv[i]) == "--outputsubdirectory" || std::string(argv[i])== "-osd") {
+                outputSubFolder = std::string(argv[i+1]);
+
             }else if (std::string(argv[i]) == "--inputdirectory" || std::string(argv[i])== "-id") {
                 inputRestartFolder = std::string(argv[i+1]);
 
@@ -73,20 +83,20 @@ int main(int argc, char* argv[])
     }
     
     //Read parameters
-    const Parameters pars(inputFileName, inputRestartFolder, runMode, restartStep);
+    const Parameters pars(inputFileName, inputRestartFolder, runMode, restartStep, outputSubFolder);
     
     // print time to log file
     std::ofstream logfile;
     logfile.open (pars.runMode+"-parameters.log", std::ios_base::app);
     std::time_t t = std::time(0);   // get time now
     tm* localtm = std::localtime(&t);
-    if (pars.runMode=="stepShear"){
+    if (pars.runMode=="stepShear" || pars.runMode=="surfaceShear"  ){
         if (restartStep=="none") restartStep=pars.restartFile;
         logfile << std::endl << std::endl << "step  " << restartStep << "------ " << asctime(localtm) << std::endl;
     }else{
        logfile << std::endl << std::endl << "------ " << asctime(localtm) << std::endl;
     }
-    
+     
    
     logfile.close();
     pars.print_to_console();
@@ -94,7 +104,8 @@ int main(int argc, char* argv[])
     
         //Open/create directory to dump the outputs
     if (pars.startingMode == "new" || (pars.startingMode == "restart" && pars.runMode == "compress") || (pars.startingMode == "restart" && pars.runMode == "special"))
-    {    DIR* dir = opendir(pars.outputFolderName.c_str());
+    {
+        DIR* dir = opendir(pars.outputFolderName.c_str());
         if (dir)
         {
             closedir(dir);
@@ -107,7 +118,13 @@ int main(int argc, char* argv[])
         }
     }else if (pars.startingMode == "restart" && (pars.runMode == "stepShear" || pars.runMode =="surfaceShear")){
         DIR* dir1 = opendir(pars.outputFolderName.c_str());
-        DIR* dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str());
+        DIR* dir2;
+        if (outputSubFolder=="none"){
+           dir2 = opendir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str());
+       }else {
+           dir2 = opendir((pars.outputFolderName +"/"+ outputSubFolder).c_str());
+       }
+        
         if (dir1)
         {
             closedir(dir1);
@@ -122,11 +139,22 @@ int main(int argc, char* argv[])
         if (dir2){
             closedir(dir2);
         } else if (ENOENT == errno){
-            const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            if (-1 == dir_err) {
+
+            if (outputSubFolder=="none"){
+                const int dir_err = mkdir((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                if (-1 == dir_err) {
+                    printf("Error creating step directory!");
+                    exit(1);
+                }
+            }else{
+
+                const int dir_err = mkdir((pars.outputFolderName +"/"+ outputSubFolder).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                if (-1 == dir_err) {
                 printf("Error creating step directory!");
                 exit(1);
+                }
             }
+            
         }
         }else if (pars.startingMode == "restart" && pars.runMode == "continuousShear"){
             DIR* dir1 = opendir(pars.outputFolderName.c_str());
@@ -187,5 +215,6 @@ int main(int argc, char* argv[])
     return 0;
     
 }
+
 
 

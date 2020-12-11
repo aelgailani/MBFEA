@@ -17,7 +17,7 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep ,  Configuration& mainSys, long step){
+void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep ,  Configuration& mainSys, long step, bool surfaceInteractions){
     
     // simple parameters validation
     if (pars.FIRE_dtmax < pars.FIRE_dtmin) {
@@ -46,12 +46,14 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
     double vmax=0;
     
     // initialize the system
-    if (pars.boundaryType == "walls"){
-        mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
-    }else if (pars.boundaryType == "periodic"){
-        mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
-    }
     
+
+    if (pars.boundaryType == "walls"){
+        mainSys.compute_forces_walls(baseData, pars, timeStep, surfaceInteractions, 0, pars.calculateHessian);
+    }else if (pars.boundaryType == "periodic"){
+        mainSys.compute_forces_pbc(baseData, pars, timeStep, surfaceInteractions, 1, pars.calculateHessian);
+    }
+   
     // initialize velocities
     mainSys.velocityX.fill(0);
     mainSys.velocityY.fill(0);
@@ -74,9 +76,9 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
         
 
         if (pars.boundaryType == "walls"){
-            mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+            mainSys.compute_forces_walls(baseData, pars, timeStep, surfaceInteractions, 0, pars.calculateHessian);
         }else if (pars.boundaryType == "periodic"){
-            mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+            mainSys.compute_forces_pbc(baseData, pars, timeStep, surfaceInteractions, 1, pars.calculateHessian);
         }
        
         if (pars.runMode=="surfaceShear"){
@@ -192,3 +194,4 @@ void fire2_solver(const BaseSysData& baseData, const Parameters& pars, long& tim
     }
         
 }
+

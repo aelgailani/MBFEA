@@ -38,7 +38,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
 
             mainSys.affine_compression(baseData, pars, relativeStrain, mainSys.ctrX, mainSys.ctrY, timeStep);
             
-            fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
+            fire2_solver(baseData, pars, timeStep , mainSys, strainStep, 1);
             
             if (mainSys.maxR > pars.FIRE_RTolerance){
                  std::cout << " step " << strainStep << " failed to coverge !" << std::endl;
@@ -67,7 +67,7 @@ void compress(const BaseSysData& baseData, const Parameters& pars, long timeStep
         long step=pars.startingStepNum; // just an ordinal number of the dumpped config.
        do{
             
-            gd_solver(baseData,pars,timeStep,step, "data", mainSys, true);
+            gd_solver(baseData,pars,timeStep,step, "data", mainSys, true, true);
 
             if(timeStep%pars.writeToConsoleEvery==0){
                 std::cout <<"next dump number    "<< step << std::endl;
@@ -122,7 +122,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
     if (pars.solver=="GD"){
     //hold
    do{
-        gd_solver(baseData,pars,timeStep, stage, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep, stage, "holding-data", mainSys, false, true);
 
         
          if(timeStep%pars.writeToConsoleEvery==0){
@@ -196,7 +196,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 
          }
         
-        gd_solver(baseData,pars,timeStep,stage, "holding-data", mainSys, false);
+        gd_solver(baseData,pars,timeStep,stage, "holding-data", mainSys, false, true);
 
         
     } while(mainSys.maxR > pars.maxForceTol);
@@ -225,7 +225,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
         long stage=0;
         /// hold
    
-               fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
+               fire2_solver(baseData, pars, timeStep , mainSys, strainStep, 1);
                
                if (mainSys.maxR > pars.FIRE_RTolerance){
                     std::cout << " Failed to coverge !" << std::endl;
@@ -254,7 +254,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
                 
                 mainSys.affine_axial_shearing(baseData, pars, pars.targetShear, mainSys.ctrX, mainSys.ctrY, timeStep);
                 
-                fire2_solver(baseData, pars, timeStep , mainSys, strainStep);
+                fire2_solver(baseData, pars, timeStep , mainSys, strainStep, 1);
                 
                 if (mainSys.maxR > pars.FIRE_RTolerance){
                      std::cout << " Failed to coverge !" << std::endl;
@@ -304,7 +304,7 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 //
 //           mainSys.affine_axial_shearing(baseData, pars, pars.targetShear, mainSys.ctrX, mainSys.ctrY, timeStep);
 //
-//           fire2_solver(baseData, pars, timeStep , mainSys, stage);
+//           fire2_solver(baseData, pars, timeStep , mainSys, stage, 1);
 //
 //            if (mainSys.maxR > pars.FIRE_RTolerance){
 //                 std::cout << " Failed to coverge !" << std::endl;
@@ -384,4 +384,5 @@ void stepshear(const BaseSysData& baseData, const Parameters& pars, long timeSte
 //       }
 //    }
 //}
+
 

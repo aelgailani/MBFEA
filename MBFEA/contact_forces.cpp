@@ -20,7 +20,7 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
     segmentIinteractions = 0;
     nodeIinteractions = 0;
     
-    // remember imagesMargies = 0 if walls are used 
+    // remember imagesMargies = 0 if walls are used
     numXCells = floor(newLX_W*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
     numYCells = floor(newLY_W*(1+2*pars.imagesMargin)/pars.verletCellCutoff);
     verletCellSizeX  = newLX_W*(1+2*pars.imagesMargin)/numXCells;
@@ -160,3 +160,4 @@ void Configuration::contact_forces(const BaseSysData& baseData, const Parameters
     
     
 }
+

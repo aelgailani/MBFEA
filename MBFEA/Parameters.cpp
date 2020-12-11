@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runModeOverWrite, std::string& restartStepOverwrite) {
+Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runModeOverWrite, std::string& restartStepOverwrite, std::string& outputSubFolderExplicit ) {
     std::ifstream inFile;
     inFile.open(inputFileName); //Make sure later that the file is open in "read" mode only
     //Check for errors
@@ -256,6 +256,15 @@ Parameters::Parameters(std::string& inputFileName, std::string& inputRestartFold
         startingMode = "restart";
         startingStepNum = std::stoi(restartStepOverwrite);
         restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
+        outputSubFolder = outputSubFolderExplicit;
+        
+    }
+    if (runModeOverWrite=="surfaceShear"){
+        runMode = "surfaceShear";
+        startingMode = "restart";
+        startingStepNum = std::stoi(restartStepOverwrite);
+        restartFile = inputRestartFolder+"/data-per-node-"+restartStepOverwrite+".txt";
+        outputSubFolder = outputSubFolderExplicit;
         
     }
     if (runModeOverWrite=="contineousShear"){
@@ -335,7 +344,7 @@ void Parameters::print_to_console(void) const {
             printit("FIRE_numStrainSteps",FIRE_numStrainSteps);
             printit("FIRE_startingStrainStep",FIRE_startingStrainStep);
         }
-    }else if (runMode=="stepShear" || runMode=="continuousShear"){
+    }else if (runMode=="stepShear" || runMode=="surfaceShear" || runMode=="continuousShear"){
         printit("targetShear",targetShear);
     }else if (runMode=="special"){
         printit("targetPressure",targetPressure);
@@ -402,3 +411,4 @@ void Parameters::printit(const std::string name,const T v) const {
         logfile2 << name+" = " << v << std::endl;
         logfile2.close();
     }
+

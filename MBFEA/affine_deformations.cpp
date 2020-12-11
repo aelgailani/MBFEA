@@ -275,3 +275,4 @@ void Configuration::hold(const BaseSysData& baseData, const Parameters& pars)
     curPosY *= 1.0/curLX_W*newLX_W;
     curPosY = curPosY.array() + yMid;
 }
+

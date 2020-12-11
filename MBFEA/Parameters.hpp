@@ -16,7 +16,7 @@ private:
 //    void print2(const std::string name,const T v, std::ofstream myfile) const
 
 public:
-    Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runMode, std::string& restartStepOverwrite);
+    Parameters(std::string& inputFileName, std::string& inputRestartFolder, std::string& runMode, std::string& restartStepOverwrite, std::string& outputSubFolderExplicit );
     double kTOverOmega;
     double NkT;
     double chi;
@@ -26,6 +26,7 @@ public:
     long splitDataEvery;
     long startingStepNum;
     std::string outputFolderName;
+    std::string outputSubFolder;
     std::string trianglesFileName;
     std::string surfaceNodesFileName;
     std::string initialNodesFileName;
@@ -100,3 +101,4 @@ public:
 };
 
 #endif /* Parameters_hpp */
+

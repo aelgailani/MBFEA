@@ -20,8 +20,14 @@ void Configuration::dump_facets(const BaseSysData& baseData, const Parameters& p
     
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear" || pars.runMode == "continuousShear"){
+        if (pars.outputSubFolder=="none"){
+            myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
+        }else{
+            myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/facets-"+step+".txt").c_str());
+        }
+        
+
     }else{
         myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
     }
@@ -51,8 +57,13 @@ void Configuration::dump_facets_ntn(const BaseSysData& baseData, const Parameter
     
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear"  || pars.runMode == "continuousShear"){
+        if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/facets-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/facets-"+step+".txt").c_str());
+            }
+
     }else{
         myfile.open (pars.outputFolderName+"/facets-"+step+".txt");
     }
@@ -122,10 +133,17 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         fname = "/final-data.txt";
     }
    
-    if (mode=="write" || first != lastStepFirst){
+    if (mode=="write"){
         std::ofstream dataFile;
-        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname);
+        if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear" || pars.runMode == "continuousShear"){
+        
+        
+            if (pars.outputSubFolder=="none"){
+                dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname);
+            }else{
+                dataFile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder).c_str()+fname);
+            }
+
         }else{
             dataFile.open (pars.outputFolderName+fname);
         }
@@ -172,7 +190,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
     
         <<  "DPOverDe0_BB" << std::setw(spacing)
         <<  "DSOverDe1_BB";
-        if (pars.boundaryType=="wall"){
+        if (pars.boundaryType=="walls"){
             dataFile
             << std::setw(spacing)
             <<  "pressure_WW"  << std::setw(spacing)
@@ -205,8 +223,14 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         
     }else if (mode=="append"){
         std::ofstream dataFile;
-        if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-        dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname,  std::ios_base::app);
+        if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear" || pars.runMode == "continuousShear"){
+
+            if (pars.outputSubFolder=="none"){
+                dataFile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))).c_str()+fname, std::ios_base::app);
+            }else{
+                dataFile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder).c_str()+fname,  std::ios_base::app);
+            }
+        
         }else{
             dataFile.open (pars.outputFolderName+fname,  std::ios_base::app);
         }
@@ -248,7 +272,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         <<  DSOverDe1_BW << std::setw(spacing)
         <<  DPOverDe0_BB << std::setw(spacing)
         <<  DSOverDe1_BB ;
-        if (pars.boundaryType=="wall"){
+        if (pars.boundaryType=="walls"){
             dataFile
             << std::setw(spacing)
             <<  P_WW << std::setw(spacing)
@@ -279,7 +303,7 @@ void Configuration::dump_global_data(const Parameters& pars, const long& timeSte
         
     }
     
-   lastStepFirst = first;
+   
 }
 
 
@@ -287,8 +311,14 @@ void Configuration::dump_per_node(const BaseSysData& baseData, const Parameters&
     int spacing =26;
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear"  || pars.runMode == "continuousShear"){
+    
+        if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/data-per-node-"+step+".txt").c_str());
+            }
+    
     }else{
         myfile.open (pars.outputFolderName+"/data-per-node-"+step+".txt");
     }
@@ -416,8 +446,14 @@ void Configuration::dump_per_node_periodic_images_on(const BaseSysData& baseData
     int spacing =26;
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-periodic-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear" || pars.runMode == "continuousShear"){
+    
+            if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-node-periodic-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/data-per-node-periodic-"+step+".txt").c_str());
+            }
+
     }else{
         myfile.open (pars.outputFolderName+"/data-per-node-periodic-"+step+".txt");
     }
@@ -480,8 +516,15 @@ void Configuration::dump_per_ele(const BaseSysData& baseData, const Parameters& 
     
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-ele-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear"  || pars.runMode == "continuousShear"){
+    
+
+        if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/data-per-ele-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/data-per-ele-"+step+".txt").c_str());
+            }
+
     }else{
         myfile.open (pars.outputFolderName+"/data-per-ele-"+step+".txt");
     }
@@ -587,8 +630,15 @@ void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Paramet
     int spacing =26;
     std::string step = std::to_string(timeStep);
     std::ofstream myfile;
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/smoothcurves-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear"  || pars.runMode == "continuousShear"){
+    
+            if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/smoothcurves-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/dsmoothcurves-"+step+".txt").c_str());
+            }
+    
+
     }else{
         myfile.open (pars.outputFolderName+"/smoothcurves-"+step+".txt");
     }
@@ -636,8 +686,14 @@ void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Paramet
     ////////////////
     std::ofstream myfile2;
 
-    if (pars.runMode == "stepShear" || pars.runMode == "continuousShear"){
-    myfile2.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/gaps-"+step+".txt").c_str());
+    if (pars.runMode == "stepShear" || pars.runMode == "surfaceShear" || pars.runMode == "continuousShear"){
+        
+        if (pars.outputSubFolder=="none"){
+                myfile.open ((pars.outputFolderName +"/step-"+std::to_string(int(pars.startingStepNum))+"/gaps-"+step+".txt").c_str());
+            }else{
+                myfile.open ((pars.outputFolderName +"/"+ pars.outputSubFolder+"/gaps-"+step+".txt").c_str());
+            }
+    
     }else{
         myfile2.open (pars.outputFolderName+"/gaps-"+step+".txt");
     }
@@ -662,3 +718,4 @@ void Configuration::dump_smoothcurves(const BaseSysData& baseData, const Paramet
     
     
 }
+

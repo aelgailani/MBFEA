@@ -24,13 +24,13 @@
 #include "Configuration.hpp"
 #include "integrators.hpp"
 
-void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, long& step, std::string name, Configuration& mainSys, bool dumpStateData){
+void gd_solver(const BaseSysData& baseData, const Parameters& pars, long& timeStep, long& step, std::string name, Configuration& mainSys, bool dumpStateData, bool surfaceInteractions){
             
             // calculate forces and energy of the current configuration of the system
             if (pars.boundaryType == "walls"){
-                mainSys.compute_forces_walls(baseData, pars, timeStep, 1, 0, pars.calculateHessian);
+                mainSys.compute_forces_walls(baseData, pars, timeStep, surfaceInteractions, 0, pars.calculateHessian);
             } else if (pars.boundaryType == "periodic"){
-                mainSys.compute_forces_pbc(baseData, pars, timeStep, 1, 1, pars.calculateHessian);
+                mainSys.compute_forces_pbc(baseData, pars, timeStep, surfaceInteractions, 1, pars.calculateHessian);
             }
     
             // zero out surface nodes forces if you want them fixed in their homo position
