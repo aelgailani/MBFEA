@@ -1,0 +1,114 @@
+
+------------------- input/output settings ----------------------------------------------------------------------------------
+---- input mesh ---- 
+surfaceNodesFileName		4by4-cir64/surfaceMeshes-cir64-4by4-drysigma0.2-NkT-20-ntn-3.dat
+trianglesFileName			4by4-cir64/referenceTriangles-cir64-4by4-drysigma0.2-NkT-20-ntn-3.dat
+initialNodesFileName		4by4-cir64/initialNodes-cir64-4by4-drysigma0.2-NkT-20-ntn-3.dat
+
+---- data out options ----
+outputFolderName 			auto	(use "auto" to name it after runMode or give it a custom name other than auto )
+dumpEvery					10000
+writeToConsoleEvery			1000
+
+splitDataEvery				1000000	/* This is to avoid gigantic data.txt files and also to avoid putting all the eggs in one basket!! */
+identifyAndDumbFacets		1		/* numeric ture or false */
+dumpPeriodicImagesXY		1		/* numeric ture or false */
+callPythonPlot				0		/* numeric  ture or false */
+
+
+------------------- material parameters -----------------------------------------------------------------------------------
+kTOverOmega					20
+NkT							1
+chi							0
+Ap							297.5716561480252 		
+
+------------------- simulation box parameters -----------------------------------------------------------------------------
+initTopPos     22.4
+initBotPos     -3.1999999999999997
+initRightPos     22.4
+initLeftPos     -3.1999999999999997
+
+------------------- run mode ---------------------------------------------------------------------------------------------
+runMode						compress									/* "stepShear" , "continuousShear" or "compress" */
+startingMode				new		
+startingStepNum				0
+restartFile					shearings/step-10650000/data-				
+
+---- compression options ----
+targetPhi					3.5
+initialStretch				2.0   (specify if you are starting 'new' run)
+
+---- shearing options ----
+targetShear					0.001  			
+
+---- special mode options ----
+targetPressure					-0.1
+shearTo							0.02 
+
+------------------- solver options ---------------------------------------------------------------------------------------
+solver						GD       /* FIRE or GD (Gradient Dynamics) or stepGD for special run step shear option */
+integrator					0			/* 0: semi-implicit Euler, 1: Leap Frog, 2: velocity Verlet, 3: explicit Euler */
+calculateHessian			0		/* numeric ture or false */
+
+--- GD parameters ----
+deformationRate				0.001     /* for both compression or shearing */ (also used for tri shear mode as shearStep)
+dt							0.001
+maxForceTol					8.5E-6            			/* specify if you are shearing */
+
+
+------------------- boundaries  ------------------------------------------------------------------------------------------
+boundaryType				walls    	/* "periodic" or "walls" case sensitive*/
+
+---- pbc parameters ----
+imagesMargin				0.2        		/* specify if you are using PBC owtherwise it will be set to 0 automatically*/
+
+---- wall parameters ----
+wallStyle					powerlaw	/* specify if you are using walls, harmonic, powerlaw, triHarmonic or triPowerlaw or triPowerlawDiscrete */
+HWallStiffness				100			/* specify if you are using harmonic walls */
+PLWallEnergyScale			1.0         /* specify if you are using powerlaw walls */
+PLWallLJScale				0.2	/* specify if you are using powerlaw walls */
+
+
+------------------- contact options -------------------------------------------------------------------------------------
+contactMethod				ntn	   ( ntn (node to node) or nts (node to segment) or gntn (ghost nodes to node) gntn2  (ghost nodes to node version 2) )
+verletCellCutoff			2.0
+
+---- nts parameters ----
+ntsPenaltyMethod			harmonic   /* powerlaw or harmonic */
+
+ntsHarmonicPenaltyStiffness	20.0
+
+ntsPowerlawRepulseEnergy	1
+ntsPowerlawLjScale			1.0
+segmentCellMethod			1		/* Choose 1 for single point method or 2 for two points method. set it 1 for putting the segment in the cell where its left node lies or 2 for associating the segment with another cell where its right node is. The latter is more robust but 10% slower */
+reversibleMasterSlaveRole	0		/* numeric ture or false */
+
+---- ntn parameters ----
+
+ntnRepulsionMethod		powerlaw
+ntnHStiffness    		50
+
+ntnPLEnergy  1.0 
+ntnRadius  0.4   /* typically I use 0.5 of VerletCuttoff */
+ntnPLRcutoffOverRadius  5.0
+
+---- gntn parameters 
+gntn_NGhostNodes  	5
+
+--FIRE Prameters (ignore if your solver is GD
+FIRE_dtmax					10.0
+FIRE_dtmin					0.00001
+FIRE_Nmax                   2000000
+FIRE_N_positive_min			50
+FIRE_N_negative_max			2000
+FIRE_intialdelay			1			/* true 1 or false 0 */
+FIRE_finc					1.1
+FIRE_fdec					0.5
+FIRE_alpha_start			0.25
+FIRE_falpha					0.99  
+FIRE_dt_start				0.00001 
+FIRE_RTolerance				9.5E-7
+FIRE_numStrainSteps			300
+FIRE_startingStrainStep		135		/* must be <= numStrainSteps */
+
+
